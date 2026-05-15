@@ -182,15 +182,34 @@ const INTERSTITIAL = {
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
-function renderMD(text) {
+const ASK_RE = /^(type|tell|pick|choose|send|share|give|write|select|enter|paste|forbid|allow|modify|answer|provide|say|name|describe|explain|continue|begin|start|click|press|review|confirm|decide|let me know|ready)/i;
+
+function renderMD(text, isAssistant) {
   if (!text) return "";
   let s = text.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-  return s
+  s = s
     .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
+    .replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+
+  const paras = s.split(/\n\n+/);
+  let askIdx = -1;
+  if (isAssistant && paras.length > 0) {
+    const last = paras[paras.length - 1].trim();
+    const lastLine = last.split("\n").map((l) => l.trim()).filter(Boolean).pop() || "";
+    if (lastLine.endsWith("?") || ASK_RE.test(last)) askIdx = paras.length - 1;
+  }
+
+  const fmt = (p) => p
     .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #e5e7eb;margin:.75rem 0">')
-    .replace(/\n\n/g, "</p><p>")
     .replace(/\n/g, "<br>");
+
+  return paras.map((p, i) => {
+    if (i === askIdx) {
+      return `<div style="margin:.75rem 0 0;padding:.625rem .875rem;background:#f0edff;border-left:3px solid #6B4EE6;border-radius:6px;color:#2E1F5E;font-weight:600"><span style="color:#6B4EE6;margin-right:.4rem">→</span>${fmt(p.trim())}</div>`;
+    }
+    const m = i === 0 ? "0" : ".5rem 0 0";
+    return `<p style="margin:${m}">${fmt(p)}</p>`;
+  }).join("");
 }
 
 function generateDocHTML(content, title, sub) {
@@ -760,7 +779,7 @@ export default function App() {
               boxShadow: msg.role === "user" ? "0 2px 8px rgba(46,31,94,.25)" : "0 1px 4px rgba(0,0,0,.06)",
               border: msg.role === "assistant" ? "1px solid #f3f4f6" : "none",
             }}>
-              <p style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: renderMD(msg.content) }} />
+              <div style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: renderMD(msg.content, msg.role === "assistant") }} />
             </div>
           </div>
         ))}
