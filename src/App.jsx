@@ -341,10 +341,14 @@ export default function App() {
     const nm = [...msgs, { role: "user", content: msg }];
     setMsgs(nm); setInput(""); setLoading(true); setShowBtns(false);
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nm, system: SYSTEM_PROMPT }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: SYSTEM_PROMPT, messages: nm }),
       });
       const data = await res.json();
       if (!data.content?.[0]) throw new Error("No response");
@@ -509,7 +513,7 @@ export default function App() {
           <span style={{ fontSize: "11px", fontWeight: "600", color: "#d1d5db", letterSpacing: ".06em", textTransform: "uppercase" }}>The Signature Method</span>
         </div>
 
-        <div style={{ padding: "2rem 1.75rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{ padding: "2rem 1.75rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "700px" }}>
 
           <h1 className="fu0" style={{ fontSize: "32px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .75rem", letterSpacing: "-.04em" }}>
             Your Voice,<br />
