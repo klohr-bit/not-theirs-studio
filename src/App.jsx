@@ -614,7 +614,7 @@ export default function App() {
         <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "640px" }}>
 
           <h1 style={{ fontSize: "34px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .875rem", letterSpacing: "-.035em" }}>
-            Your voice, not theirs.
+            Your voice, <span style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>not theirs.</span>
           </h1>
           <p style={{ fontSize: "16px", color: "#4b5563", lineHeight: "1.55", margin: "0 0 2.25rem", maxWidth: "520px" }}>
             A short walkthrough that gives any AI tool your actual writing voice. Built once, paste anywhere.
@@ -638,7 +638,7 @@ export default function App() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <button className="start-btn" onClick={startSession} style={{ background: "#2E1F5E", borderRadius: "10px", padding: ".75rem 1.375rem", color: "#fff", fontSize: "14px", fontWeight: "700", cursor: "pointer", border: "none", letterSpacing: "-.01em" }}>
+            <button className="start-btn" onClick={startSession} style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", borderRadius: "10px", padding: ".75rem 1.5rem", color: "#fff", fontSize: "14px", fontWeight: "700", cursor: "pointer", border: "none", letterSpacing: "-.01em", boxShadow: "0 4px 14px rgba(46,31,94,.35)" }}>
               Start
             </button>
             <span style={{ fontSize: "12.5px", color: "#9ca3af" }}>About 10 minutes. Nothing is saved.</span>
@@ -806,7 +806,7 @@ export default function App() {
               )}
               <button
                 onClick={() => setShowI(false)}
-                style={{ background: "transparent", color: "#fff", border: "1.5px solid rgba(255,255,255,.5)", borderRadius: "10px", padding: ".625rem 1.5rem", fontSize: "14px", fontWeight: "600", cursor: "pointer", letterSpacing: "-.01em" }}
+                style={{ background: "rgba(255,255,255,.95)", color: "#2E1F5E", border: "none", borderRadius: "10px", padding: ".625rem 1.5rem", fontSize: "14px", fontWeight: "700", cursor: "pointer", letterSpacing: "-.01em", boxShadow: "0 4px 14px rgba(0,0,0,.2)" }}
               >
                 Continue →
               </button>
@@ -817,13 +817,13 @@ export default function App() {
         {msgs.map((msg, i) => (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: "8px" }}>
             {msg.role === "assistant" && (
-              <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#2E1F5E", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0" }}>
+              <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0" }}>
                 <span style={{ fontSize: "10px", color: "#fff", fontWeight: "800" }}>NS</span>
               </div>
             )}
             <div style={{
               maxWidth: "80%",
-              background: msg.role === "user" ? "#2E1F5E" : "#fff",
+              background: msg.role === "user" ? "linear-gradient(135deg,#2E1F5E,#6B4EE6)" : "#fff",
               borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "4px 18px 18px 18px",
               padding: ".75rem 1rem",
               fontSize: "14px",
@@ -839,7 +839,7 @@ export default function App() {
 
         {loading && (
           <div style={{ display: "flex", alignItems: "flex-end", gap: "8px" }}>
-            <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#2E1F5E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "10px", color: "#fff", fontWeight: "800" }}>NS</span>
             </div>
             <div style={{ background: "#fff", border: "1px solid #f3f4f6", borderRadius: "4px 18px 18px 18px", padding: ".75rem 1rem", display: "flex", gap: "5px", alignItems: "center", boxShadow: "0 1px 4px rgba(0,0,0,.06)" }}>
@@ -866,7 +866,7 @@ export default function App() {
           )}
           <div style={{ display: "flex", gap: "8px" }}>
             {[
-              { label: "Forbid", bg: "#2E1F5E", color: "#fff" },
+              { label: "Forbid", bg: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", color: "#fff", shadow: "0 2px 8px rgba(46,31,94,.25)" },
               { label: "Modify", bg: "#f3f0ff", color: "#2E1F5E" },
               { label: "Allow", bg: "#f3f4f6", color: "#4b5563" },
             ].map((btn) => (
@@ -874,7 +874,7 @@ export default function App() {
                 key={btn.label}
                 className="dbtn"
                 onClick={() => { if (phase === 2) setDn((p) => p + 1); send(btn.label); }}
-                style={{ background: btn.bg, border: "1px solid transparent", borderRadius: "10px", padding: ".55rem 1.25rem", fontSize: "14px", color: btn.color, fontWeight: "600", letterSpacing: "-.01em" }}
+                style={{ background: btn.bg, border: "1px solid transparent", borderRadius: "10px", padding: ".55rem 1.25rem", fontSize: "14px", color: btn.color, fontWeight: "600", letterSpacing: "-.01em", boxShadow: btn.shadow || "none" }}
               >
                 {btn.label}
               </button>
@@ -904,7 +904,7 @@ export default function App() {
         <button
           onClick={() => input.trim() && !loading && send(input.trim())}
           disabled={loading || !input.trim()}
-          style={{ background: input.trim() && !loading ? "#2E1F5E" : "#f3f4f6", border: "none", borderRadius: "10px", padding: ".75rem 1.125rem", color: input.trim() && !loading ? "#fff" : "#9ca3af", fontSize: "16px", cursor: input.trim() && !loading ? "pointer" : "default", transition: "all .15s", flexShrink: "0", boxShadow: input.trim() && !loading ? "0 2px 8px rgba(46,31,94,.25)" : "none" }}
+          style={{ background: input.trim() && !loading ? "linear-gradient(135deg,#2E1F5E,#6B4EE6)" : "#f3f4f6", border: "none", borderRadius: "10px", padding: ".75rem 1.125rem", color: input.trim() && !loading ? "#fff" : "#9ca3af", fontSize: "16px", cursor: input.trim() && !loading ? "pointer" : "default", transition: "all .15s", flexShrink: "0", boxShadow: input.trim() && !loading ? "0 2px 8px rgba(46,31,94,.25)" : "none" }}
         >
           →
         </button>
