@@ -400,7 +400,7 @@ export default function App() {
 
   // ── PHASE BAR ──────────────────────────────────────────────────────────────
   const Sidebar = ({ activePhase = 0 }) => (
-    <div style={{ width: "200px", minWidth: "200px", background: "#1e2130", display: "flex", flexDirection: "column", flexShrink: "0" }}>
+    <div style={{ width: "224px", minWidth: "224px", background: "#1e2130", display: "flex", flexDirection: "column", flexShrink: "0" }}>
       <div style={{ padding: "1.25rem 1.125rem 1rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
         <p style={{ fontSize: "14px", fontWeight: "800", color: "#fff", margin: "0", letterSpacing: "-.02em" }}>Not Theirs Studio</p>
       </div>
@@ -460,11 +460,11 @@ export default function App() {
 
   // ── OPENING SCREEN ─────────────────────────────────────────────────────────
   if (screen === "opening") return (
-    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "560px" }}>
+    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)" }}>
       <style>{GLOBAL_CSS}</style>
 
       {/* SIDEBAR */}
-      <div style={{ width: "200px", minWidth: "200px", background: "#1e2130", display: "flex", flexDirection: "column", flexShrink: "0" }}>
+      <div style={{ width: "224px", minWidth: "224px", background: "#1e2130", display: "flex", flexDirection: "column", flexShrink: "0" }}>
 
         <div style={{ padding: "1.25rem 1.125rem 1rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
           <p style={{ fontSize: "14px", fontWeight: "800", color: "#fff", margin: "0", letterSpacing: "-.02em" }}>Not Theirs Studio</p>
@@ -585,7 +585,7 @@ export default function App() {
 
   // ── COMPLETION SCREEN ──────────────────────────────────────────────────────
   if (screen === "completion") return (
-    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "560px" }}>
+    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)" }}>
       <style>{GLOBAL_CSS}</style>
       <Sidebar activePhase={7} />
       <div style={{ flex: "1", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -681,7 +681,7 @@ export default function App() {
 
   // ── CHAT SCREEN ────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", height: "640px", fontFamily: "Inter,-apple-system,sans-serif" }}>
+    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", height: "calc(100vh - 56px)", minHeight: "560px", fontFamily: "Inter,-apple-system,sans-serif" }}>
       <style>{GLOBAL_CSS}</style>
       <Sidebar activePhase={phase} />
 
