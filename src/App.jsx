@@ -341,15 +341,11 @@ export default function App() {
     const nm = [...msgs, { role: "user", content: msg }];
     setMsgs(nm); setInput(""); setLoading(true); setShowBtns(false);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: SYSTEM_PROMPT, messages: nm }),
-      });
+    const res = await fetch("/api/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ messages: nm, system: SYSTEM_PROMPT }),
+});
       const data = await res.json();
       if (!data.content?.[0]) throw new Error("No response");
       const raw = data.content[0].text;
