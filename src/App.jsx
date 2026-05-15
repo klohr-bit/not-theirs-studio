@@ -512,11 +512,6 @@ export default function App() {
       <div style={{ padding: "1.25rem 1.125rem 1rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
         <p style={{ fontSize: "14px", fontWeight: "800", color: "#fff", margin: "0", letterSpacing: "-.02em" }}>Not Theirs Studio</p>
       </div>
-      <div style={{ padding: ".875rem 1rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-        <div style={{ background: "rgba(107,78,230,.3)", borderRadius: "8px", padding: ".625rem .875rem", border: "1px solid rgba(107,78,230,.4)" }}>
-          <p style={{ fontSize: "13px", fontWeight: "700", color: "#fff", margin: "0", letterSpacing: "-.01em" }}>Your Voice, Not Theirs</p>
-        </div>
-      </div>
       <div style={{ padding: ".875rem 1rem", flex: "1" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 0 .5rem" }}>
           <p style={{ fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,.3)", letterSpacing: ".1em", textTransform: "uppercase", margin: "0" }}>Phases</p>
@@ -591,28 +586,22 @@ export default function App() {
           <p style={{ fontSize: "14px", fontWeight: "800", color: "#fff", margin: "0", letterSpacing: "-.02em" }}>Not Theirs Studio</p>
         </div>
 
-        <div style={{ padding: ".875rem 1rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-          <div style={{ background: "rgba(107,78,230,.3)", borderRadius: "8px", padding: ".625rem .875rem", border: "1px solid rgba(107,78,230,.4)" }}>
-            <p style={{ fontSize: "13px", fontWeight: "700", color: "#fff", margin: "0", letterSpacing: "-.01em" }}>Your Voice, Not Theirs</p>
-          </div>
-        </div>
-
         <div style={{ padding: ".875rem 1rem", flex: "1" }}>
           <p style={{ fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,.3)", letterSpacing: ".1em", textTransform: "uppercase", margin: "0 0 .75rem" }}>Phases</p>
           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
             {[
-              [1, "Voice Calibration", false],
-              [2, "Default Review", false],
-              [3, "Personal Additions", false],
-              [4, "Build Your System", true],
-              [5, "Context Modes", false],
-              [6, "Sample Pieces", false],
-            ].map(([n, label, anchor]) => (
-              <div key={n} style={{ display: "flex", alignItems: "center", gap: "9px", padding: ".45rem .5rem", borderRadius: "7px", background: anchor ? "rgba(107,78,230,.2)" : "transparent", border: anchor ? "1px solid rgba(107,78,230,.3)" : "1px solid transparent" }}>
-                <div style={{ width: "20px", height: "20px", borderRadius: "5px", background: anchor ? "#6B4EE6" : "rgba(255,255,255,.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0" }}>
-                  <span style={{ fontSize: "10px", fontWeight: "800", color: anchor ? "#fff" : "rgba(255,255,255,.6)" }}>{n}</span>
+              [1, "Voice Calibration"],
+              [2, "Default Review"],
+              [3, "Personal Additions"],
+              [4, "Build Your System"],
+              [5, "Context Modes"],
+              [6, "Sample Pieces"],
+            ].map(([n, label]) => (
+              <div key={n} style={{ display: "flex", alignItems: "center", gap: "9px", padding: ".45rem .5rem", borderRadius: "7px" }}>
+                <div style={{ width: "20px", height: "20px", borderRadius: "5px", background: "rgba(255,255,255,.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0" }}>
+                  <span style={{ fontSize: "10px", fontWeight: "800", color: "rgba(255,255,255,.6)" }}>{n}</span>
                 </div>
-                <span style={{ fontSize: "12px", fontWeight: anchor ? "700" : "500", color: anchor ? "#C5B4F5" : "rgba(255,255,255,.7)" }}>{label}</span>
+                <span style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,.7)" }}>{label}</span>
               </div>
             ))}
           </div>
@@ -625,44 +614,37 @@ export default function App() {
 
       {/* MAIN CONTENT */}
       <div style={{ flex: "1", background: "#fff", display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "640px" }}>
 
-        <div style={{ padding: ".75rem 1.5rem", borderBottom: "1px solid #f3f4f6", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-          <span style={{ fontSize: "11px", fontWeight: "600", color: "#d1d5db", letterSpacing: ".06em", textTransform: "uppercase" }}>The Signature Method</span>
-        </div>
-
-        <div style={{ padding: "2rem 1.75rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "700px" }}>
-
-          <h1 className="fu0" style={{ fontSize: "32px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .75rem", letterSpacing: "-.04em" }}>
-            Your Voice,<br />
-            <span style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Not Theirs.</span>
+          <h1 style={{ fontSize: "34px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .875rem", letterSpacing: "-.035em" }}>
+            Your voice, not theirs.
           </h1>
-          <p className="fu1" style={{ fontSize: "14px", color: "#6b7280", lineHeight: "1.65", margin: "0 0 1.5rem", maxWidth: "340px" }}>
-            Every other brand voice tool keeps your voice locked inside their platform. This builds something you own and can take anywhere.
+          <p style={{ fontSize: "16px", color: "#4b5563", lineHeight: "1.55", margin: "0 0 2.25rem", maxWidth: "520px" }}>
+            A short walkthrough that gives any AI tool your actual writing voice. Built once, paste anywhere.
           </p>
 
-          {/* Deliverable card — light, no flash */}
-          <div className="ca" style={{ background: "#fff", borderRadius: "12px", padding: "1rem", marginBottom: "1.25rem", border: "1.5px solid #e5e7eb", boxShadow: "0 2px 12px rgba(0,0,0,.06)" }}>
-            <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".08em", textTransform: "uppercase", margin: "0 0 .75rem" }}>What you'll build</p>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[
-                { name: "Forbidden List", desc: "The AI defaults your writing doesn't use. Blocked.", color: "#2E1F5E" },
-                { name: "Voice Signature", desc: "The specific moves that make your writing yours.", color: "#6B4EE6" },
-              ].map((item) => (
-                <div key={item.name} style={{ flex: 1, background: "#f0edff", borderRadius: "9px", padding: ".75rem", border: "1px solid rgba(107,78,230,.15)" }}>
-                  <p style={{ fontSize: "12px", fontWeight: "700", color: item.color, margin: "0 0 .2rem" }}>{item.name}</p>
-                  <p style={{ fontSize: "11.5px", color: "#6b7280", margin: "0", lineHeight: "1.4" }}>{item.desc}</p>
+          <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 1rem" }}>How it works</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: ".875rem", marginBottom: "2rem" }}>
+            {[
+              { n: 1, title: "Tell me about your writing", desc: "A few questions about your style plus 2-3 samples you've already written." },
+              { n: 2, title: "Decide what to block", desc: "I'll walk you through the AI patterns that make writing sound generic. You pick what stays out." },
+              { n: 3, title: "Get your two documents", desc: "A Forbidden List and a Voice Signature. Paste them into ChatGPT, Claude, or any AI tool. Your voice goes wherever you go." },
+            ].map((s) => (
+              <div key={s.n} style={{ display: "flex", alignItems: "flex-start", gap: ".875rem" }}>
+                <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "#f0edff", color: "#6B4EE6", fontSize: "13px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>{s.n}</div>
+                <div>
+                  <p style={{ fontSize: "14px", fontWeight: "700", color: "#111", margin: "0 0 .2rem", letterSpacing: "-.01em" }}>{s.title}</p>
+                  <p style={{ fontSize: "13.5px", color: "#6b7280", margin: "0", lineHeight: "1.55" }}>{s.desc}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
-          <div className="cf" style={{ display: "flex", alignItems: "center", gap: "1rem", background: "#fafafa", borderRadius: "12px", padding: ".875rem 1.125rem", border: "1px solid #f3f4f6" }}>
-            <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0", lineHeight: "1.5", flex: "1" }}>
-              Two documents at the end. One for your AI tool. One for you.
-            </p>
-            <button className="start-btn" onClick={startSession} style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", borderRadius: "10px", padding: ".75rem 1.375rem", color: "#fff", fontSize: "14px", fontWeight: "700", whiteSpace: "nowrap", flexShrink: "0", boxShadow: "0 4px 14px rgba(46,31,94,.4)", cursor: "pointer", border: "none" }}>
-              Start →
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <button className="start-btn" onClick={startSession} style={{ background: "#2E1F5E", borderRadius: "10px", padding: ".75rem 1.375rem", color: "#fff", fontSize: "14px", fontWeight: "700", cursor: "pointer", border: "none", letterSpacing: "-.01em" }}>
+              Start
             </button>
+            <span style={{ fontSize: "12.5px", color: "#9ca3af" }}>About 10 minutes. Nothing is saved.</span>
           </div>
         </div>
       </div>
