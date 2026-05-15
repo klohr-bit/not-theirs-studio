@@ -460,11 +460,9 @@ export default function App() {
   };
 
   const startSession = () => {
-    setScreen("transition"); setPhase(0); setMsgs([]); setDn(0); setO1(""); setO2(""); setDone(false);
-    setTimeout(() => {
-      setScreen("chat");
-      send("Begin the workflow. Run the opening greeting and optional profile questions exactly as instructed.");
-    }, 5500);
+    setPhase(0); setMsgs([]); setDn(0); setO1(""); setO2(""); setDone(false);
+    setScreen("chat");
+    send("Begin the workflow. Run the opening greeting and optional profile questions exactly as instructed.");
   };
 
   const handleCopy = async (which) => {
@@ -488,8 +486,7 @@ export default function App() {
 
   // ── SHARED HEADER ──────────────────────────────────────────────────────────
   const Header = ({ right }) => (
-    <div style={{ background: "#fff", padding: ".875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #e5e7eb" }}>
-      <span style={{ fontSize: "15px", fontWeight: "800", color: "#111", letterSpacing: "-.03em" }}>Not Theirs Studio</span>
+    <div style={{ background: "#fff", padding: ".875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "flex-end", borderBottom: "1px solid #e5e7eb" }}>
       {right}
     </div>
   );
@@ -809,7 +806,7 @@ export default function App() {
               )}
               <button
                 onClick={() => setShowI(false)}
-                style={{ background: "#fff", color: "#2E1F5E", border: "none", borderRadius: "10px", padding: ".625rem 1.5rem", fontSize: "14px", fontWeight: "700", cursor: "pointer", letterSpacing: "-.01em", boxShadow: "0 4px 14px rgba(0,0,0,.25)" }}
+                style={{ background: "transparent", color: "#fff", border: "1.5px solid rgba(255,255,255,.5)", borderRadius: "10px", padding: ".625rem 1.5rem", fontSize: "14px", fontWeight: "600", cursor: "pointer", letterSpacing: "-.01em" }}
               >
                 Continue →
               </button>
@@ -820,13 +817,13 @@ export default function App() {
         {msgs.map((msg, i) => (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: "8px" }}>
             {msg.role === "assistant" && (
-              <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0" }}>
+              <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#2E1F5E", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0" }}>
                 <span style={{ fontSize: "10px", color: "#fff", fontWeight: "800" }}>NS</span>
               </div>
             )}
             <div style={{
               maxWidth: "80%",
-              background: msg.role === "user" ? "linear-gradient(135deg,#2E1F5E,#6B4EE6)" : "#fff",
+              background: msg.role === "user" ? "#2E1F5E" : "#fff",
               borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "4px 18px 18px 18px",
               padding: ".75rem 1rem",
               fontSize: "14px",
@@ -842,7 +839,7 @@ export default function App() {
 
         {loading && (
           <div style={{ display: "flex", alignItems: "flex-end", gap: "8px" }}>
-            <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#2E1F5E", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "10px", color: "#fff", fontWeight: "800" }}>NS</span>
             </div>
             <div style={{ background: "#fff", border: "1px solid #f3f4f6", borderRadius: "4px 18px 18px 18px", padding: ".75rem 1rem", display: "flex", gap: "5px", alignItems: "center", boxShadow: "0 1px 4px rgba(0,0,0,.06)" }}>
@@ -869,15 +866,15 @@ export default function App() {
           )}
           <div style={{ display: "flex", gap: "8px" }}>
             {[
-              { label: "Forbid", bg: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", color: "#fff", border: "none" },
-              { label: "Modify", bg: "#fff", color: "#2E1F5E", border: "2px solid #2E1F5E" },
-              { label: "Allow", bg: "#fff", color: "#6b7280", border: "1px solid #e5e7eb" },
+              { label: "Forbid", bg: "#2E1F5E", color: "#fff" },
+              { label: "Modify", bg: "#f3f0ff", color: "#2E1F5E" },
+              { label: "Allow", bg: "#f3f4f6", color: "#4b5563" },
             ].map((btn) => (
               <button
                 key={btn.label}
                 className="dbtn"
                 onClick={() => { if (phase === 2) setDn((p) => p + 1); send(btn.label); }}
-                style={{ background: btn.bg, border: btn.border, borderRadius: "10px", padding: ".5rem 1.25rem", fontSize: "14px", color: btn.color, fontWeight: "700", letterSpacing: "-.01em", boxShadow: btn.label === "Forbid" ? "0 2px 8px rgba(46,31,94,.25)" : "none" }}
+                style={{ background: btn.bg, border: "1px solid transparent", borderRadius: "10px", padding: ".55rem 1.25rem", fontSize: "14px", color: btn.color, fontWeight: "600", letterSpacing: "-.01em" }}
               >
                 {btn.label}
               </button>
@@ -907,7 +904,7 @@ export default function App() {
         <button
           onClick={() => input.trim() && !loading && send(input.trim())}
           disabled={loading || !input.trim()}
-          style={{ background: input.trim() && !loading ? "linear-gradient(135deg,#2E1F5E,#6B4EE6)" : "#f3f4f6", border: "none", borderRadius: "10px", padding: ".75rem 1.125rem", color: input.trim() && !loading ? "#fff" : "#9ca3af", fontSize: "16px", cursor: input.trim() && !loading ? "pointer" : "default", transition: "all .15s", flexShrink: "0", boxShadow: input.trim() && !loading ? "0 2px 8px rgba(46,31,94,.25)" : "none" }}
+          style={{ background: input.trim() && !loading ? "#2E1F5E" : "#f3f4f6", border: "none", borderRadius: "10px", padding: ".75rem 1.125rem", color: input.trim() && !loading ? "#fff" : "#9ca3af", fontSize: "16px", cursor: input.trim() && !loading ? "pointer" : "default", transition: "all .15s", flexShrink: "0", boxShadow: input.trim() && !loading ? "0 2px 8px rgba(46,31,94,.25)" : "none" }}
         >
           →
         </button>
