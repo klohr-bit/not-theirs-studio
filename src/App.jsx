@@ -59,7 +59,7 @@ Deliver:
 - [move 3]
 - [move 4]
 ---
-Ask if the summary lands. If they say anything is off, revise the specific elements they correct and redelivery the full updated summary before moving to Phase 2. Don't proceed until they confirm it's accurate.
+Ask if the summary lands. If they say anything is off, revise the specific elements they correct and redeliver the full updated summary before moving to Phase 2. Don't proceed until they confirm it's accurate.
 
 PHASE 2 — Open Phase 2 with:
 PHASE 2: DEFAULT REVIEW
