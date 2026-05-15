@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -23,13 +23,29 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 4096,
-        system,
+        system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
         messages,
+        stream: true,
       }),
     });
 
-    const data = await response.json();
-    res.status(response.status).json(data);
+    if (!upstream.ok || !upstream.body) {
+      const errText = await upstream.text().catch(() => '');
+      return res.status(upstream.status || 500).json({ error: 'Upstream error', detail: errText });
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const reader = upstream.body.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(value);
+    }
+    res.end();
   } catch (err) {
     res.status(500).json({ error: 'Failed to reach Anthropic API', detail: err.message });
   }

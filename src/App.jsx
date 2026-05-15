@@ -297,7 +297,7 @@ export default function App() {
   const [previewTab, setPreviewTab] = useState("o1");
   const endRef = useRef(null);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, loading]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: loading ? "smooth" : "auto", block: "end" }); }, [msgs, loading]);
 
   useEffect(() => {
     if (done) {
@@ -341,14 +341,50 @@ export default function App() {
     const nm = [...msgs, { role: "user", content: msg }];
     setMsgs(nm); setInput(""); setLoading(true); setShowBtns(false);
     try {
-    const res = await fetch("/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ messages: nm, system: SYSTEM_PROMPT }),
-});
-      const data = await res.json();
-      if (!data.content?.[0]) throw new Error("No response");
-      const raw = data.content[0].text;
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: nm, system: SYSTEM_PROMPT }),
+      });
+      if (!res.ok || !res.body) throw new Error("Stream failed");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let raw = "";
+      let buffer = "";
+      let started = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (!payload) continue;
+          try {
+            const evt = JSON.parse(payload);
+            if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
+              raw += evt.delta.text;
+              const { clean: live } = extract(raw);
+              if (!started) {
+                started = true;
+                setLoading(false);
+                setMsgs([...nm, { role: "assistant", content: live }]);
+              } else {
+                setMsgs((p) => {
+                  const copy = p.slice();
+                  copy[copy.length - 1] = { role: "assistant", content: live };
+                  return copy;
+                });
+              }
+            }
+          } catch {}
+        }
+      }
+
       const { clean, a, b } = extract(raw);
       if (a) setO1((p) => p || a);
       if (b) { setO2((p) => p || b); setDone(true); }
