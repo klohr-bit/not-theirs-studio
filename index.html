@@ -19,7 +19,15 @@
   justify-content: center;
   -webkit-font-smoothing: antialiased;
 }
-#root { width: 100%; }
+#root {
+  width: 100%;
+  max-width: 1180px;
+  margin: 28px auto;
+  padding: 0 24px;
+}
+@media (max-width: 720px) {
+  #root { margin: 12px auto; padding: 0 12px; }
+}
     </style>
   </head>
   <body>
