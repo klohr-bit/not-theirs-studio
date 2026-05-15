@@ -442,6 +442,8 @@ export default function App() {
       </div>
     </div>
   );
+
+  const PhaseBar = () => (
     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
       {phase > 0 && (
         <span style={{ fontSize: "12px", fontWeight: "600", color: "#6B4EE6", letterSpacing: "-.01em" }}>
