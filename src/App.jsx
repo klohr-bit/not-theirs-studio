@@ -171,12 +171,42 @@ Close: **You're done.** Output 1 goes in your AI tool. Output 2 stays with you. 
 const PHASE_LABELS = ["", "Voice Calibration", "Default Review", "Personal Additions", "Build System", "Context Modes", "Sample Pieces"];
 
 const INTERSTITIAL = {
-  1: { main: "Finding your voice...", sub: "Reading what makes your writing yours." },
-  2: { main: "Voice type identified.", sub: "Now let's find your AI defaults." },
-  3: { main: "Forbidden List taking shape.", sub: "Adding your personal layer." },
-  4: { main: "Building your system.", sub: "Forbidden List and Voice Signature coming together." },
-  5: { main: "Your system is built.", sub: "One more layer — context modes." },
-  6: { main: "Almost there.", sub: "Time to see it work." },
+  1: {
+    title: "Phase 1",
+    main: "Voice Calibration",
+    sub: "A handful of short questions about how you naturally write — register, format, openings, closings. There are no right answers.",
+    direction: "Type your responses. Be honest, not polished.",
+  },
+  2: {
+    title: "Phase 2",
+    main: "Default Review",
+    sub: "You'll see each AI default move one at a time alongside your voice signal — em-dashes, validating openers, bulleting reflexes, and more.",
+    direction: "Pick Forbid, Modify, or Allow for each one. Type a response for more nuance.",
+  },
+  3: {
+    title: "Phase 3",
+    main: "Personal Additions",
+    sub: "Patterns the AI didn't catch but you want to forbid — words you hate, formats you'd never use, openings that aren't you.",
+    direction: "List your additions, or say \"none\" to skip.",
+  },
+  4: {
+    title: "Phase 4",
+    main: "Build Your System",
+    sub: "I'll compile everything into your Forbidden List and Voice Signature — the two documents that govern your defaults.",
+    direction: "Review what I draft. Edit anything that doesn't sound like you.",
+  },
+  5: {
+    title: "Phase 5",
+    main: "Context Modes",
+    sub: "Different situations need different rules. We'll define 2-4 contexts where your defaults relax or shift.",
+    direction: "Name your contexts. I'll suggest the flexes.",
+  },
+  6: {
+    title: "Phase 6",
+    main: "Sample Pieces",
+    sub: "I'll write samples using your full system so you can verify it sounds like you before you deploy it anywhere.",
+    direction: "Read the samples. Tell me what to adjust.",
+  },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -329,8 +359,6 @@ export default function App() {
     if (phase > 0 && INTERSTITIAL[phase]) {
       setIMsg(INTERSTITIAL[phase]);
       setShowI(true);
-      const t = setTimeout(() => setShowI(false), 2400);
-      return () => clearTimeout(t);
     }
   }, [phase]);
 
@@ -773,15 +801,23 @@ export default function App() {
 
         {/* Phase interstitial */}
         {showI && (
-          <div style={{ position: "absolute", inset: "0", display: "flex", alignItems: "center", justifyContent: "center", zIndex: "10", background: "rgba(46,31,94,.9)", backdropFilter: "blur(4px)", animation: "iIn .35s ease forwards" }}>
-            <div style={{ textAlign: "center", padding: "2rem 2.5rem", maxWidth: "360px" }}>
-              <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginBottom: "1.25rem" }}>
-                {[0, 1, 2].map((i) => (
-                  <div key={i} style={{ width: "6px", height: "6px", borderRadius: "50%", background: i === 1 ? "#C5B4F5" : "rgba(197,180,245,.3)" }} />
-                ))}
-              </div>
-              <p style={{ fontSize: "22px", fontWeight: "800", color: "#fff", margin: "0 0 .625rem", lineHeight: "1.25", letterSpacing: "-.03em" }}>{iMsg.main}</p>
-              <p style={{ fontSize: "14px", fontWeight: "500", color: "rgba(197,180,245,.7)", margin: "0", lineHeight: "1.5" }}>{iMsg.sub}</p>
+          <div style={{ position: "absolute", inset: "0", display: "flex", alignItems: "center", justifyContent: "center", zIndex: "10", background: "rgba(46,31,94,.94)", backdropFilter: "blur(6px)", animation: "iIn .35s ease forwards", padding: "1.5rem" }}>
+            <div style={{ textAlign: "center", padding: "2rem 2.25rem", maxWidth: "440px", width: "100%" }}>
+              <p style={{ fontSize: "11px", fontWeight: "700", color: "#C5B4F5", letterSpacing: ".18em", textTransform: "uppercase", margin: "0 0 .875rem" }}>{iMsg.title || "Next up"}</p>
+              <p style={{ fontSize: "28px", fontWeight: "800", color: "#fff", margin: "0 0 1rem", lineHeight: "1.15", letterSpacing: "-.03em" }}>{iMsg.main}</p>
+              <p style={{ fontSize: "14px", fontWeight: "500", color: "rgba(255,255,255,.78)", margin: "0 0 1.25rem", lineHeight: "1.6" }}>{iMsg.sub}</p>
+              {iMsg.direction && (
+                <div style={{ background: "rgba(107,78,230,.22)", border: "1px solid rgba(197,180,245,.3)", borderRadius: "10px", padding: ".75rem 1rem", margin: "0 0 1.5rem", display: "flex", alignItems: "flex-start", gap: ".5rem", textAlign: "left" }}>
+                  <span style={{ color: "#C5B4F5", fontSize: "14px", fontWeight: "800", flexShrink: 0 }}>→</span>
+                  <span style={{ fontSize: "13px", fontWeight: "600", color: "#fff", lineHeight: "1.5" }}>{iMsg.direction}</span>
+                </div>
+              )}
+              <button
+                onClick={() => setShowI(false)}
+                style={{ background: "#fff", color: "#2E1F5E", border: "none", borderRadius: "10px", padding: ".625rem 1.5rem", fontSize: "14px", fontWeight: "700", cursor: "pointer", letterSpacing: "-.01em", boxShadow: "0 4px 14px rgba(0,0,0,.25)" }}
+              >
+                Continue →
+              </button>
             </div>
           </div>
         )}
