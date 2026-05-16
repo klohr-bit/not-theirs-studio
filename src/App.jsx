@@ -1162,13 +1162,23 @@ export default function App() {
     setScreen("pacing");
   };
 
+  const [pendingPace, setPendingPace] = useState(null);
   const choosePace = (mode) => {
-    setScreen("chat");
-    const msg = mode === "walk"
-      ? "Walk me through it — full explanations. Run the opening greeting and profile questions."
-      : "Just the decisions. Tight. Run the opening greeting and profile questions.";
-    send(msg);
+    setPendingPace(mode);
+    setScreen("transition");
   };
+  useEffect(() => {
+    if (screen !== "transition" || !pendingPace) return;
+    const t = setTimeout(() => {
+      const msg = pendingPace === "walk"
+        ? "Walk me through it — full explanations. Run the opening greeting and profile questions."
+        : "Just the decisions. Tight. Run the opening greeting and profile questions.";
+      setPendingPace(null);
+      setScreen("chat");
+      send(msg);
+    }, 3600);
+    return () => clearTimeout(t);
+  }, [screen, pendingPace]);
 
   const handleCopy = async (which) => {
     const text = o1;
@@ -1344,33 +1354,33 @@ export default function App() {
 
   // ── TRANSITION SCREEN ──────────────────────────────────────────────────────
   if (screen === "transition") return (
-    <div style={{ background: "#2E1F5E", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.15)", minHeight: "440px", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "Inter,-apple-system,sans-serif" }}>
+    <div style={{ background: "linear-gradient(135deg,#1a1230,#2E1F5E)", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.15)", minHeight: "calc(100vh - 56px)", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "Inter,-apple-system,sans-serif", position: "relative" }}>
       <style>{GLOBAL_CSS}</style>
 
       <div className="t-studio" style={{ padding: "1.5rem 2rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-        <span style={{ fontSize: "15px", fontWeight: "800", color: "rgba(255,255,255,.4)", letterSpacing: "-.03em" }}>Not Theirs Studio</span>
+        <span style={{ fontSize: "15px", fontWeight: "800", color: "rgba(255,255,255,.45)", letterSpacing: "-.03em" }}>Not Theirs Studio</span>
       </div>
 
-      <div style={{ padding: "3rem 2.5rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <p className="t-l1" style={{ fontSize: "32px", fontWeight: "800", color: "#fff", lineHeight: "1.15", margin: "0 0 1.25rem", letterSpacing: "-.04em" }}>
+      <div style={{ padding: "3rem 3rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "780px" }}>
+        <p className="t-l1" style={{ fontSize: "44px", fontWeight: "800", color: "#fff", lineHeight: "1.1", margin: "0 0 1.5rem", letterSpacing: "-.04em" }}>
           Every AI has defaults.
         </p>
-        <p className="t-l2" style={{ fontSize: "28px", fontWeight: "700", color: "#C5B4F5", lineHeight: "1.2", margin: "0 0 2.5rem", letterSpacing: "-.03em" }}>
+        <p className="t-l2" style={{ fontSize: "32px", fontWeight: "700", color: "#C5B4F5", lineHeight: "1.2", margin: "0 0 3rem", letterSpacing: "-.03em" }}>
           Most people don't know what theirs are yet.
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div className="t-rule" style={{ height: "2px", background: "rgba(255,255,255,.2)", flexShrink: "0", borderRadius: "2px" }} />
-          <p className="t-sub" style={{ fontSize: "15px", fontWeight: "500", color: "rgba(255,255,255,.45)", margin: "0", lineHeight: "1.5", letterSpacing: "-.01em" }}>
+          <div className="t-rule" style={{ height: "2px", background: "rgba(255,255,255,.25)", flexShrink: "0", borderRadius: "2px" }} />
+          <p className="t-sub" style={{ fontSize: "16px", fontWeight: "500", color: "rgba(255,255,255,.55)", margin: "0", lineHeight: "1.5", letterSpacing: "-.01em" }}>
             You're about to do it differently.
           </p>
         </div>
       </div>
 
       <div className="t-foot" style={{ padding: "1.5rem 2rem", borderTop: "1px solid rgba(255,255,255,.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: "11px", fontWeight: "600", color: "rgba(255,255,255,.25)", letterSpacing: ".1em", textTransform: "uppercase" }}>The Signature Method · Voice</span>
+        <span style={{ fontSize: "11px", fontWeight: "600", color: "rgba(255,255,255,.3)", letterSpacing: ".14em", textTransform: "uppercase" }}>The Signature Method · Volume 1: Voice</span>
         <div style={{ display: "flex", gap: "5px" }}>
           {[0, 1, 2].map((i) => (
-            <div key={i} style={{ width: "5px", height: "5px", borderRadius: "50%", background: i === 1 ? "rgba(255,255,255,.6)" : "rgba(255,255,255,.2)" }} />
+            <div key={i} className="dot" style={{ width: "6px", height: "6px", borderRadius: "50%", background: "rgba(197,180,245,.6)" }} />
           ))}
         </div>
       </div>
