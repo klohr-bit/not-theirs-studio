@@ -277,7 +277,13 @@ Same topic, four completely different voices. Pick which one sounds most like yo
 After the user's selection comes back (e.g., "I'm closest to Direct and Plain-Spoken"), acknowledge briefly and continue with the rest of Phase 1.
 
 ---
-After they pick, ask about secondary elements. Before asking for samples, say: "Find 2-3 things you wrote quickly and didn't heavily edit — a Slack message, an email draft, a social post written in one sitting. The less polished the better. That's where your actual voice lives." Ask for 2-3 writing samples (no AI help).
+After they pick, ask about secondary elements. Then when it's time to collect their writing, send a single message that frames the sample request and ends with the {{samples-input}} marker on its own line. The frontend renders that marker as a multi-textarea collector inline in the chat. Use roughly this script (vary naturally):
+
+"Now I need to see your actual voice. Find 2-3 things you wrote quickly and didn't heavily edit — a Slack message, an email draft, a social post written in one sitting. The less polished the better. Two minimum.
+
+{{samples-input}}"
+
+The user will submit the samples back as a message containing SAMPLE 1, SAMPLE 2, etc. The frontend styles each as a card for them, but you receive them as labeled text. Analyze each labeled sample.
 
 Analyze with depth and specificity. For each dimension below, name the pattern AND quote one example from their samples:
 - Sentence length: ratio of short/medium/long, and the rhythm pattern (e.g., "two long sentences then one short for emphasis")
@@ -844,13 +850,15 @@ const ASK_RE = /^(type|tell|pick|choose|send|share|give|write|select|enter|paste
 function parseMessage(text) {
   if (!text) return [{ type: "text", content: "" }];
   const parts = [];
-  const re = /\{\{card\}\}([\s\S]*?)\{\{\/card\}\}|\{\{passages\}\}/g;
+  const re = /\{\{card\}\}([\s\S]*?)\{\{\/card\}\}|\{\{passages\}\}|\{\{samples-input\}\}/g;
   let last = 0;
   let m;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) parts.push({ type: "text", content: text.slice(last, m.index) });
     if (m[0] === "{{passages}}") {
       parts.push({ type: "passages" });
+    } else if (m[0] === "{{samples-input}}") {
+      parts.push({ type: "samples-input" });
     } else {
       const body = m[1];
       const card = {};
@@ -868,6 +876,14 @@ function parseMessage(text) {
   }
   if (last < text.length) parts.push({ type: "text", content: text.slice(last) });
   return parts;
+}
+
+function parseUserSamples(text) {
+  if (!text) return null;
+  const re = /SAMPLE\s+(\d+)\s*\n([\s\S]+?)(?=\n\s*SAMPLE\s+\d+\s*\n|$)/gi;
+  const matches = [...text.matchAll(re)];
+  if (matches.length < 2) return null;
+  return matches.map((m) => ({ idx: parseInt(m[1], 10), content: m[2].trim() }));
 }
 
 function renderMD(text, isAssistant) {
@@ -924,6 +940,109 @@ async function copyToClipboard(text) {
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION CARD COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
+function PassageRow({ onChoice, active }) {
+  const [pick, setPick] = useState(null);
+  const choose = (p) => {
+    if (!active || pick) return;
+    setPick(p);
+    onChoice(p);
+  };
+  if (pick) {
+    return (
+      <div style={{ background: "#f0edff", border: "1.5px solid #C5B4F5", borderRadius: "12px", padding: "1rem 1.125rem", margin: ".5rem 0" }}>
+        <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 .25rem" }}>You picked</p>
+        <p style={{ fontSize: "15px", fontWeight: "700", color: "#2E1F5E", margin: "0", letterSpacing: "-.01em" }}>{pick.label}</p>
+      </div>
+    );
+  }
+  return (
+    <div style={{ margin: ".5rem 0" }}>
+      <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .75rem" }}>Pick the one that sounds most like you</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: ".625rem" }}>
+        {PASSAGES.map((p) => (
+          <button
+            key={p.id}
+            disabled={!active}
+            onClick={() => choose(p)}
+            onMouseEnter={(e) => { if (active) { e.currentTarget.style.borderColor = "#6B4EE6"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 18px rgba(46,31,94,.12)"; } }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,.04)"; }}
+            style={{ background: "#fff", border: "1.5px solid #e5e7eb", borderRadius: "12px", padding: ".875rem", textAlign: "left", cursor: active ? "pointer" : "default", transition: "all .15s ease", display: "flex", flexDirection: "column", gap: ".5rem", minHeight: "240px", boxShadow: "0 1px 3px rgba(0,0,0,.04)" }}
+          >
+            <p style={{ fontSize: "10px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".1em", textTransform: "uppercase", margin: 0 }}>{p.label}</p>
+            <p style={{ fontSize: "12.5px", color: "#374151", lineHeight: "1.55", margin: 0, flex: 1 }}>{p.excerpt}</p>
+            {active && (
+              <p style={{ fontSize: "11.5px", fontWeight: "700", color: "#6B4EE6", margin: ".25rem 0 0", letterSpacing: "-.01em" }}>Sounds like me →</p>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SampleCollector({ onSubmit, active }) {
+  const [samples, setSamples] = useState(["", "", ""]);
+  const [submitted, setSubmitted] = useState(false);
+  const update = (i, v) => {
+    const copy = [...samples];
+    copy[i] = v;
+    setSamples(copy);
+  };
+  const addAnother = () => setSamples([...samples, ""]);
+  const remove = (i) => setSamples(samples.filter((_, idx) => idx !== i));
+  const submit = () => {
+    const filled = samples.map((s) => s.trim()).filter(Boolean);
+    if (filled.length < 2) return;
+    setSubmitted(true);
+    const formatted = filled.map((s, i) => `SAMPLE ${i + 1}\n${s}`).join("\n\n");
+    onSubmit(formatted);
+  };
+  const filledCount = samples.filter((s) => s.trim()).length;
+  if (submitted) return null;
+  return (
+    <div style={{ margin: ".5rem 0", background: "#fafafa", border: "1px solid #ede9ff", borderRadius: "14px", padding: "1.125rem 1.25rem" }}>
+      <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .25rem" }}>Paste your samples</p>
+      <p style={{ fontSize: "12.5px", color: "#6b7280", margin: "0 0 1rem", lineHeight: "1.5" }}>Things you wrote quickly. The less polished, the better. Two minimum.</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: ".625rem" }}>
+        {samples.map((s, i) => (
+          <div key={i} style={{ position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: ".25rem" }}>
+              <span style={{ fontSize: "10.5px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".1em", textTransform: "uppercase" }}>Sample {i + 1}</span>
+              {samples.length > 2 && (
+                <button onClick={() => remove(i)} disabled={!active} style={{ background: "none", border: "none", color: "#9ca3af", fontSize: "11px", cursor: active ? "pointer" : "default", fontWeight: "600" }}>Remove</button>
+              )}
+            </div>
+            <textarea
+              value={s}
+              onChange={(e) => update(i, e.target.value)}
+              disabled={!active}
+              placeholder="Paste a few paragraphs you wrote yourself..."
+              style={{ width: "100%", minHeight: "90px", padding: ".75rem .875rem", border: "1.5px solid #e5e7eb", borderRadius: "10px", fontSize: "13px", color: "#111", background: "#fff", fontFamily: "Inter,-apple-system,sans-serif", lineHeight: "1.55", resize: "vertical", outline: "none" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#6B4EE6"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#e5e7eb"; }}
+            />
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: ".75rem", marginTop: "1rem" }}>
+        <button
+          onClick={submit}
+          disabled={!active || filledCount < 2}
+          style={{ background: active && filledCount >= 2 ? "linear-gradient(135deg,#2E1F5E,#6B4EE6)" : "#f3f4f6", color: active && filledCount >= 2 ? "#fff" : "#9ca3af", border: "none", borderRadius: "10px", padding: ".625rem 1.25rem", fontSize: "13.5px", fontWeight: "700", cursor: active && filledCount >= 2 ? "pointer" : "default", letterSpacing: "-.01em", boxShadow: active && filledCount >= 2 ? "0 2px 8px rgba(46,31,94,.25)" : "none" }}
+        >
+          Send {filledCount} {filledCount === 1 ? "sample" : "samples"} →
+        </button>
+        {samples.length < 5 && (
+          <button onClick={addAnother} disabled={!active} style={{ background: "none", border: "1px dashed #d1d5db", borderRadius: "8px", padding: ".5rem .875rem", color: "#6b7280", fontSize: "12.5px", fontWeight: "600", cursor: active ? "pointer" : "default" }}>
+            + Add another
+          </button>
+        )}
+        <span style={{ marginLeft: "auto", fontSize: "11.5px", color: "#9ca3af" }}>{filledCount} of {samples.length} filled</span>
+      </div>
+    </div>
+  );
+}
+
 function PassageBracket({ onChoice, active }) {
   const [round, setRound] = useState(1);
   const [winners, setWinners] = useState([]);
@@ -1620,7 +1739,7 @@ export default function App() {
         {msgs.map((msg, i) => {
           const isLatestAsst = msg.role === "assistant" && i === msgs.length - 1 && !loading;
           const parts = msg.role === "assistant" ? parseMessage(msg.content) : null;
-          const hasCard = parts && parts.some((p) => p.type === "card" || p.type === "passages");
+          const hasCard = (parts && parts.some((p) => p.type === "card" || p.type === "passages" || p.type === "samples-input")) || (msg.role === "user" && parseUserSamples(msg.content));
           return (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: "8px" }}>
             {msg.role === "assistant" && (
@@ -1639,16 +1758,31 @@ export default function App() {
               boxShadow: msg.role === "user" ? "0 2px 8px rgba(46,31,94,.25)" : "0 1px 4px rgba(0,0,0,.06)",
               border: msg.role === "assistant" ? "1px solid #f3f4f6" : "none",
             }}>
-              {msg.role === "user" ? (
-                <div style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: renderMD(msg.content, false) }} />
-              ) : (
+              {msg.role === "user" ? (() => {
+                const userSamples = parseUserSamples(msg.content);
+                if (userSamples) {
+                  return (
+                    <div style={{ display: "flex", flexDirection: "column", gap: ".5rem" }}>
+                      {userSamples.map((s) => (
+                        <div key={s.idx} style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: "10px", padding: ".625rem .75rem" }}>
+                          <p style={{ fontSize: "10.5px", fontWeight: "700", color: "rgba(197,180,245,.9)", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 .25rem" }}>Sample {s.idx}</p>
+                          <p style={{ fontSize: "13px", color: "#fff", margin: 0, lineHeight: "1.55", whiteSpace: "pre-wrap" }}>{s.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
+                return <div style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: renderMD(msg.content, false) }} />;
+              })() : (
                 <div style={{ margin: 0 }}>
                   {parts.map((part, idx) => (
                     part.type === "card"
                       ? <DecisionCard key={idx} card={part.data} active={isLatestAsst} onChoice={(label) => { if (phase === 2) setDn((p) => p + 1); send(`${label} (${part.data.id || part.data.name || ""})`.trim()); }} />
                       : part.type === "passages"
-                        ? <PassageBracket key={idx} active={isLatestAsst} onChoice={(winner) => send(`I'm closest to "${winner.label}".`)} />
-                        : <div key={idx} dangerouslySetInnerHTML={{ __html: renderMD(part.content, true) }} />
+                        ? <PassageRow key={idx} active={isLatestAsst} onChoice={(winner) => send(`I'm closest to "${winner.label}".`)} />
+                        : part.type === "samples-input"
+                          ? <SampleCollector key={idx} active={isLatestAsst} onSubmit={(formatted) => send(formatted)} />
+                          : <div key={idx} dangerouslySetInnerHTML={{ __html: renderMD(part.content, true) }} />
                   ))}
                 </div>
               )}
