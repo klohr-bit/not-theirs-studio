@@ -335,16 +335,30 @@ Anything I got wrong, or missed?
 CONFIRMATION (after either stage):
 Ask if it lands. If they say anything is off, revise the specific elements they correct and redeliver before moving to Phase 2. Don't proceed until they confirm it's accurate.
 
-PHASE 2 — Open Phase 2 with:
+PHASE 2 — Open Phase 2 in exactly this structure, in order:
+
+STEP A: Header
 **PHASE 2: DEFAULT REVIEW**
 ---
-Before we go through the AI defaults, choose how you want to do this:
 
-**Smart review** — I've already analyzed your writing against the full catalog. I'll only ask you about the patterns where your samples were silent or ambiguous (~8-12 decisions). I'll auto-forbid the patterns your writing clearly doesn't use, and auto-modify the ones your writing uses naturally. You'll see a summary of every auto-decision before we finalize. Best for most people.
+STEP B: Catalog analysis summary. Run the triage classification (auto-forbid / auto-modify / ask) against ALL 37 catalog entries using the user's samples. Then report the count in plain prose, like this:
 
-**Top 5 only** — I'll cover the five highest-impact defaults: Em-dash, Validating openers, Warm-professional register, AI vocabulary, Closing check-in questions. Auto-handle the rest from your samples. Faster.
+I checked your samples against the full catalog. **37 documented AI patterns across 6 categories.**
 
-**Accept all recommendations** — I auto-decide every catalog entry based on your samples. You see the summary and can override. Fastest.
+- **Already blocked ([N1]):** your writing doesn't use these — em-dashes, [name 2-3 specific examples drawn from the actual auto-forbid set you produced]. I'm setting them to Forbid automatically.
+- **Already allowed or modified ([N2]):** your writing uses these naturally — [name examples from your auto-modify set, if any]. I'll keep them with light constraints.
+- **Need your call ([N3]):** [N3] patterns where your samples were silent or ambiguous. These are the ones I'll walk you through.
+
+(N1 + N2 + N3 must equal 37. State actual numbers, not placeholders.)
+
+STEP C: Path choice
+Before we go through the [N3] ambiguous patterns, how do you want to handle them?
+
+**Smart review** — I walk you through each of the [N3] ambiguous patterns one at a time. Best for most people.
+
+**Top 5 only** — I'll cover only the five highest-impact defaults from the ambiguous set: Em-dash, Validating openers, Warm-professional register, AI vocabulary, Closing check-in questions. Auto-handle the rest. Faster.
+
+**Accept all recommendations** — I decide every ambiguous pattern based on your samples and voice type. Fastest.
 
 Which do you prefer?
 ---
@@ -1212,7 +1226,23 @@ input:focus { border-color: #6B4EE6 !important; outline: none; box-shadow: 0 0 0
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN APP
 // ─────────────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = "ynt:session:v1";
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
+  const saved = typeof window !== "undefined" ? loadSaved() : null;
+  const hasSaved = !!saved && saved.msgs && saved.msgs.length > 0 && saved.screen !== "completion";
   const [screen, setScreen] = useState("opening");
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState("");
@@ -1225,7 +1255,41 @@ export default function App() {
   const [showI, setShowI] = useState(false);
   const [iMsg, setIMsg] = useState({ main: "", sub: "" });
   const [copyState, setCopyState] = useState({ o1: false });
+  const [hasSavedSession, setHasSavedSession] = useState(hasSaved);
   const endRef = useRef(null);
+
+  const resumeSession = () => {
+    const data = loadSaved();
+    if (!data) return;
+    setScreen(data.screen || "chat");
+    setMsgs(data.msgs || []);
+    setPhase(data.phase || 0);
+    setO1(data.o1 || "");
+    setDone(data.done || false);
+    setDn(data.dn || 0);
+    setHasSavedSession(false);
+  };
+
+  const clearSaved = () => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    setHasSavedSession(false);
+  };
+
+  // Persist on relevant state changes, only when not actively streaming
+  useEffect(() => {
+    if (loading) return;
+    if (screen === "opening" || screen === "pacing" || screen === "transition") return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ screen, msgs, phase, o1, done, dn }));
+    } catch {}
+  }, [screen, msgs, phase, o1, done, dn, loading]);
+
+  // Clear storage once the user reaches completion
+  useEffect(() => {
+    if (screen === "completion") {
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    }
+  }, [screen]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: loading ? "smooth" : "auto", block: "end" }); }, [msgs, loading]);
 
@@ -1465,19 +1529,23 @@ export default function App() {
       <div style={{ flex: "1", display: "flex", flexDirection: "column" }}>
         <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "640px" }}>
 
+          <div style={{ display: "inline-flex", alignItems: "center", gap: ".5rem", background: "#f0edff", color: "#6B4EE6", border: "1px solid rgba(107,78,230,.2)", borderRadius: "20px", padding: ".3rem .75rem", margin: "0 0 1.25rem", fontSize: "11.5px", fontWeight: "700", letterSpacing: ".04em", width: "fit-content" }}>
+            <span>37 documented AI patterns · 6 categories</span>
+          </div>
+
           <h1 style={{ fontSize: "34px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .875rem", letterSpacing: "-.035em" }}>
             Your voice, <span style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>not theirs.</span>
           </h1>
-          <p style={{ fontSize: "16px", color: "#4b5563", lineHeight: "1.55", margin: "0 0 2.25rem", maxWidth: "520px" }}>
-            A short walkthrough that gives any AI tool your actual writing voice. Built once, paste anywhere.
+          <p style={{ fontSize: "16px", color: "#4b5563", lineHeight: "1.55", margin: "0 0 2.25rem", maxWidth: "560px" }}>
+            Most "write in my voice" prompts tell AI what to do. This builds a voice signature by checking your writing against 37 documented AI patterns — so anything you generate from here on comes back sounding like you, not the model.
           </p>
 
           <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 1rem" }}>How it works</p>
           <div style={{ display: "flex", flexDirection: "column", gap: ".875rem", marginBottom: "2rem" }}>
             {[
-              { n: 1, title: "Tell me about your writing", desc: "A few questions about your style plus 2-3 samples you've already written." },
-              { n: 2, title: "Decide what to block", desc: "I'll walk you through the AI patterns that make writing sound generic. You pick what stays out." },
-              { n: 3, title: "Get your two documents", desc: "A Forbidden List and a Voice Signature. Paste them into ChatGPT, Claude, or any AI tool. Your voice goes wherever you go." },
+              { n: 1, title: "Show me how you write", desc: "Pick the voice that sounds most like you, then paste 2-3 things you've written." },
+              { n: 2, title: "Decide what to block", desc: "I check your samples against all 37 catalog patterns. You weigh in on the ambiguous ones." },
+              { n: 3, title: "Get your voice system document", desc: "One document with your forbidden list, voice signature, drift-check prompts, and starter prompts. Paste it into ChatGPT, Claude, or any AI tool." },
             ].map((s) => (
               <div key={s.n} style={{ display: "flex", alignItems: "flex-start", gap: ".875rem" }}>
                 <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "#f0edff", color: "#6B4EE6", fontSize: "13px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>{s.n}</div>
@@ -1489,11 +1557,21 @@ export default function App() {
             ))}
           </div>
 
+          {hasSavedSession ? (
+            <div style={{ background: "#f0edff", border: "1px solid rgba(107,78,230,.25)", borderRadius: "12px", padding: "1rem 1.125rem", marginBottom: "1.25rem" }}>
+              <p style={{ fontSize: "13px", fontWeight: "700", color: "#2E1F5E", margin: "0 0 .25rem", letterSpacing: "-.01em" }}>You have a saved session.</p>
+              <p style={{ fontSize: "12.5px", color: "#6b7280", margin: "0 0 .75rem", lineHeight: "1.5" }}>You left off mid-workflow. Pick up where you stopped, or start fresh.</p>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button onClick={resumeSession} style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", color: "#fff", border: "none", borderRadius: "8px", padding: ".5rem 1rem", fontSize: "13px", fontWeight: "700", cursor: "pointer", boxShadow: "0 2px 6px rgba(46,31,94,.25)" }}>Resume →</button>
+                <button onClick={clearSaved} style={{ background: "#fff", color: "#6b7280", border: "1px solid #e5e7eb", borderRadius: "8px", padding: ".5rem 1rem", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>Start fresh</button>
+              </div>
+            </div>
+          ) : null}
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <button className="start-btn" onClick={startSession} style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", borderRadius: "10px", padding: ".75rem 1.5rem", color: "#fff", fontSize: "14px", fontWeight: "700", cursor: "pointer", border: "none", letterSpacing: "-.01em", boxShadow: "0 4px 14px rgba(46,31,94,.35)" }}>
-              Start
+              {hasSavedSession ? "Start a new session" : "Start"}
             </button>
-            <span style={{ fontSize: "12.5px", color: "#9ca3af" }}>About 10 minutes. Nothing is saved.</span>
+            <span style={{ fontSize: "12.5px", color: "#9ca3af" }}>About 15-30 minutes. Saved in your browser so you can come back.</span>
           </div>
         </div>
       </div>
