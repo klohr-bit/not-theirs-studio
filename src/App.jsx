@@ -856,7 +856,7 @@ export default function App() {
       setMsgs([...nm, { role: "assistant", content: clean }]);
       const np = dPhase(raw);
       if (np && np > phase) setPhase(np);
-      setShowBtns((raw.includes("Forbid / Allow / Modify?") || raw.includes("Forbid, Allow, or Modify?")) && !a);
+      setShowBtns(/forbid[,\s/]+(?:modify|allow)[,\s/]+(?:or\s+)?(?:allow|modify)\s*\??/i.test(raw) && !a);
     } catch {
       setMsgs((p) => [...p, { role: "assistant", content: "Connection issue. Please try again." }]);
     } finally {
