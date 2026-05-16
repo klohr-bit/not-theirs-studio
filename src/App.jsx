@@ -1552,8 +1552,8 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <TopBar />
       <div style={{ flex: "1", display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 400px)", gap: "3.5rem", alignItems: "center" }}>
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "560px" }}>
+        <div style={{ padding: "2.5rem 3rem 2.5rem", flex: "1", display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 400px)", gap: "3.5rem", alignItems: "flex-start" }}>
+          <div style={{ display: "flex", flexDirection: "column", maxWidth: "560px" }}>
 
           <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .875rem" }}>The Signature Build · Not Theirs Studio · Volume 1: Voice</p>
 
@@ -1617,12 +1617,12 @@ export default function App() {
                 <span style={{ fontSize: "10px", fontWeight: "800", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase" }}>AI default</span>
                 <span style={{ fontSize: "10px", color: "#d1d5db", fontWeight: "600" }}>Facebook · 2m</span>
               </div>
-              <div style={{ padding: ".875rem 1rem 1rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: ".5rem" }}>
-                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "#e5e7eb" }} />
-                  <span style={{ fontSize: "11.5px", fontWeight: "700", color: "#374151" }}>You</span>
+              <div style={{ padding: ".75rem .875rem .875rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: ".4rem" }}>
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "#e5e7eb" }} />
+                  <span style={{ fontSize: "11px", fontWeight: "700", color: "#374151" }}>You</span>
                 </div>
-                <p style={{ fontSize: "12.5px", color: "#374151", lineHeight: "1.6", margin: 0, whiteSpace: "pre-line" }}>
+                <p style={{ fontSize: "11.5px", color: "#374151", lineHeight: "1.55", margin: 0, whiteSpace: "pre-line" }}>
 {`Hey friends! 🎉 I'm SO excited to share something I've been working on — a transformative new coaching session designed to empower you on your journey to clarity.
 
 It's not just another session. It's a deep dive into what's holding you back.
