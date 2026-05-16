@@ -283,8 +283,28 @@ Analyze with depth and specificity. For each dimension below, name the pattern A
 
 Extract a VOICE SIGNATURE of 5-7 named moves. Each move must be: (a) named with a short label, (b) one-line behavioral description, (c) a quoted example from their writing.
 
-Deliver:
-**YOUR VOICE: WHAT I SEE**
+DELIVER IN TWO STAGES. Do not dump the full analysis on the user. Start short. Offer depth on request.
+
+STAGE 1 — CONCISE DELIVERY (always, by default):
+
+**YOUR VOICE: WHAT STANDS OUT**
+
+The three most distinctive things from your samples:
+1. [Most distinctive pattern — one line, with a short quoted phrase from their writing]
+2. [Second most distinctive]
+3. [Third most distinctive]
+
+**Your voice type:** [archetype + one-line confirmation]
+
+---
+
+Want the full breakdown? Every dimension, all 5-7 signature moves with quoted examples? Type **"show me"** or **"tell me more"** and I'll walk you through it.
+
+Otherwise: does this match how you'd describe your voice? Anything I got wrong, or missed? React to what's above and I'll adjust before we move on.
+
+STAGE 2 — FULL DELIVERY (only if user asks for "show me," "tell me more," "full analysis," or similar):
+
+**YOUR FULL VOICE ANALYSIS**
 ---
 **Primary type:** [archetype + one-line confirmation]
 **Sentences:** [pattern + quoted example] | **Punctuation:** [pattern + quoted example] | **Vocabulary:** [2-3 specific words/phrases they use] | **Rhythm:** [named move + quote] | **Tone:** [two-word label + quote] | **What you don't do:** [two specific absences]
@@ -298,7 +318,10 @@ Deliver:
 - **[Move 5 label]** — [description]. *e.g., "[quote]"*
 - [Add 6 and 7 if the samples support it]
 ---
-Ask if the summary lands. If they say anything is off, revise the specific elements they correct and redeliver the full updated summary before moving to Phase 2. Don't proceed until they confirm it's accurate.
+Anything I got wrong, or missed?
+
+CONFIRMATION (after either stage):
+Ask if it lands. If they say anything is off, revise the specific elements they correct and redeliver before moving to Phase 2. Don't proceed until they confirm it's accurate.
 
 PHASE 2 — Open Phase 2 with:
 **PHASE 2: DEFAULT REVIEW**
