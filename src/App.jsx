@@ -1552,7 +1552,8 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <TopBar />
       <div style={{ flex: "1", display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "640px" }}>
+        <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 380px)", gap: "3rem", alignItems: "center" }}>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "560px" }}>
 
           <div style={{ display: "inline-flex", alignItems: "center", gap: ".5rem", background: "#f0edff", color: "#6B4EE6", border: "1px solid rgba(107,78,230,.2)", borderRadius: "20px", padding: ".3rem .75rem", margin: "0 0 1.25rem", fontSize: "11.5px", fontWeight: "700", letterSpacing: ".04em", width: "fit-content" }}>
             <span>42 patterns · 6 dimensions · structural, rhetorical, tonal</span>
@@ -1597,6 +1598,81 @@ export default function App() {
               {hasSavedSession ? "Start a new session" : "Start"}
             </button>
             <span style={{ fontSize: "12.5px", color: "#9ca3af" }}>About 15-30 minutes. Saved in your browser so you can come back.</span>
+          </div>
+          </div>
+
+          {/* RIGHT COLUMN — Before/After mockup */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .375rem" }}>What changes</p>
+              <p style={{ fontSize: "15px", fontWeight: "700", color: "#111", margin: "0 0 .25rem", letterSpacing: "-.02em" }}>Same prompt. Different voice.</p>
+              <p style={{ fontSize: "13px", color: "#6b7280", margin: 0, lineHeight: "1.55" }}>Both are a Facebook post about a new coaching session. Look at the difference.</p>
+            </div>
+
+            {/* AI default post */}
+            <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,.04)" }}>
+              <div style={{ background: "#fafafa", padding: ".5rem .875rem", borderBottom: "1px solid #f3f4f6", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "10px", fontWeight: "800", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase" }}>AI default</span>
+                <span style={{ fontSize: "10px", color: "#d1d5db", fontWeight: "600" }}>Facebook · 2m</span>
+              </div>
+              <div style={{ padding: ".875rem 1rem 1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: ".5rem" }}>
+                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "#e5e7eb" }} />
+                  <span style={{ fontSize: "11.5px", fontWeight: "700", color: "#374151" }}>You</span>
+                </div>
+                <p style={{ fontSize: "12.5px", color: "#374151", lineHeight: "1.6", margin: 0, whiteSpace: "pre-line" }}>
+{`Hey friends! 🎉 I'm SO excited to share something I've been working on — a transformative new coaching session designed to empower you on your journey to clarity.
+
+It's not just another session. It's a deep dive into what's holding you back.
+
+✨ Clarity around your goals
+✨ Actionable insights you can implement immediately
+✨ A roadmap forward
+
+Drop a 💛 below if this resonates. Can't wait to support you!`}
+                </p>
+                <div style={{ display: "flex", gap: ".75rem", marginTop: ".75rem", paddingTop: ".5rem", borderTop: "1px dashed #f3f4f6", fontSize: "10.5px", color: "#9ca3af", fontWeight: "600" }}>
+                  <span>👍 Like</span><span>💬 Comment</span><span>↗ Share</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: ".5rem" }}>
+              <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
+              <span style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em" }}>↓ AFTER VOICE SYSTEM ↓</span>
+              <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
+            </div>
+
+            {/* Voice-applied post */}
+            <div style={{ background: "#fff", border: "1.5px solid #6B4EE6", borderRadius: "14px", overflow: "hidden", boxShadow: "0 8px 20px rgba(107,78,230,.18)" }}>
+              <div style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", padding: ".5rem .875rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "10px", fontWeight: "800", color: "#fff", letterSpacing: ".14em", textTransform: "uppercase" }}>Your voice</span>
+                <span style={{ fontSize: "10px", color: "rgba(255,255,255,.7)", fontWeight: "600" }}>Facebook · 2m</span>
+              </div>
+              <div style={{ padding: ".875rem 1rem 1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: ".5rem" }}>
+                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)" }} />
+                  <span style={{ fontSize: "11.5px", fontWeight: "700", color: "#111" }}>You</span>
+                </div>
+                <p style={{ fontSize: "12.5px", color: "#111", lineHeight: "1.6", margin: 0, whiteSpace: "pre-line" }}>
+{`New session opening up. Two spots.
+
+It's for the people who've done the work, made the moves, and still feel stuck. Not because they need more strategy. Because they need someone to call out the pattern they can't see from inside it.
+
+90 minutes. We talk. I tell you what I see. You decide what to do with it.
+
+Reply or DM if you want one.`}
+                </p>
+                <div style={{ display: "flex", gap: ".75rem", marginTop: ".75rem", paddingTop: ".5rem", borderTop: "1px dashed #f3f4f6", fontSize: "10.5px", color: "#9ca3af", fontWeight: "600" }}>
+                  <span>👍 Like</span><span>💬 Comment</span><span>↗ Share</span>
+                </div>
+              </div>
+            </div>
+
+            <p style={{ fontSize: "11.5px", color: "#9ca3af", lineHeight: "1.5", margin: ".25rem 0 0", fontStyle: "italic" }}>
+              No em-dashes, no manufactured enthusiasm, no "actionable insights," no closing check-in. Specific. Direct. Sounds like a person.
+            </p>
           </div>
         </div>
       </div>
