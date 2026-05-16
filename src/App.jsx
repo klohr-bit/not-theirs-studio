@@ -1373,10 +1373,23 @@ export default function App() {
 
   const extract = (raw) => {
     let a = "";
+    let complete = false;
     const m1 = raw.match(/<output1>([\s\S]*?)<\/output1>/);
-    if (m1) a = m1[1].trim();
-    const clean = raw.replace(/<output1>[\s\S]*?<\/output1>/g, a);
-    return { clean, a };
+    if (m1) {
+      a = m1[1].trim();
+      complete = true;
+      const clean = raw.replace(/<output1>[\s\S]*?<\/output1>/g, a);
+      return { clean, a, complete };
+    }
+    // Fallback: opening tag exists but no closing — stream may have been cut off.
+    // Take whatever was generated after <output1> so the user still gets a document.
+    const openOnly = raw.match(/<output1>([\s\S]*)$/);
+    if (openOnly) {
+      a = openOnly[1].trim();
+      const clean = raw.replace(/<output1>[\s\S]*$/, a);
+      return { clean, a, complete: false };
+    }
+    return { clean: raw, a: "", complete: false };
   };
 
   const send = async (msg) => {
