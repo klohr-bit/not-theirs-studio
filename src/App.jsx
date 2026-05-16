@@ -507,133 +507,46 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // ── SHARED HEADER ──────────────────────────────────────────────────────────
-  const Header = ({ right }) => (
-    <div style={{ background: "#fff", padding: ".875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "flex-end", borderBottom: "1px solid #e5e7eb" }}>
-      {right}
-    </div>
-  );
-
-  // ── PHASE BAR ──────────────────────────────────────────────────────────────
-  const Sidebar = ({ activePhase = 0, decisions = 0 }) => {
-    const steps = [
-      [1, "Voice Calibration", null],
-      [2, "Default Review", { current: decisions, total: 14 }],
-      [3, "Personal Additions", null],
-      [4, "Build Your System", null],
-      [5, "Context Modes", null],
-      [6, "Sample Pieces", null],
-    ];
+  // ── TOP BAR ────────────────────────────────────────────────────────────────
+  const TopBar = ({ activePhase = 0, decisions = 0, right = null, showRestart = false }) => {
     const allDone = activePhase > 6;
-    const stepsDone = Math.max(0, Math.min(6, activePhase - 1));
-    const overallPct = allDone ? 100 : (stepsDone / 6) * 100;
+    const overallPct = allDone ? 100 : Math.max(0, ((activePhase - 1) / 6) * 100);
+    const phaseName = activePhase > 0 && activePhase <= 6 ? PHASE_LABELS[activePhase] : "";
+    const subProgress = activePhase === 2 ? Math.min(100, (decisions / 14) * 100) : 0;
     return (
-    <div style={{ width: "224px", minWidth: "224px", background: "#1e2130", display: "flex", flexDirection: "column", flexShrink: "0" }}>
-      <div style={{ padding: "1.25rem 1.125rem 1rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-        <p style={{ fontSize: "14px", fontWeight: "800", color: "#fff", margin: "0", letterSpacing: "-.02em" }}>Not Theirs Studio</p>
-      </div>
-      <div style={{ padding: ".875rem 1rem", flex: "1" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 0 .5rem" }}>
-          <p style={{ fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,.3)", letterSpacing: ".1em", textTransform: "uppercase", margin: "0" }}>Phases</p>
-          <span style={{ fontSize: "10px", fontWeight: "600", color: "rgba(255,255,255,.4)", letterSpacing: "-.01em" }}>
-            {allDone ? "Done" : activePhase > 0 ? `${Math.min(activePhase, 6)} of 6` : "Not started"}
-          </span>
-        </div>
-        <div style={{ height: "3px", background: "rgba(255,255,255,.08)", borderRadius: "3px", overflow: "hidden", margin: "0 0 .875rem" }}>
-          <div style={{ height: "100%", width: `${overallPct}%`, background: "linear-gradient(90deg,#6B4EE6,#8E6FF0)", borderRadius: "3px", transition: "width .5s ease" }} />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-          {steps.map(([n, label, sub]) => {
-            const isActive = n === activePhase;
-            const isDone = n < activePhase || allDone;
-            const subPct = sub && isActive ? Math.min(100, (sub.current / sub.total) * 100) : 0;
-            return (
-              <div key={n}>
-                <div style={{ display: "flex", alignItems: "center", gap: "9px", padding: ".45rem .5rem .45rem calc(.5rem - 2px)", borderRadius: "7px", background: isActive ? "rgba(107,78,230,.22)" : "transparent", borderLeft: isActive ? "3px solid #6B4EE6" : "3px solid transparent", borderTop: isActive ? "1px solid rgba(107,78,230,.3)" : "1px solid transparent", borderRight: isActive ? "1px solid rgba(107,78,230,.3)" : "1px solid transparent", borderBottom: isActive ? "1px solid rgba(107,78,230,.3)" : "1px solid transparent", transition: "background .2s ease" }}>
-                  <div style={{ width: "20px", height: "20px", borderRadius: "5px", background: isActive ? "#6B4EE6" : isDone ? "rgba(107,78,230,.4)" : "rgba(255,255,255,.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0", boxShadow: isActive ? "0 0 0 3px rgba(107,78,230,.18)" : "none", transition: "box-shadow .2s ease" }}>
-                    <span style={{ fontSize: "10px", fontWeight: "800", color: isDone || isActive ? "#fff" : "rgba(255,255,255,.6)" }}>{isDone ? "✓" : n}</span>
-                  </div>
-                  <span style={{ fontSize: "12px", fontWeight: isActive ? "700" : "500", color: isActive ? "#fff" : isDone ? "rgba(255,255,255,.85)" : "rgba(255,255,255,.55)" }}>{label}</span>
-                </div>
-                {sub && isActive && (
-                  <div style={{ margin: ".3rem .5rem 0 2.1875rem", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <div style={{ flex: 1, height: "2px", background: "rgba(255,255,255,.1)", borderRadius: "2px", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${subPct}%`, background: "linear-gradient(90deg,#6B4EE6,#8E6FF0)", borderRadius: "2px", transition: "width .4s ease" }} />
-                    </div>
-                    <span style={{ fontSize: "9px", fontWeight: "700", color: "rgba(197,180,245,.7)", letterSpacing: "-.01em", flexShrink: 0 }}>{Math.min(sub.current, sub.total)}/{sub.total}</span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+      <div style={{ padding: ".875rem 1.25rem", display: "flex", alignItems: "center", gap: "1.25rem", borderBottom: "1px solid #e5e7eb", background: "#fff", flexShrink: 0 }}>
+        <span style={{ fontSize: "13px", fontWeight: "800", color: "#111", letterSpacing: "-.02em", flexShrink: 0 }}>Not Theirs Studio</span>
+        {activePhase > 0 && !allDone && (
+          <div style={{ display: "flex", alignItems: "center", gap: ".75rem", flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: "12px", fontWeight: "700", color: "#6B4EE6", letterSpacing: "-.01em", whiteSpace: "nowrap", flexShrink: 0 }}>{phaseName}</span>
+            <div style={{ flex: 1, maxWidth: "260px", height: "4px", background: "#f3f4f6", borderRadius: "2px", overflow: "hidden", position: "relative" }}>
+              <div style={{ height: "100%", width: `${overallPct}%`, background: "linear-gradient(90deg,#2E1F5E,#6B4EE6)", borderRadius: "2px", transition: "width .4s ease" }} />
+              {activePhase === 2 && (
+                <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${(1/6)*subProgress}%`, background: "rgba(107,78,230,.35)", borderRadius: "2px", transition: "width .4s ease" }} />
+              )}
+            </div>
+            <span style={{ fontSize: "11.5px", fontWeight: "600", color: "#9ca3af", whiteSpace: "nowrap", flexShrink: 0 }}>
+              Step {Math.min(activePhase, 6)} of 6{activePhase === 2 ? ` · ${Math.min(decisions, 14)}/14` : ""}
+            </span>
+          </div>
+        )}
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".75rem", flexShrink: 0 }}>
+          {right}
+          {showRestart && (
+            <button onClick={startSession} title="Start over" style={{ background: "none", border: "1px solid #e5e7eb", borderRadius: "6px", padding: ".35rem .625rem", color: "#9ca3af", fontSize: "13px", cursor: "pointer" }}>↺</button>
+          )}
         </div>
       </div>
-      <div style={{ padding: ".875rem 1rem", borderTop: "1px solid rgba(255,255,255,.08)", display: "flex", flexDirection: "column", gap: "4px" }}>
-        <button onClick={startSession} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: ".375rem .5rem", borderRadius: "6px", display: "flex", alignItems: "center", gap: "7px" }}>
-          <span style={{ fontSize: "12px", color: "rgba(255,255,255,.35)" }}>↺</span>
-          <span style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,.35)" }}>Start over</span>
-        </button>
-        <p style={{ fontSize: "11px", color: "rgba(255,255,255,.2)", margin: "0 0 0 .5rem", fontWeight: "500" }}>nottheirsstudio.com</p>
-      </div>
-    </div>
     );
   };
 
-  const PhaseBar = () => (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      {phase > 0 && (
-        <span style={{ fontSize: "12px", fontWeight: "600", color: "#6B4EE6", letterSpacing: "-.01em" }}>
-          {PHASE_LABELS[phase]}
-        </span>
-      )}
-      <div style={{ display: "flex", gap: "4px" }}>
-        {[1, 2, 3, 4, 5, 6].map((n) => (
-          <div key={n} style={{ width: "20px", height: "3px", borderRadius: "3px", background: n < phase ? "#2E1F5E" : n === phase ? "#6B4EE6" : "#e5e7eb", transition: "background .4s ease" }} />
-        ))}
-      </div>
-    </div>
-  );
 
   // ── OPENING SCREEN ─────────────────────────────────────────────────────────
   if (screen === "opening") return (
-    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)" }}>
+    <div style={{ display: "flex", flexDirection: "column", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)", background: "#fff" }}>
       <style>{GLOBAL_CSS}</style>
-
-      {/* SIDEBAR */}
-      <div style={{ width: "224px", minWidth: "224px", background: "#1e2130", display: "flex", flexDirection: "column", flexShrink: "0" }}>
-
-        <div style={{ padding: "1.25rem 1.125rem 1rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-          <p style={{ fontSize: "14px", fontWeight: "800", color: "#fff", margin: "0", letterSpacing: "-.02em" }}>Not Theirs Studio</p>
-        </div>
-
-        <div style={{ padding: ".875rem 1rem", flex: "1" }}>
-          <p style={{ fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,.3)", letterSpacing: ".1em", textTransform: "uppercase", margin: "0 0 .75rem" }}>Phases</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-            {[
-              [1, "Voice Calibration"],
-              [2, "Default Review"],
-              [3, "Personal Additions"],
-              [4, "Build Your System"],
-              [5, "Context Modes"],
-              [6, "Sample Pieces"],
-            ].map(([n, label]) => (
-              <div key={n} style={{ display: "flex", alignItems: "center", gap: "9px", padding: ".45rem .5rem", borderRadius: "7px" }}>
-                <div style={{ width: "20px", height: "20px", borderRadius: "5px", background: "rgba(255,255,255,.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0" }}>
-                  <span style={{ fontSize: "10px", fontWeight: "800", color: "rgba(255,255,255,.6)" }}>{n}</span>
-                </div>
-                <span style={{ fontSize: "12px", fontWeight: "500", color: "rgba(255,255,255,.7)" }}>{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ padding: ".875rem 1rem", borderTop: "1px solid rgba(255,255,255,.08)" }}>
-          <p style={{ fontSize: "11px", color: "rgba(255,255,255,.25)", margin: "0", fontWeight: "500" }}>nottheirsstudio.com</p>
-        </div>
-      </div>
-
-      {/* MAIN CONTENT */}
-      <div style={{ flex: "1", background: "#fff", display: "flex", flexDirection: "column" }}>
+      <TopBar />
+      <div style={{ flex: "1", display: "flex", flexDirection: "column" }}>
         <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "640px" }}>
 
           <h1 style={{ fontSize: "34px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .875rem", letterSpacing: "-.035em" }}>
@@ -708,11 +621,10 @@ export default function App() {
 
   // ── COMPLETION SCREEN ──────────────────────────────────────────────────────
   if (screen === "completion") return (
-    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)" }}>
+    <div style={{ display: "flex", flexDirection: "column", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)", background: "#fff" }}>
       <style>{GLOBAL_CSS}</style>
-      <Sidebar activePhase={7} />
+      <TopBar activePhase={7} right={<span style={{ fontSize: "12px", fontWeight: "700", color: "#6B4EE6", background: "#f0edff", padding: ".35rem .875rem", borderRadius: "20px" }}>Session complete ✓</span>} />
       <div style={{ flex: "1", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <Header right={<span style={{ fontSize: "12px", fontWeight: "700", color: "#6B4EE6", background: "#f0edff", padding: ".35rem .875rem", borderRadius: "20px" }}>Session complete ✓</span>} />
 
       <div style={{ padding: "2.5rem 2rem 3rem", overflowY: "auto", maxWidth: "780px" }}>
         <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .75rem" }}>You're done.</p>
@@ -813,12 +725,11 @@ export default function App() {
 
   // ── CHAT SCREEN ────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: "flex", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", height: "calc(100vh - 56px)", minHeight: "560px", fontFamily: "Inter,-apple-system,sans-serif" }}>
+    <div style={{ display: "flex", flexDirection: "column", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", height: "calc(100vh - 56px)", minHeight: "560px", fontFamily: "Inter,-apple-system,sans-serif", background: "#fff" }}>
       <style>{GLOBAL_CSS}</style>
-      <Sidebar activePhase={phase} decisions={dn} />
+      <TopBar activePhase={phase} decisions={dn} showRestart={true} />
 
       <div style={{ flex: "1", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <Header right={<PhaseBar />} />
 
       {/* Messages */}
       <div style={{ flex: "1", overflowY: "auto", padding: "1.25rem 1.5rem", display: "flex", flexDirection: "column", gap: "1rem", background: "#f9fafb", position: "relative" }}>
