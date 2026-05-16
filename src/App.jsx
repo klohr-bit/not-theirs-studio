@@ -348,13 +348,17 @@ Reference THE CATALOG OF AI DEFAULTS at the end of this document. For every cata
 DEFAULT-WHEN-INVISIBLE RULE: If a default is invisible in their samples (you can't tell), default to FORBID. The forbidden GPT produces cleaner output and the user can re-allow later if it feels too constrained.
 
 SMART REVIEW PATH:
-Walk the user through only the ASK items, one at a time, in this format:
-**DEFAULT: [Catalog ID and name]**
-[The WHAT line from the catalog]
-**YOUR WRITING:** [specific observation — what you saw or didn't see in their samples]
-**RECOMMENDATION:** [Forbid / Modify / Allow + one-line reason]
----
-Forbid, Modify, or Allow?
+Walk the user through only the ASK items, one at a time. For each ASK item, emit a card block in this EXACT format. The frontend renders cards as styled UI with embedded Forbid/Modify/Allow buttons and a "Why?" toggle. Do not add a question after the card — the buttons handle that.
+
+{{card}}
+id: [Catalog ID, e.g., A1]
+name: [Catalog name, e.g., Em-dash]
+writing: [Tight observation about what you saw or didn't see in their samples. One line max. Quote a phrase if relevant.]
+take: [Forbid / Modify / Allow — your recommendation, one word]
+why: [The WHAT from the catalog plus a one-line reason this fits THIS user. Concise. This is the "Why?" expansion.]
+{{/card}}
+
+Only one card per message. Wait for the user's button click before sending the next.
 
 Target 8-12 ASK decisions. Auto-handle the rest silently.
 
@@ -644,6 +648,31 @@ const INTERSTITIAL = {
 // ─────────────────────────────────────────────────────────────────────────────
 const ASK_RE = /^(type|tell|pick|choose|send|share|give|write|select|enter|paste|forbid|allow|modify|answer|provide|say|name|describe|explain|continue|begin|start|click|press|review|confirm|decide|let me know|ready)/i;
 
+function parseMessage(text) {
+  if (!text) return [{ type: "text", content: "" }];
+  const parts = [];
+  const re = /\{\{card\}\}([\s\S]*?)\{\{\/card\}\}/g;
+  let last = 0;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push({ type: "text", content: text.slice(last, m.index) });
+    const body = m[1];
+    const card = {};
+    body.split("\n").forEach((line) => {
+      const idx = line.indexOf(":");
+      if (idx > 0) {
+        const key = line.slice(0, idx).trim().toLowerCase();
+        const val = line.slice(idx + 1).trim();
+        if (key) card[key] = val;
+      }
+    });
+    parts.push({ type: "card", data: card });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push({ type: "text", content: text.slice(last) });
+  return parts;
+}
+
 function renderMD(text, isAssistant) {
   if (!text) return "";
   let s = text.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
@@ -693,6 +722,50 @@ async function copyToClipboard(text) {
   } catch {
     return false;
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DECISION CARD COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
+function DecisionCard({ card, onChoice, active }) {
+  const [showWhy, setShowWhy] = useState(false);
+  const takeColor = card.take === "Forbid" ? "#2E1F5E" : card.take === "Modify" ? "#6B4EE6" : "#6b7280";
+  return (
+    <div style={{ background: "#fff", border: "1.5px solid #ede9ff", borderRadius: "12px", padding: "1rem 1.125rem", margin: ".25rem 0", boxShadow: "0 2px 10px rgba(46,31,94,.06)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: ".5rem" }}>
+        {card.id && (
+          <span style={{ fontSize: "10px", fontWeight: "800", color: "#6B4EE6", background: "#f0edff", padding: ".2rem .5rem", borderRadius: "5px", letterSpacing: ".05em" }}>{card.id}</span>
+        )}
+        <strong style={{ fontSize: "14px", color: "#111", letterSpacing: "-.01em" }}>{card.name || "Default"}</strong>
+      </div>
+      {card.writing && (
+        <p style={{ fontSize: "13px", color: "#4b5563", margin: ".15rem 0", lineHeight: "1.55" }}>
+          <span style={{ fontWeight: 600, color: "#6b7280" }}>Your writing: </span>{card.writing}
+        </p>
+      )}
+      {card.take && (
+        <p style={{ fontSize: "13px", color: "#4b5563", margin: ".15rem 0 .75rem", lineHeight: "1.55" }}>
+          <span style={{ fontWeight: 600, color: "#6b7280" }}>My take: </span><strong style={{ color: takeColor }}>{card.take}</strong>
+        </p>
+      )}
+      {showWhy && card.why && (
+        <div style={{ fontSize: "12.5px", color: "#374151", margin: "0 0 .75rem", padding: ".625rem .875rem", background: "#fafafa", borderRadius: "8px", borderLeft: "3px solid #6B4EE6", lineHeight: "1.6" }}>{card.why}</div>
+      )}
+      {active && (
+        <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+          <button onClick={() => onChoice("Forbid")} style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", color: "#fff", border: "none", borderRadius: "8px", padding: ".5rem 1rem", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 2px 6px rgba(46,31,94,.2)" }}>Forbid</button>
+          <button onClick={() => onChoice("Modify")} style={{ background: "#f3f0ff", color: "#2E1F5E", border: "1px solid #ede9ff", borderRadius: "8px", padding: ".5rem 1rem", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>Modify</button>
+          <button onClick={() => onChoice("Allow")} style={{ background: "#f3f4f6", color: "#4b5563", border: "1px solid #e5e7eb", borderRadius: "8px", padding: ".5rem 1rem", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>Allow</button>
+          {card.why && (
+            <button onClick={() => setShowWhy((s) => !s)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#6B4EE6", fontSize: "12px", fontWeight: 600, cursor: "pointer", padding: ".25rem .5rem" }}>{showWhy ? "Hide why ↑" : "Why? ↓"}</button>
+          )}
+        </div>
+      )}
+      {!active && (
+        <p style={{ fontSize: "12px", color: "#9ca3af", margin: 0, fontStyle: "italic" }}>Decision logged.</p>
+      )}
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1187,7 +1260,11 @@ export default function App() {
           </div>
         )}
 
-        {msgs.map((msg, i) => (
+        {msgs.map((msg, i) => {
+          const isLatestAsst = msg.role === "assistant" && i === msgs.length - 1 && !loading;
+          const parts = msg.role === "assistant" ? parseMessage(msg.content) : null;
+          const hasCard = parts && parts.some((p) => p.type === "card");
+          return (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: "8px" }}>
             {msg.role === "assistant" && (
               <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: "0" }}>
@@ -1195,7 +1272,7 @@ export default function App() {
               </div>
             )}
             <div style={{
-              maxWidth: "80%",
+              maxWidth: hasCard ? "92%" : "80%",
               background: msg.role === "user" ? "linear-gradient(135deg,#2E1F5E,#6B4EE6)" : "#fff",
               borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "4px 18px 18px 18px",
               padding: ".75rem 1rem",
@@ -1205,10 +1282,21 @@ export default function App() {
               boxShadow: msg.role === "user" ? "0 2px 8px rgba(46,31,94,.25)" : "0 1px 4px rgba(0,0,0,.06)",
               border: msg.role === "assistant" ? "1px solid #f3f4f6" : "none",
             }}>
-              <div style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: renderMD(msg.content, msg.role === "assistant") }} />
+              {msg.role === "user" ? (
+                <div style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: renderMD(msg.content, false) }} />
+              ) : (
+                <div style={{ margin: 0 }}>
+                  {parts.map((part, idx) => (
+                    part.type === "card"
+                      ? <DecisionCard key={idx} card={part.data} active={isLatestAsst} onChoice={(label) => { if (phase === 2) setDn((p) => p + 1); send(`${label} (${part.data.id || part.data.name || ""})`.trim()); }} />
+                      : <div key={idx} dangerouslySetInnerHTML={{ __html: renderMD(part.content, true) }} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {loading && (
           <div style={{ display: "flex", alignItems: "flex-end", gap: "8px" }}>
