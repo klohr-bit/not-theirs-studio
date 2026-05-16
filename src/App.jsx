@@ -46,20 +46,32 @@ Most people build their custom GPT the same way they'd brief a new employee. The
 The problem with most custom GPTs is architectural. Large language models are trained using reinforcement learning from human feedback, which systematically rewards outputs that diverse populations rate as acceptable. The result is a statistical pull toward hedged, neutral language optimized against objection rather than for distinctiveness. When a user adds brand voice instructions, they add a positive signal layer on top of default behavior. In most cases, the training wins. Positive instruction is insufficient. The defaults are overridden by explicit constraint, not additional signal.
 
 ---
-After they pick, ask about secondary elements. Before asking for samples, say: "Find 2-3 things you wrote quickly and didn't heavily edit — a Slack message, an email draft, a social post written in one sitting. The less polished the better. That's where your actual voice lives." Ask for 2-3 writing samples (no AI help). Analyze: sentence length, punctuation, vocabulary, rhythm, tone, absences. Extract VOICE SIGNATURE — specific positive moves.
+After they pick, ask about secondary elements. Before asking for samples, say: "Find 2-3 things you wrote quickly and didn't heavily edit — a Slack message, an email draft, a social post written in one sitting. The less polished the better. That's where your actual voice lives." Ask for 2-3 writing samples (no AI help).
+
+Analyze with depth and specificity. For each dimension below, name the pattern AND quote one example from their samples:
+- Sentence length: ratio of short/medium/long, and the rhythm pattern (e.g., "two long sentences then one short for emphasis")
+- Punctuation: their tells (comma habits, parentheticals, semicolons, dashes if any, sentence fragments)
+- Vocabulary: 2-3 words or phrases they use that most writers don't
+- Rhythm: one named structural move (e.g., "opens with a claim, no preamble")
+- Tone: two-word label, plus a quoted sentence that proves it
+- Absences: two things they consistently don't do (e.g., "never softens with hedges")
+
+Extract a VOICE SIGNATURE of 5-7 named moves. Each move must be: (a) named with a short label, (b) one-line behavioral description, (c) a quoted example from their writing.
 
 Deliver:
 **YOUR VOICE: WHAT I SEE**
 ---
 **Primary type:** [archetype + one-line confirmation]
-**Sentences:** [observation] | **Punctuation:** [observation] | **Vocabulary:** [observation] | **Rhythm:** [observation] | **Tone:** [observation] | **What you don't do:** [absence]
+**Sentences:** [pattern + quoted example] | **Punctuation:** [pattern + quoted example] | **Vocabulary:** [2-3 specific words/phrases they use] | **Rhythm:** [named move + quote] | **Tone:** [two-word label + quote] | **What you don't do:** [two specific absences]
 ---
 **YOUR VOICE SIGNATURE**
 *The specific moves that make your writing yours.*
-- [move 1 — specific and named]
-- [move 2]
-- [move 3]
-- [move 4]
+- **[Move 1 label]** — [one-line behavioral description]. *e.g., "[quoted example from their samples]"*
+- **[Move 2 label]** — [description]. *e.g., "[quote]"*
+- **[Move 3 label]** — [description]. *e.g., "[quote]"*
+- **[Move 4 label]** — [description]. *e.g., "[quote]"*
+- **[Move 5 label]** — [description]. *e.g., "[quote]"*
+- [Add 6 and 7 if the samples support it]
 ---
 Ask if the summary lands. If they say anything is off, revise the specific elements they correct and redeliver the full updated summary before moving to Phase 2. Don't proceed until they confirm it's accurate.
 
@@ -111,10 +123,10 @@ PART 1: HYGIENE RULES
 Correct grammar/spelling unless asked not to. Ask one clarifying question if prompt is ambiguous. Match formality of request. Acknowledge uncertainty rather than stating as fact. Do not explain what you're about to do — do it. Do not summarize output — end when content ends. Preserve specificity over abstraction.
 ---
 PART 2: VOICE SIGNATURE
-[Insert the 4-5 signature moves from Phase 1]
-Structural approach: [one sentence]
-Vocabulary: [one sentence]
-Rhythm: Vary sentence length. Short sentences land emphasis. Never three short sentences in a row without variation.
+[Insert ALL 5-7 named signature moves from Phase 1, each with its label, one-line behavioral description, and quoted example. Do not abbreviate. Do not collapse moves together.]
+Structural approach: [one specific sentence describing how their writing is structured — opening pattern, body movement, closing pattern]
+Vocabulary: [one specific sentence with their characteristic words/phrases, and what they avoid]
+Rhythm: Vary sentence length. Short sentences land emphasis. Never three short sentences in a row without variation. [Add one sentence specific to this user's rhythm pattern from Phase 1.]
 ---
 PART 3: FORBIDDEN LIST
 [All Phase 2 decisions by category]
@@ -142,7 +154,9 @@ Tell me:
 3. A copy or content piece — what and where? Or I can choose.
 Answer any, all, or none — I'll fill in whatever you leave blank.
 
-Generate all three using the complete system. After delivering all three samples, ask: "Compare the email to something you actually wrote recently. Does it sound like the same person?" Wait for their response. If they say yes, proceed to Output 2. If they say it's off, ask what specifically feels wrong, make one round of targeted revisions, then proceed. Then produce Output 2 in XML:
+Generate all three using the complete system. Each sample must be: 120-200 words, opens with a named scenario line (e.g., "EMAIL — declining a partnership pitch"), demonstrates at least 3 of their named signature moves, and avoids at least 3 patterns from their Forbidden List. After each sample, briefly note which signature moves it demonstrates.
+
+After delivering all three samples, ask: "Compare the email to something you actually wrote recently. Does it sound like the same person?" Wait for their response. If they say yes, proceed to Output 2. If they say it's off, ask what specifically feels wrong, make one round of targeted revisions, then proceed. Then produce Output 2 in XML:
 
 <output2>
 OUTPUT 2: YOUR REFERENCE DOCUMENT
@@ -151,13 +165,13 @@ Save this for yourself. Not for the GPT — for you.
 YOUR VOICE SYSTEM: REFERENCE
 Built with The Signature Method by Not Theirs Studio
 ---
-YOUR VOICE TYPE: [primary + secondary elements]
-WHAT I NOTICED: [4-6 specific observations]
-YOUR VOICE SIGNATURE: [the named signature moves]
-WHAT YOU FORBADE: [plain-language summary]
-WHAT YOU KEPT: [items allowed]
-WHAT YOU ADDED: [Phase 3 items]
-CONTEXT MODES: [each mode and what it changes]
+YOUR VOICE TYPE: [primary archetype + secondary elements + one-line confirmation of why this fits them]
+WHAT I NOTICED: [5-7 specific observations from their samples, each one a behavioral observation with a quoted example. Not "warm tone" — instead "Trusts the reader to finish the thought: 'You know what happens next.'"]
+YOUR VOICE SIGNATURE: [all 5-7 named signature moves with label, description, and quoted example. Exact copy from Phase 1.]
+WHAT YOU FORBADE: [plain-language summary grouped by category, with one-line reason per item]
+WHAT YOU KEPT: [items allowed, with reason kept]
+WHAT YOU ADDED: [Phase 3 items, with reason added]
+CONTEXT MODES: [each mode named + what specifically relaxes or shifts in that mode]
 ---
 YOUR VOICE IN PRACTICE
 SAMPLE 1: EMAIL | [approved email]
@@ -356,7 +370,6 @@ export default function App() {
   const [showI, setShowI] = useState(false);
   const [iMsg, setIMsg] = useState({ main: "", sub: "" });
   const [copyState, setCopyState] = useState({ o1: false, o2: false });
-  const [previewTab, setPreviewTab] = useState("o1");
   const endRef = useRef(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: loading ? "smooth" : "auto", block: "end" }); }, [msgs, loading]);
@@ -472,6 +485,16 @@ export default function App() {
       setCopyState((p) => ({ ...p, [which]: true }));
       setTimeout(() => setCopyState((p) => ({ ...p, [which]: false })), 2000);
     }
+  };
+
+  const dlPDF = (content, title, sub) => {
+    if (!content) { alert("Complete the full workflow first."); return; }
+    const html = generateDocHTML(content, title, sub);
+    const win = window.open("", "_blank");
+    if (!win) { alert("Pop-up blocked. Allow pop-ups for this site and try again."); return; }
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { try { win.focus(); win.print(); } catch {} };
   };
 
   const dlDoc = (content, fname, title, sub) => {
@@ -691,86 +714,95 @@ export default function App() {
       <div style={{ flex: "1", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <Header right={<span style={{ fontSize: "12px", fontWeight: "700", color: "#6B4EE6", background: "#f0edff", padding: ".35rem .875rem", borderRadius: "20px" }}>Session complete ✓</span>} />
 
-      <div style={{ padding: "2rem 1.75rem", overflowY: "auto" }}>
-        <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".1em", textTransform: "uppercase", margin: "0 0 .75rem" }}>Your voice system is built.</p>
-        <h2 style={{ fontSize: "26px", fontWeight: "800", color: "#111", lineHeight: "1.2", margin: "0 0 1.75rem", letterSpacing: "-.03em" }}>
-          Your <span style={{ color: "#2E1F5E" }}>Forbidden List</span> and <span style={{ color: "#6B4EE6" }}>Voice Signature</span> are ready.
+      <div style={{ padding: "2.5rem 2rem 3rem", overflowY: "auto", maxWidth: "780px" }}>
+        <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .75rem" }}>You're done.</p>
+        <h2 style={{ fontSize: "30px", fontWeight: "800", color: "#111", lineHeight: "1.15", margin: "0 0 .75rem", letterSpacing: "-.035em" }}>
+          Here's <span style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>your voice system</span>.
         </h2>
+        <p style={{ fontSize: "15px", color: "#4b5563", lineHeight: "1.6", margin: "0 0 2rem", maxWidth: "580px" }}>
+          One document. Everything that makes your writing yours, written as instructions an AI can follow. Save it. Then load it into whatever AI tool you use.
+        </p>
 
-        {/* In-app preview tabs */}
-        <div style={{ background: "#f9fafb", borderRadius: "12px", overflow: "hidden", border: "1px solid #e5e7eb", marginBottom: "1.25rem" }}>
-          <div style={{ display: "flex", borderBottom: "1px solid #e5e7eb" }}>
-            {[{ key: "o1", label: "Output 1: System Prompt" }, { key: "o2", label: "Output 2: Reference Doc" }].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setPreviewTab(tab.key)}
-                style={{ flex: 1, padding: ".75rem 1rem", fontSize: "13px", fontWeight: previewTab === tab.key ? "700" : "500", color: previewTab === tab.key ? "#2E1F5E" : "#9ca3af", background: previewTab === tab.key ? "#fff" : "transparent", border: "none", cursor: "pointer", borderBottom: previewTab === tab.key ? "2px solid #2E1F5E" : "2px solid transparent", transition: "all .15s", letterSpacing: "-.01em" }}
-              >
-                {tab.label}
-              </button>
-            ))}
+        {/* THE DELIVERABLE */}
+        <div style={{ background: "linear-gradient(135deg,#2E1F5E,#3a2877)", borderRadius: "16px", padding: "1.75rem", marginBottom: "2.25rem", boxShadow: "0 8px 28px rgba(46,31,94,.3)" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", marginBottom: "1.25rem" }}>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: "700", color: "#C5B4F5", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 .4rem" }}>Your file</p>
+              <p style={{ fontSize: "22px", fontWeight: "800", color: "#fff", margin: "0 0 .3rem", letterSpacing: "-.02em" }}>Your Voice System</p>
+              <p style={{ fontSize: "13px", color: "rgba(197,180,245,.85)", margin: "0", fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace" }}>your-voice-system.pdf</p>
+            </div>
+            <div style={{ fontSize: "32px", lineHeight: "1", flexShrink: 0 }}>📄</div>
           </div>
-          <div style={{ padding: "1rem", maxHeight: "200px", overflowY: "auto" }}>
-            <pre style={{ fontSize: "12px", color: "#374151", lineHeight: "1.6", whiteSpace: "pre-wrap", fontFamily: "Inter,sans-serif", margin: "0" }}>
-              {previewTab === "o1" ? (o1 || "Complete the workflow to generate Output 1.") : (o2 || "Complete the workflow to generate Output 2.")}
-            </pre>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              className="copy-btn"
+              onClick={() => handleCopy("o1")}
+              style={{ flex: 1, background: copyState.o1 ? "rgba(107,78,230,.5)" : "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.25)", borderRadius: "10px", padding: ".75rem", color: "#fff", fontSize: "14px", fontWeight: "700", cursor: "pointer", letterSpacing: "-.01em" }}
+            >
+              {copyState.o1 ? "Copied ✓" : "📋  Copy text"}
+            </button>
+            <button
+              onClick={() => dlPDF(o1, "Your Voice System", "Built with The Signature Method by Not Theirs Studio")}
+              style={{ flex: 1, background: "#fff", border: "none", borderRadius: "10px", padding: ".75rem", color: "#2E1F5E", fontSize: "14px", fontWeight: "700", cursor: "pointer", letterSpacing: "-.01em", boxShadow: "0 2px 8px rgba(0,0,0,.15)" }}
+            >
+              ⬇  Download PDF
+            </button>
           </div>
+          <p style={{ fontSize: "11.5px", color: "rgba(197,180,245,.65)", margin: ".875rem 0 0", lineHeight: "1.5" }}>
+            Tip: when the print window opens, choose "Save as PDF" as your destination.
+          </p>
         </div>
 
-        {/* Action cards */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "1.25rem" }}>
-          {/* Output 1 */}
-          <div style={{ flex: 1, background: "#2E1F5E", borderRadius: "12px", padding: "1.25rem", boxShadow: "0 4px 16px rgba(46,31,94,.25)" }}>
-            <p style={{ fontSize: "11px", fontWeight: "700", color: "#C5B4F5", letterSpacing: ".08em", textTransform: "uppercase", margin: "0 0 .3rem" }}>Output 1</p>
-            <p style={{ fontSize: "14px", fontWeight: "700", color: "#fff", margin: "0 0 .2rem", letterSpacing: "-.01em" }}>System Prompt</p>
-            <p style={{ fontSize: "12px", color: "rgba(255,255,255,.5)", margin: "0 0 1rem", lineHeight: "1.4" }}>Paste into your AI tool.</p>
-            <div style={{ display: "flex", gap: "6px" }}>
-              <button
-                className="copy-btn"
-                onClick={() => handleCopy("o1")}
-                style={{ flex: 1, background: copyState.o1 ? "rgba(107,78,230,.4)" : "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: "8px", padding: ".5rem", color: "#fff", fontSize: "12px", fontWeight: "600" }}
-              >
-                {copyState.o1 ? "Copied ✓" : "Copy"}
-              </button>
-              <button
-                onClick={() => dlDoc(o1, "system-prompt.html", "Your System Prompt", "Paste this into your custom GPT or Claude Project")}
-                style={{ flex: 1, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", borderRadius: "8px", padding: ".5rem", color: "#fff", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
-              >
-                Download
-              </button>
+        {/* HOW TO USE IT */}
+        <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 1rem" }}>How to use it</p>
+        <p style={{ fontSize: "14px", color: "#4b5563", lineHeight: "1.6", margin: "0 0 1rem" }}>
+          Never done this before? Don't worry. Pick the tool you use most. The "instructions" or "system prompt" field is where this goes — that's the spot where you tell the AI how to behave for every conversation.
+        </p>
+        <div style={{ display: "grid", gap: ".75rem", marginBottom: "2.25rem" }}>
+          {[
+            { name: "ChatGPT", how: "If you have a Custom GPT, click Configure → paste into Instructions. Otherwise, in any chat, open Settings → Customize ChatGPT → paste into \"How would you like ChatGPT to respond?\"" },
+            { name: "Claude", how: "Open or create a Project → Project Settings → Custom Instructions → paste in. Or upload the PDF to the project's knowledge files." },
+            { name: "Cursor / Windsurf", how: "Add the contents as a .cursorrules file at the root of your project, or paste into the assistant's system prompt setting." },
+            { name: "Anything else", how: "Look for \"system prompt,\" \"instructions,\" \"persona,\" or \"behavior\" in the AI tool's settings. Paste it there. If there's no such field, paste it as the first message in any new chat." },
+          ].map((t) => (
+            <div key={t.name} style={{ background: "#fafafa", border: "1px solid #f3f4f6", borderRadius: "10px", padding: "1rem 1.125rem" }}>
+              <p style={{ fontSize: "13.5px", fontWeight: "700", color: "#111", margin: "0 0 .35rem", letterSpacing: "-.01em" }}>{t.name}</p>
+              <p style={{ fontSize: "13px", color: "#6b7280", margin: "0", lineHeight: "1.55" }}>{t.how}</p>
             </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Output 2 */}
-          <div style={{ flex: 1, background: "#fafafa", borderRadius: "12px", padding: "1.25rem", border: "1px solid #e5e7eb" }}>
-            <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".08em", textTransform: "uppercase", margin: "0 0 .3rem" }}>Output 2</p>
-            <p style={{ fontSize: "14px", fontWeight: "700", color: "#111", margin: "0 0 .2rem", letterSpacing: "-.01em" }}>Reference Document</p>
-            <p style={{ fontSize: "12px", color: "#9ca3af", margin: "0 0 1rem", lineHeight: "1.4" }}>This one stays with you.</p>
-            <div style={{ display: "flex", gap: "6px" }}>
+        {/* YOUR VOICE PROFILE (reference content inline) */}
+        {o2 && (
+          <>
+            <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 1rem" }}>Your voice profile</p>
+            <p style={{ fontSize: "14px", color: "#4b5563", lineHeight: "1.6", margin: "0 0 1rem" }}>
+              For you, not the AI. This is the analysis behind what's in your document. Keep it as your calibration baseline. When your AI starts drifting, compare what it produces against this.
+            </p>
+            <div style={{ background: "#fafafa", border: "1px solid #f3f4f6", borderRadius: "12px", padding: "1.25rem 1.5rem", marginBottom: "1.5rem" }}>
+              <pre style={{ fontSize: "13px", color: "#374151", lineHeight: "1.7", whiteSpace: "pre-wrap", fontFamily: "Inter,sans-serif", margin: "0" }}>{o2}</pre>
+            </div>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "2rem" }}>
               <button
                 className="copy-btn"
                 onClick={() => handleCopy("o2")}
-                style={{ flex: 1, background: copyState.o2 ? "#f0edff" : "#fff", border: `1px solid ${copyState.o2 ? "#6B4EE6" : "#e5e7eb"}`, borderRadius: "8px", padding: ".5rem", color: copyState.o2 ? "#6B4EE6" : "#374151", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                style={{ background: copyState.o2 ? "#f0edff" : "#fff", border: `1px solid ${copyState.o2 ? "#6B4EE6" : "#e5e7eb"}`, borderRadius: "8px", padding: ".55rem 1rem", color: copyState.o2 ? "#6B4EE6" : "#374151", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
               >
-                {copyState.o2 ? "Copied ✓" : "Copy"}
+                {copyState.o2 ? "Copied ✓" : "Copy profile"}
               </button>
               <button
-                onClick={() => dlDoc(o2, "reference-document.html", "Your Reference Document", "Your voice type, decisions, sample pieces, and maintenance guide")}
-                style={{ flex: 1, background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px", padding: ".5rem", color: "#374151", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                onClick={() => dlPDF(o2, "Your Voice Profile", "Reference document by Not Theirs Studio")}
+                style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px", padding: ".55rem 1rem", color: "#374151", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
               >
-                Download
+                Save profile as PDF
               </button>
             </div>
-          </div>
-        </div>
+          </>
+        )}
 
-        <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0 0 1.25rem", lineHeight: "1.6" }}>
-          The samples in your Reference Document are your calibration baseline. When your AI starts drifting, compare what it produces to those.
-        </p>
-
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "1rem", borderTop: "1px solid #f3f4f6" }}>
-          <span style={{ fontSize: "12px", color: "#d1d5db", fontWeight: "500" }}>Built with The Signature Method · Not Theirs Studio</span>
-          <button className="restart-btn" onClick={startSession} style={{ background: "none", border: "1px solid #e5e7eb", borderRadius: "8px", padding: ".5rem 1rem", color: "#9ca3af", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "1.5rem", borderTop: "1px solid #f3f4f6" }}>
+          <span style={{ fontSize: "12px", color: "#9ca3af", fontWeight: "500" }}>Built with The Signature Method · Not Theirs Studio</span>
+          <button className="restart-btn" onClick={startSession} style={{ background: "none", border: "1px solid #e5e7eb", borderRadius: "8px", padding: ".5rem 1rem", color: "#6b7280", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}>
             Start a new session
           </button>
         </div>
