@@ -567,6 +567,16 @@ ${CATALOG}`;
 // ─────────────────────────────────────────────────────────────────────────────
 const PHASE_LABELS = ["", "Voice Calibration", "Default Review", "Personal Additions", "Build System", "Context Modes", "Sample Pieces"];
 
+const LOADING_MSG = {
+  0: "Getting started...",
+  1: "Reading your samples...",
+  2: "Checking the catalog...",
+  3: "Logging your additions...",
+  4: "Pulling it together...",
+  5: "Building your context modes...",
+  6: "Drafting your document...",
+};
+
 const INTERSTITIAL = {
   1: {
     title: "Phase 1",
@@ -682,6 +692,8 @@ const GLOBAL_CSS = `
 @keyframes bounce { 0%,80%,100% { transform:translateY(0); opacity:.4; } 40% { transform:translateY(-4px); opacity:1; } }
 @keyframes slideR { from { width:0; } to { width:44px; } }
 @keyframes iIn { from { opacity:0; } to { opacity:1; } }
+@keyframes confettiFall { 0% { transform: translateY(-20vh) rotate(0deg); opacity:1; } 100% { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+.confetti-piece { position:fixed; top:0; width:8px; height:14px; border-radius:2px; pointer-events:none; z-index:9999; animation: confettiFall linear forwards; }
 
 .fu0 { animation: fadeUp .5s cubic-bezier(.22,.68,0,1.2) forwards; opacity:0; }
 .fu1 { animation: fadeUp .5s cubic-bezier(.22,.68,0,1.2) .1s forwards; opacity:0; }
@@ -749,6 +761,22 @@ export default function App() {
       return () => clearTimeout(t);
     }
   }, [done]);
+
+  const [confetti, setConfetti] = useState(false);
+  useEffect(() => {
+    if (screen === "completion") {
+      setConfetti(true);
+      const t = setTimeout(() => setConfetti(false), 4500);
+      return () => clearTimeout(t);
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    if (!showI) return;
+    const handler = (e) => { if (e.key === "Escape") setShowI(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [showI]);
 
   useEffect(() => {
     if (phase > 0 && INTERSTITIAL[phase]) {
@@ -984,17 +1012,46 @@ export default function App() {
   );
 
   // ── COMPLETION SCREEN ──────────────────────────────────────────────────────
-  if (screen === "completion") return (
-    <div style={{ display: "flex", flexDirection: "column", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)", background: "#fff" }}>
+  if (screen === "completion") {
+    const words = o1 ? o1.split(/\s+/).filter(Boolean).length : 0;
+    const pages = Math.max(1, Math.ceil(words / 280));
+    const part3 = o1 ? (o1.match(/PART 3[\s\S]*?(?=\nPART 4|$)/) || [""])[0] : "";
+    const patternsBlocked = (part3.match(/^###\s/gm) || []).length;
+    const part4 = o1 ? (o1.match(/PART 4[\s\S]*?(?=\nPART 5|$)/) || [""])[0] : "";
+    const contextModes = Math.max(0, (part4.match(/^###\s/gm) || []).length);
+    const confettiColors = ["#6B4EE6", "#2E1F5E", "#C5B4F5", "#8E6FF0", "#F0EDFF"];
+    return (
+    <div style={{ display: "flex", flexDirection: "column", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)", background: "#fff", position: "relative" }}>
       <style>{GLOBAL_CSS}</style>
+      {confetti && Array.from({ length: 60 }).map((_, i) => (
+        <div key={i} className="confetti-piece" style={{
+          left: `${Math.random() * 100}%`,
+          background: confettiColors[i % confettiColors.length],
+          animationDuration: `${2.5 + Math.random() * 2}s`,
+          animationDelay: `${Math.random() * 0.6}s`,
+          transform: `rotate(${Math.random() * 360}deg)`,
+        }} />
+      ))}
       <TopBar activePhase={7} right={<span style={{ fontSize: "12px", fontWeight: "700", color: "#6B4EE6", background: "#f0edff", padding: ".35rem .875rem", borderRadius: "20px" }}>Session complete ✓</span>} />
       <div style={{ flex: "1", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
       <div style={{ padding: "2.5rem 2rem 3rem", overflowY: "auto", maxWidth: "780px" }}>
         <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .75rem" }}>You're done.</p>
-        <h2 style={{ fontSize: "30px", fontWeight: "800", color: "#111", lineHeight: "1.15", margin: "0 0 .75rem", letterSpacing: "-.035em" }}>
+        <h2 style={{ fontSize: "30px", fontWeight: "800", color: "#111", lineHeight: "1.15", margin: "0 0 .875rem", letterSpacing: "-.035em" }}>
           Here's <span style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>your voice system</span>.
         </h2>
+        {o1 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", margin: "0 0 1.25rem" }}>
+            {[
+              { label: `${pages} ${pages === 1 ? "page" : "pages"}` },
+              { label: `${words.toLocaleString()} words` },
+              patternsBlocked > 0 && { label: `${patternsBlocked} patterns blocked` },
+              contextModes > 0 && { label: `${contextModes} context ${contextModes === 1 ? "mode" : "modes"}` },
+            ].filter(Boolean).map((chip) => (
+              <span key={chip.label} style={{ fontSize: "11.5px", fontWeight: "600", color: "#6B4EE6", background: "#f0edff", padding: ".3rem .625rem", borderRadius: "20px", letterSpacing: "-.005em" }}>{chip.label}</span>
+            ))}
+          </div>
+        )}
         <p style={{ fontSize: "15px", color: "#4b5563", lineHeight: "1.6", margin: "0 0 2rem", maxWidth: "580px" }}>
           One document. Everything that makes your writing yours, written as instructions an AI can follow. Save it. Then load it into whatever AI tool you use.
         </p>
@@ -1070,7 +1127,8 @@ export default function App() {
       </div>
       </div>
     </div>
-  );
+    );
+  }
 
   // ── CHAT SCREEN ────────────────────────────────────────────────────────────
   return (
@@ -1134,10 +1192,13 @@ export default function App() {
             <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "10px", color: "#fff", fontWeight: "800" }}>NS</span>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #f3f4f6", borderRadius: "4px 18px 18px 18px", padding: ".75rem 1rem", display: "flex", gap: "5px", alignItems: "center", boxShadow: "0 1px 4px rgba(0,0,0,.06)" }}>
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="dot" style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#C5B4F5" }} />
-              ))}
+            <div style={{ background: "#fff", border: "1px solid #f3f4f6", borderRadius: "4px 18px 18px 18px", padding: ".75rem 1rem", display: "flex", gap: "8px", alignItems: "center", boxShadow: "0 1px 4px rgba(0,0,0,.06)" }}>
+              <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="dot" style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#C5B4F5" }} />
+                ))}
+              </div>
+              <span style={{ fontSize: "12px", color: "#9ca3af", fontWeight: "500", letterSpacing: "-.01em" }}>{LOADING_MSG[phase] || "Thinking..."}</span>
             </div>
           </div>
         )}
