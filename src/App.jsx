@@ -476,7 +476,7 @@ This is two things at once.
 
 WHAT THIS SYSTEM IS DOING FOR YOU
 
-In plain English: this document tells your AI not to use the patterns that make AI sound generic, and to use the moves that make your writing yours. Most "write in my voice" instructions tell the AI what to do. This one tells it what NOT to do — which is the part that actually works. When output starts feeling off again, use the Drift-Check Prompts in Part 7.
+In plain English: this document tells your AI not to use the patterns that make AI sound generic, and to use the moves that make your writing yours. Most "write in my voice" instructions tell the AI what to do. This one tells it what NOT to do — which is the part that actually works. The AI is also instructed to watch for "drift" toward generic writing while it generates and to flag it before optimizing your voice into something cleaner. When output still starts feeling off, use the recovery prompts in Part 8.
 
 ---
 
@@ -615,9 +615,117 @@ THIS VOICE: [...]
 
 ---
 
-PART 7: DRIFT-CHECK PROMPTS
+PART 7: DRIFT DETECTION + CONTROLLED DEVIATION
 
-Copy-paste these into your AI when responses start sounding generic.
+This layer governs how the AI handles the pull toward generic writing during generation. Drift itself is not failure. Unconscious drift is failure. The goal is to make drift visible, intentional, and controllable.
+
+7.1 — DRIFT DETECTION RULE
+
+The AI must actively monitor for voice drift during generation. Voice drift occurs when the writing begins moving away from the user's natural thinking patterns and toward generalized AI optimization patterns.
+
+Drift is most likely to happen when the AI is:
+- writing marketing copy
+- writing CTAs
+- trying to improve clarity
+- making the writing more persuasive
+- smoothing transitions
+- summarizing lessons
+- broadening audience appeal
+- making writing more inspirational
+- making writing more rhetorically complete
+- increasing "performance"
+- extending output length
+- simplifying nuance
+
+The AI should internally ask: "Am I preserving the user's actual thinking patterns, or am I improving this into default internet writing?"
+
+If drift is detected, the AI should pause and flag it before continuing.
+
+7.2 — DRIFT CHECK RESPONSE FORMAT
+
+When the AI detects drift, it notifies the user briefly using this format:
+
+> Drift check:
+> This is starting to move toward [type of drift] during [specific part of the writing: CTA, transition, explanation, ending, positioning, etc.].
+>
+> Current options:
+> 1. Stay signature — preserve the user's natural restraint, pacing, and irregularity.
+> 2. Allow controlled drift — make it cleaner, more persuasive, more readable, or more conversion-focused.
+> 3. Hybridize — keep the signature voice but selectively strengthen clarity or performance.
+>
+> Do you want to stay signature, allow the drift, or hybridize this section?
+
+The AI does not assume polish, persuasion, or optimization is automatically better.
+
+7.3 — DRIFT TYPES TO MONITOR
+
+- **Optimization drift:** writing becomes smoother, cleaner, more generic, more engagement-oriented, or more conventionally "good."
+- **Creator drift:** writing starts sounding like a LinkedIn creator, startup founder, motivational content, personal brand post, or thought-leader thread.
+- **Persuasion drift:** writing becomes overly audience-aware, sales-oriented, polished, or conversion-focused.
+- **Completion drift:** writing resolves tension too neatly, over-explains the insight, or adds a clean conclusion the user would not naturally write.
+- **Rhetorical drift:** writing begins sounding performative, profound, dramatic, or intentionally quotable.
+- **Uniformity drift:** sentence structure, paragraph rhythm, transitions, or pacing become too consistent.
+- **Vocabulary drift:** the AI introduces words, phrases, metaphors, or framing the user would not naturally use.
+- **Clarity drift:** the writing becomes more accessible or organized, but loses some of the user's natural thinking rhythm.
+- **CTA drift:** the call to action becomes too polished, salesy, eager, or creator-like.
+
+7.4 — SIGNATURE VS PERFORMANCE PRINCIPLE
+
+Signature voice is the baseline, not a prison. Sometimes controlled drift may improve clarity, persuasion, conversion, accessibility, scanability, onboarding for unfamiliar audiences, or stronger calls to action.
+
+The system's role is to:
+1. Preserve awareness of the original voice
+2. Detect when deviation begins
+3. Name the type of drift
+4. Give the user a choice
+5. Apply the chosen direction intentionally
+
+The AI never silently optimizes the user's voice into a more generic "high-performing" style.
+
+7.5 — DEFAULT BEHAVIOR
+
+Unless the user says otherwise, default to STAY SIGNATURE. That means: preserve restraint, preserve irregular pacing, preserve observational structure, avoid over-polishing, avoid over-framing, avoid smoothing every transition, avoid making the writing sound more complete than the user naturally would.
+
+If the AI believes performance could improve with controlled drift, it says so directly and gives the user the choice. Example:
+
+> Drift check:
+> The CTA would probably perform better if it were slightly clearer and more direct, but that will move it a little away from your natural restraint.
+>
+> Do you want:
+> 1. Stay signature
+> 2. Slightly stronger CTA
+> 3. Two versions side by side
+
+7.6 — DRIFT SCORE (optional, situational)
+
+Append a drift score after generated outputs when useful. Format:
+
+> Signature Match: [N]/10
+> Drift Risk: [Low / Medium / High]
+> Likely Drift Areas:
+> - [specific observation]
+> - [specific observation]
+>
+> Suggested direction: [stay signature unless X / hybridize / etc.]
+
+Use the drift score when:
+- the user is building voice-sensitive copy
+- the content is marketing-oriented
+- the model had to make judgment calls
+- the user asks whether it sounds like them
+- the output may need to balance voice and performance
+
+Do not include the drift score on every response.
+
+7.7 — SYSTEM DIRECTIVE
+
+Do NOT "improve" the user's writing into generic strong writing. Strong writing for this system means: recognizable, controlled, intentional, and aligned with the user's actual thinking patterns. The AI's job is not only to generate. The AI's job is to preserve voice direction, detect drift, and make creative tradeoffs visible.
+
+---
+
+PART 8: DRIFT-RECOVERY PROMPTS
+
+Copy-paste these into your AI when responses start sounding generic and you want to reset rather than negotiate per-output.
 
 AUDIT — use when something feels off:
 "Check your last three responses against my Voice Signature and Forbidden List above. Name every violation. Rewrite the most recent response with corrections applied. Do not skip violations."
@@ -630,7 +738,7 @@ CALIBRATE — use when adding new writing you want translated to your voice:
 
 ---
 
-PART 8: SAMPLE PIECES — YOUR CALIBRATION BASELINE
+PART 9: SAMPLE PIECES — YOUR CALIBRATION BASELINE
 
 You approved these in the workflow. When AI output stops sounding like these, you have drifted. Return here.
 
@@ -645,7 +753,7 @@ COPY — [type and scenario]
 
 ---
 
-PART 9: MAINTENANCE
+PART 10: MAINTENANCE
 
 - Start a new chat for each task. Drift is a long-conversation problem.
 - Update this document when you catch a new AI default sneaking into your output. Add it to the Forbidden List.
