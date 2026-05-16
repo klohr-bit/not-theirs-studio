@@ -77,6 +77,26 @@ WHAT: Article-opening phrases that buy time. "In today's fast-paced world." "In 
 EXAMPLES: "In today's fast-paced digital landscape..." / "As we navigate the current moment..."
 FORBID LANGUAGE: Never open a piece of writing with a vague temporal phrase: "in today's," "in the current," "in an increasingly," "as we navigate," "where we are right now." If the time period matters, name it specifically. If it doesn't, start with the actual subject.
 
+### A12. The concessive "While X, Y" / "Although X, Y" structure
+WHAT: AI overuses concessive constructions to perform balance. "While X matters, Y matters more." "Although the data is mixed, the trend is clear." Reads as careful reasoning; functionally template.
+EXAMPLES: "While clarity matters, depth matters more." / "Although the timing isn't perfect, the opportunity is real."
+FORBID LANGUAGE: Do not open sentences or claims with "While X, Y" or "Although X, Y" concessive structures as a default rhetorical move. State the claim directly. If the contrast genuinely matters, find a structure that doesn't preface every point with the alternative.
+
+### A13. The forced analogy ("X is like Y")
+WHAT: AI reaches for metaphor to sound profound when the literal would do. "Building a brand is like planting a garden." "Strategy is like architecture." Reflex more than insight, and AI tends to reach for stock comparisons — gardens, journeys, architecture, recipes, sports.
+EXAMPLES: "Building a brand is like tending a garden." / "Writing well is like architecture."
+FORBID LANGUAGE: Do not introduce analogies or metaphors ("X is like Y," "think of it as," "imagine it as") as a default rhetorical move. State the actual point. If a metaphor genuinely clarifies, use one specific to the writer's domain. Avoid stock comparisons (gardens, architecture, journeys, recipes, sports).
+
+### A14. The "let me break this down" preamble
+WHAT: Performative process-announcing before doing the thing. Variants: "Let me break this down." "Here's how I'd think about it." "Here's the framework I'd use." "Let me walk you through." Throat-clearing dressed as helpfulness.
+EXAMPLES: "Let me break this down for you." / "Here's how I'd approach this."
+FORBID LANGUAGE: Do not preface responses with "let me break this down," "here's how I'd think about it," "here's the framework I'd use," "let me walk you through," "let me unpack." Just do the thing. The process announcement is the AI tell, not the substance.
+
+### A15. The "fewer X, more Y" punchy comparison
+WHAT: Rhetorical contrast structure that scans clever but is template-y. "Less polish, more truth." "Fewer answers, more questions." Reads as wisdom-tweet, not earned insight.
+EXAMPLES: "Less polish, more truth." / "Fewer rules, more taste."
+FORBID LANGUAGE: Do not use "fewer X, more Y" or "less X, more Y" as a default rhetorical comparison. If the contrast is real, state it as a normal sentence. The punchy-comparison structure signals AI's pull toward shareable phrasing over honest claims.
+
 ---
 
 ## CATEGORY B — Structural and Formatting Defaults
@@ -166,6 +186,11 @@ FORBID LANGUAGE: Do not open writing with manipulative-curiosity hooks: "what if
 ### D6. Contrarian posture
 WHAT: "Most people think X. The reality is Y." Positioning as a heretic for routine claims.
 FORBID LANGUAGE: Do not adopt contrarian posture as a rhetorical default: "most people think X, but the reality is Y," "everyone says X, but they're wrong," "conventional wisdom says X." If your position genuinely contradicts a widely held belief, you can name that, but do not use the structure as a hook for ordinary claims.
+
+### D7. The opening listicle
+WHAT: Opening a thought by announcing the count. "Three things I notice." "Two patterns emerge." "Five reasons this works." Different from D4 (which is articles structured as listicles) — this is the rhetorical pre-announcement that you're about to enumerate.
+EXAMPLES: "Three things stand out:" / "Two patterns emerge here:" / "A few thoughts:"
+FORBID LANGUAGE: Do not open responses or sections by announcing how many items follow ("three things," "two patterns," "five reasons," "a few thoughts"). Make the points directly. If the structure is genuinely enumerated, let it stand on its own without preface.
 
 ---
 
@@ -341,15 +366,15 @@ STEP A: Header
 **PHASE 2: DEFAULT REVIEW**
 ---
 
-STEP B: Catalog analysis summary. Run the triage classification (auto-forbid / auto-modify / ask) against ALL 37 catalog entries using the user's samples. Then report the count in plain prose, like this:
+STEP B: Catalog analysis summary. Run the triage classification (auto-forbid / auto-modify / ask) against ALL 42 catalog entries using the user's samples. Then report the count in plain prose, like this:
 
-I checked your samples against the full catalog. **37 documented AI patterns across 6 categories.**
+I checked your samples against the full catalog. **42 documented AI patterns across 6 dimensions — structural, rhetorical, tonal.**
 
 - **Already blocked ([N1]):** your writing doesn't use these — em-dashes, [name 2-3 specific examples drawn from the actual auto-forbid set you produced]. I'm setting them to Forbid automatically.
 - **Already allowed or modified ([N2]):** your writing uses these naturally — [name examples from your auto-modify set, if any]. I'll keep them with light constraints.
 - **Need your call ([N3]):** [N3] patterns where your samples were silent or ambiguous. These are the ones I'll walk you through.
 
-(N1 + N2 + N3 must equal 37. State actual numbers, not placeholders.)
+(N1 + N2 + N3 must equal 42. State actual numbers, not placeholders.)
 
 STEP C: Path choice
 Before we go through the [N3] ambiguous patterns, how do you want to handle them?
@@ -365,7 +390,7 @@ Which do you prefer?
 
 PHASE 2 EXECUTION:
 
-Reference THE CATALOG OF AI DEFAULTS at the end of this document. For every catalog entry (A1-A11, B1-B7, C1-C6, D1-D6, E1-E5, F1-F2 = 37 total), classify based on the user's samples:
+Reference THE CATALOG OF AI DEFAULTS at the end of this document. For every catalog entry (A1-A15, B1-B7, C1-C6, D1-D7, E1-E5, F1-F2 = 42 total), classify based on the user's samples:
 
 - AUTO-FORBID: samples show zero or near-zero use of the pattern. Apply the catalog's FORBID LANGUAGE verbatim.
 - AUTO-MODIFY: samples show natural, considered use. Apply the catalog's MODIFY LANGUAGE if present, otherwise allow with note.
@@ -1530,21 +1555,21 @@ export default function App() {
         <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "640px" }}>
 
           <div style={{ display: "inline-flex", alignItems: "center", gap: ".5rem", background: "#f0edff", color: "#6B4EE6", border: "1px solid rgba(107,78,230,.2)", borderRadius: "20px", padding: ".3rem .75rem", margin: "0 0 1.25rem", fontSize: "11.5px", fontWeight: "700", letterSpacing: ".04em", width: "fit-content" }}>
-            <span>37 documented AI patterns · 6 categories</span>
+            <span>42 patterns · 6 dimensions · structural, rhetorical, tonal</span>
           </div>
 
           <h1 style={{ fontSize: "34px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .875rem", letterSpacing: "-.035em" }}>
             Your voice, <span style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>not theirs.</span>
           </h1>
           <p style={{ fontSize: "16px", color: "#4b5563", lineHeight: "1.55", margin: "0 0 2.25rem", maxWidth: "560px" }}>
-            Most "write in my voice" prompts tell AI what to do. This builds a voice signature by checking your writing against 37 documented AI patterns — so anything you generate from here on comes back sounding like you, not the model.
+            Most "write in my voice" prompts tell AI what to do. This builds a voice signature by checking your writing against 42 documented AI patterns — sentence constructions, rhetorical postures, tonal defaults, and formatting reflexes — so anything you generate from here on comes back sounding like you, not the model.
           </p>
 
           <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 1rem" }}>How it works</p>
           <div style={{ display: "flex", flexDirection: "column", gap: ".875rem", marginBottom: "2rem" }}>
             {[
               { n: 1, title: "Show me how you write", desc: "Pick the voice that sounds most like you, then paste 2-3 things you've written." },
-              { n: 2, title: "Decide what to block", desc: "I check your samples against all 37 catalog patterns. You weigh in on the ambiguous ones." },
+              { n: 2, title: "Decide what to block", desc: "I check your samples against all 42 catalog patterns. You weigh in on the ambiguous ones." },
               { n: 3, title: "Get your voice system document", desc: "One document with your forbidden list, voice signature, drift-check prompts, and starter prompts. Paste it into ChatGPT, Claude, or any AI tool." },
             ].map((s) => (
               <div key={s.n} style={{ display: "flex", alignItems: "flex-start", gap: ".875rem" }}>
