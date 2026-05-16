@@ -1604,9 +1604,9 @@ export default function App() {
           {/* RIGHT COLUMN — Before/After mockup */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div>
-              <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .375rem" }}>What changes</p>
-              <p style={{ fontSize: "15px", fontWeight: "700", color: "#111", margin: "0 0 .25rem", letterSpacing: "-.02em" }}>Same prompt. Different voice.</p>
-              <p style={{ fontSize: "13px", color: "#6b7280", margin: 0, lineHeight: "1.55" }}>Both are a Facebook post about a new coaching session. Look at the difference.</p>
+              <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .375rem" }}>What the system does</p>
+              <p style={{ fontSize: "15px", fontWeight: "700", color: "#111", margin: "0 0 .25rem", letterSpacing: "-.02em" }}>It strips the patterns, not the voice.</p>
+              <p style={{ fontSize: "13px", color: "#6b7280", margin: 0, lineHeight: "1.55" }}>Here's a typical AI-generated Facebook post for a new coaching session, and the patterns from your catalog that would get caught.</p>
             </div>
 
             {/* AI default post */}
@@ -1637,41 +1637,35 @@ Drop a 💛 below if this resonates. Can't wait to support you!`}
               </div>
             </div>
 
-            {/* Arrow */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: ".5rem" }}>
-              <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
-              <span style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em" }}>↓ AFTER VOICE SYSTEM ↓</span>
-              <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
-            </div>
-
-            {/* Voice-applied post */}
+            {/* Violations panel */}
             <div style={{ background: "#fff", border: "1.5px solid #6B4EE6", borderRadius: "14px", overflow: "hidden", boxShadow: "0 8px 20px rgba(107,78,230,.18)" }}>
               <div style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", padding: ".5rem .875rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "10px", fontWeight: "800", color: "#fff", letterSpacing: ".14em", textTransform: "uppercase" }}>Your voice</span>
-                <span style={{ fontSize: "10px", color: "rgba(255,255,255,.7)", fontWeight: "600" }}>Facebook · 2m</span>
+                <span style={{ fontSize: "10px", fontWeight: "800", color: "#fff", letterSpacing: ".14em", textTransform: "uppercase" }}>Patterns the system catches</span>
+                <span style={{ fontSize: "10px", color: "rgba(255,255,255,.75)", fontWeight: "700" }}>7 of 42 flagged</span>
               </div>
-              <div style={{ padding: ".875rem 1rem 1rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: ".5rem" }}>
-                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)" }} />
-                  <span style={{ fontSize: "11.5px", fontWeight: "700", color: "#111" }}>You</span>
-                </div>
-                <p style={{ fontSize: "12.5px", color: "#111", lineHeight: "1.6", margin: 0, whiteSpace: "pre-line" }}>
-{`Two coaching spots opening up this month.
-
-These are for people who've been stuck on the same thing for too long and basically know what they should be doing but can't get themselves to actually do it. We work on the why behind that.
-
-90 minutes. Real conversation, no frameworks.
-
-DM me if you want one.`}
-                </p>
-                <div style={{ display: "flex", gap: ".75rem", marginTop: ".75rem", paddingTop: ".5rem", borderTop: "1px dashed #f3f4f6", fontSize: "10.5px", color: "#9ca3af", fontWeight: "600" }}>
-                  <span>👍 Like</span><span>💬 Comment</span><span>↗ Share</span>
-                </div>
+              <div style={{ padding: ".875rem 1rem 1rem", display: "flex", flexDirection: "column", gap: ".5rem" }}>
+                {[
+                  { id: "A5", name: "Validating opener", quote: "Hey friends! 🎉" },
+                  { id: "C2", name: "Manufactured enthusiasm", quote: "I'm SO excited" + " · " + "Can't wait to support you!" },
+                  { id: "A1", name: "Em-dash", quote: "designed to empower you — a transformative new..." },
+                  { id: "F1", name: "AI vocabulary", quote: "transformative · empower · journey · deep dive · actionable insights · resonate" },
+                  { id: "A2", name: "Not just X, it's Y", quote: "It's not just another session. It's a deep dive..." },
+                  { id: "B1", name: "Reflex bulleting + ✨ ornament", quote: "✨ Clarity · ✨ Actionable insights · ✨ A roadmap" },
+                  { id: "B5", name: "Closing check-in", quote: "Drop a 💛 below if this resonates" },
+                ].map((v) => (
+                  <div key={v.id} style={{ display: "flex", gap: ".5rem", alignItems: "flex-start" }}>
+                    <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#6B4EE6", background: "#f0edff", padding: ".2rem .4rem", borderRadius: "4px", letterSpacing: ".05em", flexShrink: 0, marginTop: "1px" }}>{v.id}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: "12px", fontWeight: "700", color: "#111", margin: 0, letterSpacing: "-.01em" }}>{v.name}</p>
+                      <p style={{ fontSize: "11.5px", color: "#6b7280", margin: ".1rem 0 0", lineHeight: "1.45", fontStyle: "italic", textDecoration: "line-through", textDecorationColor: "rgba(107,78,230,.4)" }}>"{v.quote}"</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <p style={{ fontSize: "11.5px", color: "#9ca3af", lineHeight: "1.5", margin: ".25rem 0 0", fontStyle: "italic" }}>
-              No em-dashes. No manufactured enthusiasm. No "actionable insights." No "not X, but Y" pivot. No closing check-in. Just a real person saying a specific thing.
+            <p style={{ fontSize: "12px", color: "#4b5563", lineHeight: "1.6", margin: ".25rem 0 0" }}>
+              <strong style={{ color: "#111" }}>Your version sounds like you.</strong> The system isn't a voice. It's the rules that get applied so your real voice has room to show up.
             </p>
           </div>
         </div>
