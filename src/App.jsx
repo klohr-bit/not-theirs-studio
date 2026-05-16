@@ -1459,7 +1459,7 @@ export default function App() {
       setPendingPace(null);
       setScreen("chat");
       send(msg);
-    }, 3600);
+    }, 4800);
     return () => clearTimeout(t);
   }, [screen, pendingPace]);
 
@@ -1552,7 +1552,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <TopBar />
       <div style={{ flex: "1", display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 380px)", gap: "3rem", alignItems: "center" }}>
+        <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 400px)", gap: "3.5rem", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "560px" }}>
 
           <div style={{ display: "inline-flex", alignItems: "center", gap: ".5rem", background: "#f0edff", color: "#6B4EE6", border: "1px solid rgba(107,78,230,.2)", borderRadius: "20px", padding: ".3rem .75rem", margin: "0 0 1.25rem", fontSize: "11.5px", fontWeight: "700", letterSpacing: ".04em", width: "fit-content" }}>
@@ -1601,8 +1601,8 @@ export default function App() {
           </div>
           </div>
 
-          {/* RIGHT COLUMN — Before/After mockup */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {/* RIGHT COLUMN — Demo: AI default post + violations from catalog */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
             <div>
               <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .375rem" }}>What the system does</p>
               <p style={{ fontSize: "15px", fontWeight: "700", color: "#111", margin: "0 0 .25rem", letterSpacing: "-.02em" }}>It strips the patterns, not the voice.</p>
@@ -1641,23 +1641,19 @@ Drop a 💛 below if this resonates. Can't wait to support you!`}
             <div style={{ background: "#fff", border: "1.5px solid #6B4EE6", borderRadius: "14px", overflow: "hidden", boxShadow: "0 8px 20px rgba(107,78,230,.18)" }}>
               <div style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", padding: ".5rem .875rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontSize: "10px", fontWeight: "800", color: "#fff", letterSpacing: ".14em", textTransform: "uppercase" }}>Patterns the system catches</span>
-                <span style={{ fontSize: "10px", color: "rgba(255,255,255,.75)", fontWeight: "700" }}>7 of 42 flagged</span>
+                <span style={{ fontSize: "10px", color: "rgba(255,255,255,.75)", fontWeight: "700" }}>3 examples · 42 in catalog</span>
               </div>
-              <div style={{ padding: ".875rem 1rem 1rem", display: "flex", flexDirection: "column", gap: ".5rem" }}>
+              <div style={{ padding: "1rem 1.125rem 1.125rem", display: "flex", flexDirection: "column", gap: ".875rem" }}>
                 {[
-                  { id: "A5", name: "Validating opener", quote: "Hey friends! 🎉" },
-                  { id: "C2", name: "Manufactured enthusiasm", quote: "I'm SO excited" + " · " + "Can't wait to support you!" },
-                  { id: "A1", name: "Em-dash", quote: "designed to empower you — a transformative new..." },
-                  { id: "F1", name: "AI vocabulary", quote: "transformative · empower · journey · deep dive · actionable insights · resonate" },
-                  { id: "A2", name: "Not just X, it's Y", quote: "It's not just another session. It's a deep dive..." },
-                  { id: "B1", name: "Reflex bulleting + ✨ ornament", quote: "✨ Clarity · ✨ Actionable insights · ✨ A roadmap" },
-                  { id: "B5", name: "Closing check-in", quote: "Drop a 💛 below if this resonates" },
+                  { cat: "Sentence", name: "Validating opener", quote: "Hey friends! 🎉" },
+                  { cat: "Vocabulary", name: "AI vocabulary", quote: "transformative · empower · journey · deep dive · actionable insights" },
+                  { cat: "Structure", name: "Reflex bulleting with ✨ ornament", quote: "✨ Clarity · ✨ Actionable insights · ✨ A roadmap" },
                 ].map((v) => (
-                  <div key={v.id} style={{ display: "flex", gap: ".5rem", alignItems: "flex-start" }}>
-                    <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#6B4EE6", background: "#f0edff", padding: ".2rem .4rem", borderRadius: "4px", letterSpacing: ".05em", flexShrink: 0, marginTop: "1px" }}>{v.id}</span>
+                  <div key={v.cat} style={{ display: "flex", gap: ".625rem", alignItems: "flex-start" }}>
+                    <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#6B4EE6", background: "#f0edff", padding: ".25rem .5rem", borderRadius: "5px", letterSpacing: ".08em", textTransform: "uppercase", flexShrink: 0, marginTop: "1px" }}>{v.cat}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: "12px", fontWeight: "700", color: "#111", margin: 0, letterSpacing: "-.01em" }}>{v.name}</p>
-                      <p style={{ fontSize: "11.5px", color: "#6b7280", margin: ".1rem 0 0", lineHeight: "1.45", fontStyle: "italic", textDecoration: "line-through", textDecorationColor: "rgba(107,78,230,.4)" }}>"{v.quote}"</p>
+                      <p style={{ fontSize: "12.5px", fontWeight: "700", color: "#111", margin: 0, letterSpacing: "-.01em" }}>{v.name}</p>
+                      <p style={{ fontSize: "11.5px", color: "#6b7280", margin: ".15rem 0 0", lineHeight: "1.5", fontStyle: "italic", textDecoration: "line-through", textDecorationColor: "rgba(107,78,230,.4)" }}>"{v.quote}"</p>
                     </div>
                   </div>
                 ))}
