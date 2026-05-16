@@ -1596,8 +1596,8 @@ export default function App() {
             </div>
           ) : null}
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <button className="start-btn" onClick={startSession} style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", borderRadius: "10px", padding: ".75rem 1.5rem", color: "#fff", fontSize: "14px", fontWeight: "700", cursor: "pointer", border: "none", letterSpacing: "-.01em", boxShadow: "0 4px 14px rgba(46,31,94,.35)" }}>
-              {hasSavedSession ? "Start a new session" : "Start"}
+            <button className="start-btn" onClick={startSession} style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", borderRadius: "12px", padding: "1rem 1.875rem", color: "#fff", fontSize: "16px", fontWeight: "700", cursor: "pointer", border: "none", letterSpacing: "-.015em", boxShadow: "0 6px 18px rgba(46,31,94,.4)" }}>
+              {hasSavedSession ? "Start a new Signature Build →" : "Start the Signature Build →"}
             </button>
             <span style={{ fontSize: "12.5px", color: "#9ca3af" }}>About 15-30 minutes. Saved in your browser so you can come back.</span>
           </div>
