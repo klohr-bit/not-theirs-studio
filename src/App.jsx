@@ -1371,23 +1371,41 @@ export default function App() {
     return null;
   };
 
-  const extract = (raw) => {
-    let a = "";
-    let complete = false;
+  const extract = (raw, history = []) => {
+    // Strategy 1: full <output1>...</output1> in current response (most common)
     const m1 = raw.match(/<output1>([\s\S]*?)<\/output1>/);
     if (m1) {
-      a = m1[1].trim();
-      complete = true;
+      const a = m1[1].trim();
       const clean = raw.replace(/<output1>[\s\S]*?<\/output1>/g, a);
-      return { clean, a, complete };
+      return { clean, a, complete: true };
     }
-    // Fallback: opening tag exists but no closing — stream may have been cut off.
-    // Take whatever was generated after <output1> so the user still gets a document.
+    // Strategy 2: tags span multiple turns — look across full assistant history + current
+    const allText = history
+      .filter((m) => m.role === "assistant")
+      .map((m) => m.content)
+      .join("\n\n") + "\n\n" + raw;
+    const m2 = allText.match(/<output1>([\s\S]*?)<\/output1>/);
+    if (m2) {
+      const a = m2[1].trim();
+      const clean = raw.replace(/<\/output1>/g, "").replace(/<output1>[\s\S]*$/, "");
+      return { clean, a, complete: true };
+    }
+    // Strategy 3: opening tag in current response, no closing — stream cut mid-doc
     const openOnly = raw.match(/<output1>([\s\S]*)$/);
     if (openOnly) {
-      a = openOnly[1].trim();
+      const a = openOnly[1].trim();
       const clean = raw.replace(/<output1>[\s\S]*$/, a);
       return { clean, a, complete: false };
+    }
+    // Strategy 4: detect by document header — catches case where tags were lost
+    // entirely (e.g., model continued without re-emitting the wrapper)
+    const headerRE = /(?:YOUR VOICE SYSTEM\s*\n.*?Signature Method)/i;
+    if (headerRE.test(allText)) {
+      const idx = allText.search(headerRE);
+      const doc = allText.slice(idx).replace(/<\/?output1>/g, "").trim();
+      if (doc.length > 1500) {
+        return { clean: raw, a: doc, complete: false };
+      }
     }
     return { clean: raw, a: "", complete: false };
   };
@@ -1423,7 +1441,7 @@ export default function App() {
             const evt = JSON.parse(payload);
             if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
               raw += evt.delta.text;
-              const { clean: live } = extract(raw);
+              const { clean: live } = extract(raw, nm);
               if (!started) {
                 started = true;
                 setLoading(false);
@@ -1440,7 +1458,7 @@ export default function App() {
         }
       }
 
-      const { clean, a } = extract(raw);
+      const { clean, a } = extract(raw, nm);
       if (a) { setO1((p) => p || a); setDone(true); }
       setMsgs([...nm, { role: "assistant", content: clean }]);
       const np = dPhase(raw);
