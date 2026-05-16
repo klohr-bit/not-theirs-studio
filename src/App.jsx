@@ -971,6 +971,8 @@ const GLOBAL_CSS = `
 @keyframes slideR { from { width:0; } to { width:44px; } }
 @keyframes iIn { from { opacity:0; } to { opacity:1; } }
 @keyframes confettiFall { 0% { transform: translateY(-20vh) rotate(0deg); opacity:1; } 100% { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+@keyframes segPulse { 0% { box-shadow: 0 0 0 0 rgba(107,78,230,.55); } 70% { box-shadow: 0 0 0 6px rgba(107,78,230,0); } 100% { box-shadow: 0 0 0 0 rgba(107,78,230,0); } }
+@keyframes checkPop { 0% { transform: scale(.5); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 .confetti-piece { position:fixed; top:0; width:8px; height:14px; border-radius:2px; pointer-events:none; z-index:9999; animation: confettiFall linear forwards; }
 
 .fu0 { animation: fadeUp .5s cubic-bezier(.22,.68,0,1.2) forwards; opacity:0; }
@@ -1048,6 +1050,19 @@ export default function App() {
       return () => clearTimeout(t);
     }
   }, [screen]);
+
+  const [justCompleted, setJustCompleted] = useState(null);
+  const prevPhaseRef = useRef(0);
+  useEffect(() => {
+    if (phase > prevPhaseRef.current && prevPhaseRef.current >= 1) {
+      const completed = prevPhaseRef.current;
+      setJustCompleted(completed);
+      const t = setTimeout(() => setJustCompleted(null), 2400);
+      prevPhaseRef.current = phase;
+      return () => clearTimeout(t);
+    }
+    prevPhaseRef.current = phase;
+  }, [phase]);
 
   useEffect(() => {
     if (!showI) return;
@@ -1185,32 +1200,52 @@ export default function App() {
   };
 
   // ── TOP BAR ────────────────────────────────────────────────────────────────
-  const TopBar = ({ activePhase = 0, decisions = 0, right = null, showRestart = false }) => {
+  const TopBar = ({ activePhase = 0, decisions = 0, justCompleted = null, right = null, showRestart = false }) => {
     const allDone = activePhase > 6;
-    const overallPct = allDone ? 100 : Math.max(0, ((activePhase - 1) / 6) * 100);
-    const phaseName = activePhase > 0 && activePhase <= 6 ? PHASE_LABELS[activePhase] : "";
+    const phaseName = allDone ? "" : activePhase > 0 ? PHASE_LABELS[activePhase] : "Getting started";
     const subProgress = activePhase === 2 ? Math.min(100, (decisions / 14) * 100) : 0;
+    const confirmRestart = () => {
+      if (msgs.length > 0 && !done) {
+        if (!window.confirm("Restart the workflow? You'll lose all progress.")) return;
+      }
+      startSession();
+    };
     return (
       <div style={{ padding: ".875rem 1.25rem", display: "flex", alignItems: "center", gap: "1.25rem", borderBottom: "1px solid #e5e7eb", background: "#fff", flexShrink: 0 }}>
         <span style={{ fontSize: "13px", fontWeight: "800", color: "#111", letterSpacing: "-.02em", flexShrink: 0 }}>Not Theirs Studio</span>
-        {activePhase > 0 && !allDone && (
+        {!allDone && (
           <div style={{ display: "flex", alignItems: "center", gap: ".75rem", flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: "12px", fontWeight: "700", color: "#6B4EE6", letterSpacing: "-.01em", whiteSpace: "nowrap", flexShrink: 0 }}>{phaseName}</span>
-            <div style={{ flex: 1, maxWidth: "260px", height: "4px", background: "#f3f4f6", borderRadius: "2px", overflow: "hidden", position: "relative" }}>
-              <div style={{ height: "100%", width: `${overallPct}%`, background: "linear-gradient(90deg,#2E1F5E,#6B4EE6)", borderRadius: "2px", transition: "width .4s ease" }} />
-              {activePhase === 2 && (
-                <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${(1/6)*subProgress}%`, background: "rgba(107,78,230,.35)", borderRadius: "2px", transition: "width .4s ease" }} />
-              )}
+            <span style={{ fontSize: "12px", fontWeight: "700", color: activePhase > 0 ? "#6B4EE6" : "#9ca3af", letterSpacing: "-.01em", whiteSpace: "nowrap", flexShrink: 0 }}>{phaseName}</span>
+            <div style={{ display: "flex", gap: "4px", alignItems: "center", flex: 1, maxWidth: "300px" }}>
+              {[1, 2, 3, 4, 5, 6].map((n) => {
+                const isDone = n < activePhase;
+                const isActive = n === activePhase;
+                const isJustCompleted = n === justCompleted;
+                const segColor = isDone || isJustCompleted ? "linear-gradient(90deg,#2E1F5E,#6B4EE6)" : isActive ? "rgba(107,78,230,.25)" : "#f3f4f6";
+                return (
+                  <div key={n} style={{ position: "relative", flex: 1, height: "5px", borderRadius: "3px", background: segColor, transition: "background .4s ease", animation: isActive ? "segPulse 1.8s ease-in-out infinite" : "none", overflow: "hidden" }}>
+                    {isActive && n === 2 && (
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,#2E1F5E,#6B4EE6)", width: `${subProgress}%`, transition: "width .4s ease" }} />
+                    )}
+                    {isActive && n !== 2 && (
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,#2E1F5E,#6B4EE6)", width: "55%", borderRadius: "3px" }} />
+                    )}
+                    {isJustCompleted && (
+                      <span style={{ position: "absolute", top: "-18px", left: "50%", transform: "translateX(-50%)", fontSize: "11px", fontWeight: "700", color: "#fff", background: "#2E1F5E", padding: ".15rem .5rem", borderRadius: "10px", whiteSpace: "nowrap", animation: "checkPop .35s cubic-bezier(.22,.68,0,1.2) forwards", boxShadow: "0 2px 8px rgba(46,31,94,.3)" }}>✓ {PHASE_LABELS[n]}</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <span style={{ fontSize: "11.5px", fontWeight: "600", color: "#9ca3af", whiteSpace: "nowrap", flexShrink: 0 }}>
-              Step {Math.min(activePhase, 6)} of 6{activePhase === 2 ? ` · ${Math.min(decisions, 14)}/14` : ""}
+              {activePhase === 0 ? "0 of 6" : `${Math.min(activePhase, 6)} of 6`}{activePhase === 2 ? ` · ${Math.min(decisions, 14)}/14` : ""}
             </span>
           </div>
         )}
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".75rem", flexShrink: 0 }}>
           {right}
           {showRestart && (
-            <button onClick={startSession} title="Start over" style={{ background: "none", border: "1px solid #e5e7eb", borderRadius: "6px", padding: ".35rem .625rem", color: "#9ca3af", fontSize: "13px", cursor: "pointer" }}>↺</button>
+            <button onClick={confirmRestart} title="Start over" style={{ background: "none", border: "1px solid #e5e7eb", borderRadius: "6px", padding: ".35rem .625rem", color: "#9ca3af", fontSize: "13px", cursor: "pointer" }}>↺</button>
           )}
         </div>
       </div>
@@ -1465,7 +1500,7 @@ export default function App() {
   return (
     <div style={{ display: "flex", flexDirection: "column", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", height: "calc(100vh - 56px)", minHeight: "560px", fontFamily: "Inter,-apple-system,sans-serif", background: "#fff" }}>
       <style>{GLOBAL_CSS}</style>
-      <TopBar activePhase={phase} decisions={dn} showRestart={true} />
+      <TopBar activePhase={phase} decisions={dn} justCompleted={justCompleted} showRestart={true} />
 
       <div style={{ flex: "1", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
