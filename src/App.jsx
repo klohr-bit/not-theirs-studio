@@ -1656,13 +1656,13 @@ Drop a 💛 below if this resonates. Can't wait to support you!`}
                   <span style={{ fontSize: "11.5px", fontWeight: "700", color: "#111" }}>You</span>
                 </div>
                 <p style={{ fontSize: "12.5px", color: "#111", lineHeight: "1.6", margin: 0, whiteSpace: "pre-line" }}>
-{`New session opening up. Two spots.
+{`Two coaching spots opening up this month.
 
-It's for the people who've done the work, made the moves, and still feel stuck. Not because they need more strategy. Because they need someone to call out the pattern they can't see from inside it.
+These are for people who've been stuck on the same thing for too long and basically know what they should be doing but can't get themselves to actually do it. We work on the why behind that.
 
-90 minutes. We talk. I tell you what I see. You decide what to do with it.
+90 minutes. Real conversation, no frameworks.
 
-Reply or DM if you want one.`}
+DM me if you want one.`}
                 </p>
                 <div style={{ display: "flex", gap: ".75rem", marginTop: ".75rem", paddingTop: ".5rem", borderTop: "1px dashed #f3f4f6", fontSize: "10.5px", color: "#9ca3af", fontWeight: "600" }}>
                   <span>👍 Like</span><span>💬 Comment</span><span>↗ Share</span>
@@ -1671,7 +1671,7 @@ Reply or DM if you want one.`}
             </div>
 
             <p style={{ fontSize: "11.5px", color: "#9ca3af", lineHeight: "1.5", margin: ".25rem 0 0", fontStyle: "italic" }}>
-              No em-dashes, no manufactured enthusiasm, no "actionable insights," no closing check-in. Specific. Direct. Sounds like a person.
+              No em-dashes. No manufactured enthusiasm. No "actionable insights." No "not X, but Y" pivot. No closing check-in. Just a real person saying a specific thing.
             </p>
           </div>
         </div>
