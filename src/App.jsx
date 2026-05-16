@@ -1354,29 +1354,31 @@ export default function App() {
 
   // ── TRANSITION SCREEN ──────────────────────────────────────────────────────
   if (screen === "transition") return (
-    <div style={{ background: "linear-gradient(135deg,#1a1230,#2E1F5E)", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.15)", minHeight: "calc(100vh - 56px)", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "Inter,-apple-system,sans-serif", position: "relative" }}>
+    <div style={{ background: "linear-gradient(135deg,#1a1230,#2E1F5E)", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.15)", height: "calc(100vh - 56px)", minHeight: "560px", display: "flex", flexDirection: "column", fontFamily: "Inter,-apple-system,sans-serif" }}>
       <style>{GLOBAL_CSS}</style>
 
-      <div className="t-studio" style={{ padding: "1.5rem 2rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
+      <div className="t-studio" style={{ padding: "1.5rem 2rem", borderBottom: "1px solid rgba(255,255,255,.08)", flexShrink: 0 }}>
         <span style={{ fontSize: "15px", fontWeight: "800", color: "rgba(255,255,255,.45)", letterSpacing: "-.03em" }}>Not Theirs Studio</span>
       </div>
 
-      <div style={{ padding: "3rem 3rem", flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "780px" }}>
-        <p className="t-l1" style={{ fontSize: "44px", fontWeight: "800", color: "#fff", lineHeight: "1.1", margin: "0 0 1.5rem", letterSpacing: "-.04em" }}>
-          Every AI has defaults.
-        </p>
-        <p className="t-l2" style={{ fontSize: "32px", fontWeight: "700", color: "#C5B4F5", lineHeight: "1.2", margin: "0 0 3rem", letterSpacing: "-.03em" }}>
-          Most people don't know what theirs are yet.
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div className="t-rule" style={{ height: "2px", background: "rgba(255,255,255,.25)", flexShrink: "0", borderRadius: "2px" }} />
-          <p className="t-sub" style={{ fontSize: "16px", fontWeight: "500", color: "rgba(255,255,255,.55)", margin: "0", lineHeight: "1.5", letterSpacing: "-.01em" }}>
-            You're about to do it differently.
+      <div style={{ flex: "1 1 0", display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem", minHeight: 0 }}>
+        <div style={{ maxWidth: "780px", width: "100%" }}>
+          <p className="t-l1" style={{ fontSize: "44px", fontWeight: "800", color: "#fff", lineHeight: "1.1", margin: "0 0 1.5rem", letterSpacing: "-.04em" }}>
+            Every AI has defaults.
           </p>
+          <p className="t-l2" style={{ fontSize: "32px", fontWeight: "700", color: "#C5B4F5", lineHeight: "1.2", margin: "0 0 3rem", letterSpacing: "-.03em" }}>
+            Most people don't know what theirs are yet.
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <div className="t-rule" style={{ height: "2px", background: "rgba(255,255,255,.25)", flexShrink: "0", borderRadius: "2px" }} />
+            <p className="t-sub" style={{ fontSize: "16px", fontWeight: "500", color: "rgba(255,255,255,.55)", margin: "0", lineHeight: "1.5", letterSpacing: "-.01em" }}>
+              You're about to do it differently.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="t-foot" style={{ padding: "1.5rem 2rem", borderTop: "1px solid rgba(255,255,255,.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="t-foot" style={{ padding: "1.5rem 2rem", borderTop: "1px solid rgba(255,255,255,.08)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <span style={{ fontSize: "11px", fontWeight: "600", color: "rgba(255,255,255,.3)", letterSpacing: ".14em", textTransform: "uppercase" }}>The Signature Method · Volume 1: Voice</span>
         <div style={{ display: "flex", gap: "5px" }}>
           {[0, 1, 2].map((i) => (
