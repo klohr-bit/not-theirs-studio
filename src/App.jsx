@@ -1561,8 +1561,8 @@ export default function App() {
             <span>42 documented AI patterns across 6 dimensions</span>
           </div>
 
-          <h1 style={{ fontSize: "34px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .875rem", letterSpacing: "-.035em" }}>
-            Your voice, <span style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>not theirs.</span>
+          <h1 style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "54px", fontWeight: "600", color: "#111", lineHeight: "1.05", margin: "0 0 1rem", letterSpacing: "-.02em" }}>
+            Your voice, <em style={{ fontStyle: "italic", fontWeight: "600", background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>not theirs.</em>
           </h1>
           <p style={{ fontSize: "16px", color: "#4b5563", lineHeight: "1.55", margin: "0 0 2.25rem", maxWidth: "560px" }}>
             Most "write in my voice" prompts tell AI what to do. The Signature Build checks your writing against 42 documented AI patterns — sentence constructions, rhetorical postures, tonal defaults, and formatting reflexes — so anything you generate from here on comes back sounding like you, not the model.
