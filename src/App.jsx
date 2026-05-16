@@ -267,26 +267,14 @@ Before we start, a few optional questions. These help personalize your documents
 Type your answers or say "skip" to go straight to Voice Calibration.
 ---
 
-PHASE 1 — after profile, open:
+PHASE 1 — after profile, open with EXACTLY this:
 **PHASE 1: VOICE CALIBRATION**
 ---
-Four passages. Same topic. Four completely different voices. Which feels closest to how you write? Which feels most foreign?
+Same topic, four completely different voices. Pick which one sounds most like you. You'll compare them in pairs.
 
----
-**PASSAGE 1: Considered and Literary**
-There is something quietly disorienting about reading a piece of writing and knowing, before you have finished the first sentence, that no particular human being wrote it. Not offense, not quite disappointment, but something closer to the low-grade sadness of finding a hotel room: clean, functional, arranged to please no one and therefore pleasing to everyone in exactly the same insufficient way. This is what most custom GPTs produce. Writing optimized against the possibility of being wrong. The model has learned the vocabulary of warmth without the experience that produces warmth. What it cannot learn is the idiosyncrasy, the private logic, the sentence that could only have come from a person who has thought a particular thought in a particular way. That sentence is you.
+{{passages}}
 
----
-**PASSAGE 2: Direct and Plain-Spoken**
-Your custom GPT sounds like everyone else's because you told it what to do. You didn't tell it what not to do. Big difference. The model has defaults. Strong ones. Your instructions said: write warmly, be professional, use my brand voice. Fine. But the model's defaults are still running underneath. You layered your voice on top. The defaults won. Stop adding. Start forbidding. Tell the model exactly what it cannot do. When you forbid the defaults, your actual voice has room to show up.
-
----
-**PASSAGE 3: Grounded and Warm**
-Most people build their custom GPT the same way they'd brief a new employee. They hand over the style guide, share writing samples, describe the tone. Then they're surprised when the output sounds like a well-briefed stranger wrote it. The issue isn't that you didn't give the AI enough. It's that you gave it the right things in the wrong order. You told it what to reach for. You didn't tell it what to stop doing first. What actually works is the reverse: name the defaults first, tell the AI not to use them. Clear the ground before you plant anything.
-
----
-**PASSAGE 4: Analytical and Precise**
-The problem with most custom GPTs is architectural. Large language models are trained using reinforcement learning from human feedback, which systematically rewards outputs that diverse populations rate as acceptable. The result is a statistical pull toward hedged, neutral language optimized against objection rather than for distinctiveness. When a user adds brand voice instructions, they add a positive signal layer on top of default behavior. In most cases, the training wins. Positive instruction is insufficient. The defaults are overridden by explicit constraint, not additional signal.
+After the user's selection comes back (e.g., "I'm closest to Direct and Plain-Spoken"), acknowledge briefly and continue with the rest of Phase 1.
 
 ---
 After they pick, ask about secondary elements. Before asking for samples, say: "Find 2-3 things you wrote quickly and didn't heavily edit — a Slack message, an email draft, a social post written in one sitting. The less polished the better. That's where your actual voice lives." Ask for 2-3 writing samples (no AI help).
@@ -776,6 +764,29 @@ ${CATALOG}`;
 // ─────────────────────────────────────────────────────────────────────────────
 const PHASE_LABELS = ["", "Voice Calibration", "Default Review", "Personal Additions", "Build System", "Context Modes", "Sample Pieces"];
 
+const PASSAGES = [
+  {
+    id: 1,
+    label: "Considered and Literary",
+    excerpt: "There is something quietly disorienting about reading a piece of writing and knowing, before you have finished the first sentence, that no particular human being wrote it. The model has learned the vocabulary of warmth without the experience that produces warmth. What it cannot learn is the idiosyncrasy, the private logic, the sentence that could only have come from a person who has thought a particular thought.",
+  },
+  {
+    id: 2,
+    label: "Direct and Plain-Spoken",
+    excerpt: "Your custom GPT sounds like everyone else's because you told it what to do. You didn't tell it what not to do. Big difference. The model has defaults. Strong ones. Stop adding. Start forbidding. When you forbid the defaults, your actual voice has room to show up.",
+  },
+  {
+    id: 3,
+    label: "Grounded and Warm",
+    excerpt: "Most people build their custom GPT the same way they'd brief a new employee. They hand over the style guide, share writing samples, describe the tone. Then they're surprised when the output sounds like a well-briefed stranger wrote it. You told it what to reach for. You didn't tell it what to stop doing first.",
+  },
+  {
+    id: 4,
+    label: "Analytical and Precise",
+    excerpt: "The problem with most custom GPTs is architectural. Large language models systematically reward outputs that diverse populations rate as acceptable, producing a pull toward hedged, neutral language. When a user adds brand voice instructions, the training wins. Positive instruction is insufficient. The defaults are overridden by explicit constraint, not additional signal.",
+  },
+];
+
 const LOADING_MSG = {
   0: "Getting started...",
   1: "Reading your samples...",
@@ -833,22 +844,26 @@ const ASK_RE = /^(type|tell|pick|choose|send|share|give|write|select|enter|paste
 function parseMessage(text) {
   if (!text) return [{ type: "text", content: "" }];
   const parts = [];
-  const re = /\{\{card\}\}([\s\S]*?)\{\{\/card\}\}/g;
+  const re = /\{\{card\}\}([\s\S]*?)\{\{\/card\}\}|\{\{passages\}\}/g;
   let last = 0;
   let m;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) parts.push({ type: "text", content: text.slice(last, m.index) });
-    const body = m[1];
-    const card = {};
-    body.split("\n").forEach((line) => {
-      const idx = line.indexOf(":");
-      if (idx > 0) {
-        const key = line.slice(0, idx).trim().toLowerCase();
-        const val = line.slice(idx + 1).trim();
-        if (key) card[key] = val;
-      }
-    });
-    parts.push({ type: "card", data: card });
+    if (m[0] === "{{passages}}") {
+      parts.push({ type: "passages" });
+    } else {
+      const body = m[1];
+      const card = {};
+      body.split("\n").forEach((line) => {
+        const idx = line.indexOf(":");
+        if (idx > 0) {
+          const key = line.slice(0, idx).trim().toLowerCase();
+          const val = line.slice(idx + 1).trim();
+          if (key) card[key] = val;
+        }
+      });
+      parts.push({ type: "card", data: card });
+    }
     last = m.index + m[0].length;
   }
   if (last < text.length) parts.push({ type: "text", content: text.slice(last) });
@@ -909,6 +924,66 @@ async function copyToClipboard(text) {
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION CARD COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
+function PassageBracket({ onChoice, active }) {
+  const [round, setRound] = useState(1);
+  const [winners, setWinners] = useState([]);
+  const [chosen, setChosen] = useState(null);
+  const [final, setFinal] = useState(null);
+
+  const roundLabel = round === 1 ? "Round 1 of 3" : round === 2 ? "Round 2 of 3" : "Final round";
+  const pair = round === 1 ? [PASSAGES[0], PASSAGES[1]]
+             : round === 2 ? [PASSAGES[2], PASSAGES[3]]
+             : winners;
+
+  const pick = (p) => {
+    if (!active || final) return;
+    if (round === 3) {
+      setFinal(p);
+      onChoice(p);
+      return;
+    }
+    const nextWinners = [...winners, p];
+    setWinners(nextWinners);
+    setRound(round + 1);
+  };
+
+  if (final) {
+    return (
+      <div style={{ background: "#f0edff", border: "1.5px solid #C5B4F5", borderRadius: "12px", padding: "1rem 1.125rem", margin: ".5rem 0" }}>
+        <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 .25rem" }}>Your match</p>
+        <p style={{ fontSize: "15px", fontWeight: "700", color: "#2E1F5E", margin: "0", letterSpacing: "-.01em" }}>{final.label}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: "#fafafa", border: "1px solid #ede9ff", borderRadius: "14px", padding: "1rem 1.125rem", margin: ".5rem 0" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: ".75rem" }}>
+        <p style={{ fontSize: "10.5px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em", textTransform: "uppercase", margin: 0 }}>{roundLabel}</p>
+        <p style={{ fontSize: "11.5px", fontWeight: "600", color: "#9ca3af", margin: 0 }}>Which sounds more like you?</p>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".75rem" }}>
+        {pair.map((p) => (
+          <button
+            key={p.id}
+            disabled={!active}
+            onClick={() => pick(p)}
+            onMouseEnter={(e) => { if (active) e.currentTarget.style.borderColor = "#6B4EE6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e5e7eb"; }}
+            style={{ background: "#fff", border: "1.5px solid #e5e7eb", borderRadius: "12px", padding: "1rem", textAlign: "left", cursor: active ? "pointer" : "default", transition: "border-color .15s ease, transform .1s ease", display: "flex", flexDirection: "column", gap: ".5rem", minHeight: "200px" }}
+          >
+            <p style={{ fontSize: "10.5px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".1em", textTransform: "uppercase", margin: 0 }}>{p.label}</p>
+            <p style={{ fontSize: "13px", color: "#374151", lineHeight: "1.6", margin: 0, flex: 1 }}>{p.excerpt}</p>
+            {active && (
+              <p style={{ fontSize: "12px", fontWeight: "700", color: "#6B4EE6", margin: ".25rem 0 0", letterSpacing: "-.01em" }}>Pick this one →</p>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DecisionCard({ card, onChoice, active }) {
   const [showWhy, setShowWhy] = useState(false);
   const takeColor = card.take === "Forbid" ? "#2E1F5E" : card.take === "Modify" ? "#6B4EE6" : "#6b7280";
@@ -1545,7 +1620,7 @@ export default function App() {
         {msgs.map((msg, i) => {
           const isLatestAsst = msg.role === "assistant" && i === msgs.length - 1 && !loading;
           const parts = msg.role === "assistant" ? parseMessage(msg.content) : null;
-          const hasCard = parts && parts.some((p) => p.type === "card");
+          const hasCard = parts && parts.some((p) => p.type === "card" || p.type === "passages");
           return (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: "8px" }}>
             {msg.role === "assistant" && (
@@ -1571,7 +1646,9 @@ export default function App() {
                   {parts.map((part, idx) => (
                     part.type === "card"
                       ? <DecisionCard key={idx} card={part.data} active={isLatestAsst} onChoice={(label) => { if (phase === 2) setDn((p) => p + 1); send(`${label} (${part.data.id || part.data.name || ""})`.trim()); }} />
-                      : <div key={idx} dangerouslySetInnerHTML={{ __html: renderMD(part.content, true) }} />
+                      : part.type === "passages"
+                        ? <PassageBracket key={idx} active={isLatestAsst} onChoice={(winner) => send(`I'm closest to "${winner.label}".`)} />
+                        : <div key={idx} dangerouslySetInnerHTML={{ __html: renderMD(part.content, true) }} />
                   ))}
                 </div>
               )}
