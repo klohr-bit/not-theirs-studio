@@ -235,6 +235,24 @@ BEHAVIORAL RULES (Kimberly Lohr voice):
 
 Format with bold headers, short blocks, --- dividers.
 
+PACING MODE: The user's first message will either start with "Walk me through it" (verbose mode) or "Just the decisions" (concise mode). Set the mode for the entire session.
+
+WALK MODE (verbose):
+- Explanations expanded by default.
+- Phase 1: deliver BOTH Stage 1 (concise) AND Stage 2 (full breakdown) automatically in the first response. Don't wait for "show me."
+- Phase 2 cards: include a one-line reason in the "take" field. Suggest the user click Why? for more.
+- Brief context lines before key questions.
+- Slightly longer transitions between phases.
+
+CONCISE MODE:
+- Tight outputs, recommendation up front, minimal commentary.
+- Phase 1: deliver Stage 1 only. Wait for user to ask before showing Stage 2.
+- Phase 2 cards: keep them lean. Why? stays collapsed; the user opens it if they want depth.
+- Skip rationale unless the user asks.
+- Minimal transitions.
+
+Both modes follow every behavioral rule and use the full catalog. Only depth and pace varies. Acknowledge the chosen mode in one short line at the start of Phase 0 ("Walking through it — full version." or "Tight mode it is."), then continue.
+
 PHASE 0 — open with EXACTLY this:
 **YOUR VOICE, NOT THEIRS**
 *A voice system builder by Not Theirs Studio*
@@ -453,6 +471,62 @@ This is two things at once.
 (1) Paste everything below into your AI tool's instructions or system prompt field. That tells the AI how to write like you for every conversation.
 
 (2) Keep this document as your reference. Return to it when your AI starts sounding generic, when you want to check for drift, or when you want to add a new context mode.
+
+---
+
+WHAT THIS SYSTEM IS DOING FOR YOU
+
+In plain English: this document tells your AI not to use the patterns that make AI sound generic, and to use the moves that make your writing yours. Most "write in my voice" instructions tell the AI what to do. This one tells it what NOT to do — which is the part that actually works. When output starts feeling off again, use the Drift-Check Prompts in Part 7.
+
+---
+
+FIRST INTERACTION (instructions to the AI)
+
+When the user opens a chat with you for the first time after this document has been loaded, do NOT summarize this document, list its sections, or explain the system. Instead, deliver this exact welcome in 4-5 short lines:
+
+1. One-line welcome that names their voice type. ("Voice system loaded. Running your [archetype] voice.")
+2. One line naming 2-3 active forbids by plain-language pattern. ("Blocking: em-dashes, validating openers, AI vocabulary.")
+3. One line naming 1-2 signature moves the user will see. ("You'll see: [signature move 1], [signature move 2].")
+4. One line offering starter prompts. ("Try one of these to start:")
+5. Three numbered starter prompts (use the STARTER PROMPTS section below as your source).
+
+Then stop and wait for the user's input. Do not over-explain.
+
+On every subsequent message: just respond. Do not greet, do not preface, do not announce.
+
+---
+
+STARTER PROMPTS (for the user — paste any of these to begin)
+
+[Generate 5 starter prompts customized to what the user does, pulled from the Phase 0 profile (their name/business, what they do, who they write for). Each prompt is one line, copy-paste-ready. Examples to model after:]
+
+1. Write a 150-word email introducing my [their service] to a new client.
+2. Rewrite this in my voice: [paste your draft]
+3. Draft a LinkedIn post about [a topic relevant to their work].
+4. Decline this pitch politely in my voice: [paste]
+5. Audit your last response. Did you violate anything from my Voice System? Name and fix every violation.
+
+---
+
+CALIBRATION TEST (run this first to verify the system loaded)
+
+Paste this prompt into your AI tool exactly:
+
+> Write a 75-word welcome message for a new newsletter subscriber. Use my voice system.
+
+Check the output. It should NOT have:
+- Any em-dashes (—)
+- Any opening with "Welcome to..." or "Thanks for..." as validation
+- Any of these words: leverage, unpack, deep dive, robust, seamless, transformative, journey
+- A closing question like "Does that make sense?" or "Looking forward to..."
+- A bulleted three-item list
+
+It SHOULD have:
+- At least one signature move from Part 2 below
+- Short, varied sentence length
+- A specific, grounded opening (no generic warmth)
+
+If anything from the "should not" list shows up, paste this back: "Audit that response against my Forbidden List. Name violations. Rewrite."
 
 ---
 
@@ -962,8 +1036,15 @@ export default function App() {
 
   const startSession = () => {
     setPhase(0); setMsgs([]); setDn(0); setO1(""); setDone(false);
+    setScreen("pacing");
+  };
+
+  const choosePace = (mode) => {
     setScreen("chat");
-    send("Begin the workflow. Run the opening greeting and optional profile questions exactly as instructed.");
+    const msg = mode === "walk"
+      ? "Walk me through it — full explanations. Run the opening greeting and profile questions."
+      : "Just the decisions. Tight. Run the opening greeting and profile questions.";
+    send(msg);
   };
 
   const handleCopy = async (which) => {
@@ -1068,6 +1149,52 @@ export default function App() {
             <span style={{ fontSize: "12.5px", color: "#9ca3af" }}>About 10 minutes. Nothing is saved.</span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+
+  // ── PACING CHOICE SCREEN ───────────────────────────────────────────────────
+  if (screen === "pacing") return (
+    <div style={{ display: "flex", flexDirection: "column", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.12)", fontFamily: "Inter,-apple-system,sans-serif", minHeight: "calc(100vh - 56px)", background: "#fff" }}>
+      <style>{GLOBAL_CSS}</style>
+      <TopBar />
+      <div style={{ flex: "1", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 2rem" }}>
+        <p style={{ fontSize: "11px", fontWeight: "700", color: "#6B4EE6", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .875rem" }}>One quick choice</p>
+        <h1 style={{ fontSize: "32px", fontWeight: "800", color: "#111", lineHeight: "1.15", margin: "0 0 .75rem", letterSpacing: "-.035em", textAlign: "center" }}>
+          How do you want this to feel?
+        </h1>
+        <p style={{ fontSize: "15px", color: "#6b7280", lineHeight: "1.55", margin: "0 0 2.5rem", maxWidth: "520px", textAlign: "center" }}>
+          You can't change it mid-session. Pick the one that fits today.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", maxWidth: "720px", width: "100%" }}>
+          <button
+            onClick={() => choosePace("walk")}
+            style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", color: "#fff", border: "none", borderRadius: "16px", padding: "1.75rem 1.5rem", textAlign: "left", cursor: "pointer", boxShadow: "0 6px 20px rgba(46,31,94,.25)", transition: "transform .15s ease, box-shadow .15s ease" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 10px 28px rgba(46,31,94,.35)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(46,31,94,.25)"; }}
+          >
+            <p style={{ fontSize: "10.5px", fontWeight: "700", color: "#C5B4F5", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .625rem" }}>Best for first time · 30 min</p>
+            <p style={{ fontSize: "20px", fontWeight: "800", color: "#fff", margin: "0 0 .625rem", letterSpacing: "-.02em" }}>Walk me through it</p>
+            <p style={{ fontSize: "13.5px", color: "rgba(255,255,255,.82)", margin: "0", lineHeight: "1.55" }}>
+              Full explanations, the reasoning behind each recommendation, the "why" expanded by default. Best when you want to learn the system as you build it.
+            </p>
+          </button>
+          <button
+            onClick={() => choosePace("concise")}
+            style={{ background: "#fff", color: "#111", border: "1.5px solid #e5e7eb", borderRadius: "16px", padding: "1.75rem 1.5rem", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 12px rgba(0,0,0,.04)", transition: "transform .15s ease, box-shadow .15s ease, border-color .15s ease" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 10px 24px rgba(0,0,0,.08)"; e.currentTarget.style.borderColor = "#6B4EE6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,.04)"; e.currentTarget.style.borderColor = "#e5e7eb"; }}
+          >
+            <p style={{ fontSize: "10.5px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .625rem" }}>Best if you trust the method · 15 min</p>
+            <p style={{ fontSize: "20px", fontWeight: "800", color: "#111", margin: "0 0 .625rem", letterSpacing: "-.02em" }}>Just the decisions</p>
+            <p style={{ fontSize: "13.5px", color: "#6b7280", margin: "0", lineHeight: "1.55" }}>
+              Tight prompts, recommendations up front, minimal commentary. Why? toggle stays collapsed so you can expand it when you want it.
+            </p>
+          </button>
+        </div>
+        <p style={{ fontSize: "12.5px", color: "#9ca3af", margin: "1.75rem 0 0", textAlign: "center" }}>
+          Not sure? Pick <strong style={{ color: "#6B4EE6" }}>Walk me through it</strong>.
+        </p>
       </div>
     </div>
   );
