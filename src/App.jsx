@@ -1481,6 +1481,41 @@ export default function App() {
     setPendingPace(mode);
     setScreen("transition");
   };
+
+  // Manual escape hatch: scan all assistant messages for the document and finish.
+  // Used when the AI got stuck mid-generation or the user thinks the doc is done.
+  const forceFinish = () => {
+    const allText = msgs
+      .filter((m) => m.role === "assistant")
+      .map((m) => m.content)
+      .join("\n\n");
+    // Try the smart extract first
+    const { a } = extract("", msgs);
+    if (a) {
+      setO1(a);
+      setDone(true);
+      return;
+    }
+    // Fallback: detect by header
+    const headerRE = /(?:YOUR VOICE SYSTEM\s*\n.*?Signature Method)/i;
+    if (headerRE.test(allText)) {
+      const idx = allText.search(headerRE);
+      const doc = allText.slice(idx).replace(/<\/?output1>/g, "").trim();
+      setO1(doc);
+      setDone(true);
+      return;
+    }
+    // Last resort: grab the longest assistant message — better than nothing
+    const longest = [...msgs]
+      .filter((m) => m.role === "assistant")
+      .sort((a, b) => b.content.length - a.content.length)[0];
+    if (longest && longest.content.length > 500) {
+      setO1(longest.content);
+      setDone(true);
+      return;
+    }
+    alert("No document content found in chat yet. Wait for the AI to finish generating, then try again.");
+  };
   useEffect(() => {
     if (screen !== "transition" || !pendingPace) return;
     const t = setTimeout(() => {
@@ -2061,6 +2096,15 @@ Drop a 💛 below if this resonates. Can't wait to support you!`}
         >
           ↺
         </button>
+        {phase >= 6 && !done && (
+          <button
+            onClick={forceFinish}
+            title="If the AI got stuck, capture whatever it's generated and go to the completion screen"
+            style={{ background: "#f0edff", color: "#6B4EE6", border: "1px solid rgba(107,78,230,.3)", borderRadius: "8px", padding: ".5rem .75rem", fontSize: "12px", fontWeight: "700", cursor: "pointer", flexShrink: "0", letterSpacing: "-.01em" }}
+          >
+            Get my document →
+          </button>
+        )}
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
