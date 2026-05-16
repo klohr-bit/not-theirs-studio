@@ -1538,14 +1538,108 @@ export default function App() {
     }
   };
 
-  const dlPDF = (content, title, sub) => {
+  const dlPDF = async (content, title, sub) => {
     if (!content) { alert("Complete the full workflow first."); return; }
-    const html = generateDocHTML(content, title, sub);
-    const win = window.open("", "_blank");
-    if (!win) { alert("Pop-up blocked. Allow pop-ups for this site and try again."); return; }
-    win.document.write(html);
-    win.document.close();
-    win.onload = () => { try { win.focus(); win.print(); } catch {} };
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ unit: "pt", format: "letter", orientation: "portrait" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 54;
+    const maxW = pageW - margin * 2;
+    let y = margin;
+
+    // Cover block
+    doc.setFont("helvetica", "normal").setFontSize(9).setTextColor(150);
+    doc.text("NOT THEIRS STUDIO · THE SIGNATURE METHOD · VOLUME 1: VOICE", margin, y);
+    y += 36;
+    doc.setFont("helvetica", "bold").setFontSize(26).setTextColor(17);
+    const titleLines = doc.splitTextToSize(title, maxW);
+    doc.text(titleLines, margin, y);
+    y += titleLines.length * 30;
+    if (sub) {
+      doc.setFont("helvetica", "normal").setFontSize(12).setTextColor(107, 78, 230);
+      const subLines = doc.splitTextToSize(sub, maxW);
+      doc.text(subLines, margin, y);
+      y += subLines.length * 16;
+    }
+    y += 14;
+    doc.setDrawColor(46, 31, 94).setLineWidth(2);
+    doc.line(margin, y, pageW - margin, y);
+    y += 28;
+    doc.setTextColor(30);
+
+    const ensureRoom = (h) => {
+      if (y + h > pageH - margin) { doc.addPage(); y = margin; }
+    };
+    const writeBlock = (text, opts = {}) => {
+      const { size = 11, bold = false, color = [30, 30, 30], leading = 16, gapAfter = 8, italic = false } = opts;
+      doc.setFont("helvetica", bold ? "bold" : italic ? "italic" : "normal").setFontSize(size).setTextColor(...color);
+      const lines = doc.splitTextToSize(text, maxW);
+      lines.forEach((line) => {
+        ensureRoom(leading);
+        doc.text(line, margin, y);
+        y += leading;
+      });
+      y += gapAfter;
+    };
+
+    // Simple markdown-like parse: detect # / ## / ### headers, --- dividers, **bold**, blank-line paragraphs
+    const lines = content.split("\n");
+    let para = [];
+    const flushPara = () => {
+      if (!para.length) return;
+      // Strip ** ** wrappers (rendered as plain text for now)
+      const text = para.join(" ").replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1");
+      if (text.trim()) writeBlock(text, { size: 11, leading: 15, gapAfter: 9 });
+      para = [];
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+      if (!trimmed) { flushPara(); continue; }
+      if (trimmed === "---") {
+        flushPara();
+        ensureRoom(20);
+        doc.setDrawColor(220).setLineWidth(0.5);
+        doc.line(margin, y + 4, pageW - margin, y + 4);
+        y += 18;
+        continue;
+      }
+      const h1 = trimmed.match(/^#\s+(.+)/);
+      const h2 = trimmed.match(/^##\s+(.+)/);
+      const h3 = trimmed.match(/^###\s+(.+)/);
+      if (h1) { flushPara(); writeBlock(h1[1], { size: 18, bold: true, color: [17, 17, 17], leading: 24, gapAfter: 10 }); continue; }
+      if (h2) { flushPara(); writeBlock(h2[1], { size: 14, bold: true, color: [46, 31, 94], leading: 20, gapAfter: 8 }); continue; }
+      if (h3) { flushPara(); writeBlock(h3[1], { size: 12, bold: true, color: [46, 31, 94], leading: 17, gapAfter: 6 }); continue; }
+      // Treat all-caps short lines as inline headers (the document uses these for "PART 1: HYGIENE" etc.)
+      if (trimmed === trimmed.toUpperCase() && trimmed.length > 3 && trimmed.length < 80 && /[A-Z]/.test(trimmed) && !trimmed.startsWith("-")) {
+        flushPara();
+        writeBlock(trimmed, { size: 12, bold: true, color: [46, 31, 94], leading: 18, gapAfter: 6 });
+        continue;
+      }
+      // Bullet
+      if (/^[-*]\s+/.test(trimmed)) {
+        flushPara();
+        const bullet = trimmed.replace(/^[-*]\s+/, "• ").replace(/\*\*([^*]+)\*\*/g, "$1");
+        writeBlock(bullet, { size: 11, leading: 15, gapAfter: 4 });
+        continue;
+      }
+      para.push(trimmed);
+    }
+    flushPara();
+
+    // Footer with page numbers
+    const pages = doc.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      doc.setFont("helvetica", "normal").setFontSize(9).setTextColor(170);
+      doc.text(`${p} / ${pages}`, pageW - margin, pageH - 24, { align: "right" });
+      doc.text("Not Theirs Studio · The Signature Build", margin, pageH - 24);
+    }
+
+    const fname = (title || "your-voice-system").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".pdf";
+    doc.save(fname);
   };
 
   const dlDoc = (content, fname, title, sub) => {
