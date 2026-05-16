@@ -1555,15 +1555,17 @@ export default function App() {
         <div style={{ padding: "3rem 3rem 2.5rem", flex: "1", display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 400px)", gap: "3.5rem", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: "560px" }}>
 
+          <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 .875rem" }}>The Signature Build · Not Theirs Studio · Volume 1: Voice</p>
+
           <div style={{ display: "inline-flex", alignItems: "center", gap: ".5rem", background: "#f0edff", color: "#6B4EE6", border: "1px solid rgba(107,78,230,.2)", borderRadius: "20px", padding: ".3rem .75rem", margin: "0 0 1.25rem", fontSize: "11.5px", fontWeight: "700", letterSpacing: ".04em", width: "fit-content" }}>
-            <span>42 patterns · 6 dimensions · structural, rhetorical, tonal</span>
+            <span>42 documented AI patterns across 6 dimensions</span>
           </div>
 
           <h1 style={{ fontSize: "34px", fontWeight: "800", color: "#111", lineHeight: "1.1", margin: "0 0 .875rem", letterSpacing: "-.035em" }}>
             Your voice, <span style={{ background: "linear-gradient(135deg,#2E1F5E,#6B4EE6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>not theirs.</span>
           </h1>
           <p style={{ fontSize: "16px", color: "#4b5563", lineHeight: "1.55", margin: "0 0 2.25rem", maxWidth: "560px" }}>
-            Most "write in my voice" prompts tell AI what to do. This builds a voice signature by checking your writing against 42 documented AI patterns — sentence constructions, rhetorical postures, tonal defaults, and formatting reflexes — so anything you generate from here on comes back sounding like you, not the model.
+            Most "write in my voice" prompts tell AI what to do. The Signature Build checks your writing against 42 documented AI patterns — sentence constructions, rhetorical postures, tonal defaults, and formatting reflexes — so anything you generate from here on comes back sounding like you, not the model.
           </p>
 
           <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 1rem" }}>How it works</p>
@@ -1660,9 +1662,11 @@ Drop a 💛 below if this resonates. Can't wait to support you!`}
               </div>
             </div>
 
-            <p style={{ fontSize: "12px", color: "#4b5563", lineHeight: "1.6", margin: ".25rem 0 0" }}>
-              <strong style={{ color: "#111" }}>Your version sounds like you.</strong> The system isn't a voice. It's the rules that get applied so your real voice has room to show up.
-            </p>
+            <div style={{ background: "#f0edff", border: "1px solid rgba(107,78,230,.2)", borderRadius: "10px", padding: ".75rem .875rem", margin: ".25rem 0 0" }}>
+              <p style={{ fontSize: "12.5px", color: "#2E1F5E", lineHeight: "1.55", margin: 0 }}>
+                <strong>After the Signature Build:</strong> any AI tool loaded with your Voice System will avoid these patterns automatically. Your version sounds like you, not the model.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -1859,8 +1863,15 @@ Drop a 💛 below if this resonates. Can't wait to support you!`}
           </>
         )}
 
+        {/* TESTER FEEDBACK — swap href to your Google Form / email / Notion when ready */}
+        <div style={{ background: "#fafafa", border: "1px dashed #d1d5db", borderRadius: "12px", padding: "1rem 1.125rem", margin: "1.5rem 0" }}>
+          <p style={{ fontSize: "12.5px", fontWeight: "700", color: "#111", margin: "0 0 .25rem", letterSpacing: "-.01em" }}>You're a tester. Tell us what you thought.</p>
+          <p style={{ fontSize: "12px", color: "#6b7280", margin: "0 0 .625rem", lineHeight: "1.5" }}>Three things help most: where you got confused, whether the AI's output actually sounds like you, and the one thing you'd change.</p>
+          <a href="mailto:klohr@foundationforwardacademics.com?subject=The Signature Build — tester feedback" style={{ display: "inline-block", background: "#fff", color: "#2E1F5E", border: "1px solid #c5b4f5", borderRadius: "8px", padding: ".4rem .875rem", fontSize: "12.5px", fontWeight: "700", textDecoration: "none" }}>Send feedback →</a>
+        </div>
+
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "1.5rem", borderTop: "1px solid #f3f4f6" }}>
-          <span style={{ fontSize: "12px", color: "#9ca3af", fontWeight: "500" }}>Built with The Signature Method · Not Theirs Studio</span>
+          <span style={{ fontSize: "12px", color: "#9ca3af", fontWeight: "500" }}>The Signature Build · Not Theirs Studio · Volume 1: Voice</span>
           <button className="restart-btn" onClick={startSession} style={{ background: "none", border: "1px solid #e5e7eb", borderRadius: "8px", padding: ".5rem 1rem", color: "#6b7280", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}>
             Start a new session
           </button>
