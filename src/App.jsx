@@ -1612,10 +1612,10 @@ export default function App() {
             </div>
 
             {/* AI default post */}
-            <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,.04)" }}>
-              <div style={{ background: "#fafafa", padding: ".5rem .875rem", borderBottom: "1px solid #f3f4f6", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "10px", fontWeight: "800", color: "#9ca3af", letterSpacing: ".14em", textTransform: "uppercase" }}>AI default</span>
-                <span style={{ fontSize: "10px", color: "#d1d5db", fontWeight: "600" }}>Facebook · 2m</span>
+            <div style={{ background: "#fff", border: "1.5px solid #fecaca", borderRadius: "14px", overflow: "hidden", boxShadow: "0 2px 8px rgba(220,38,38,.06)" }}>
+              <div style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)", padding: ".5rem .875rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "10px", fontWeight: "800", color: "#fff", letterSpacing: ".14em", textTransform: "uppercase" }}>✗ AI default — what not to do</span>
+                <span style={{ fontSize: "10px", color: "rgba(255,255,255,.7)", fontWeight: "600" }}>Facebook · 2m</span>
               </div>
               <div style={{ padding: ".75rem .875rem .875rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: ".4rem" }}>
