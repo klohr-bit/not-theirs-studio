@@ -109,35 +109,19 @@ The catalog covers AI defaults. This phase covers you specifically. A few questi
 
 Ask one at a time: industry jargon to avoid, competitor language to differentiate, personal pet peeves, registers that don't fit, formatting preferences, concise vs thorough default.
 
-PHASE 4 — produce Output 1 in XML tags:
-<output1>
-OUTPUT 1: YOUR SYSTEM PROMPT
-Copy and paste this into your custom GPT instructions or Claude Project.
+PHASE 4 — Open Phase 4 with:
+**PHASE 4: BUILDING YOUR SYSTEM**
 ---
-VOICE SYSTEM FOR [NAME/BUSINESS]
-Built with The Signature Method by Not Theirs Studio
+I have your voice signature, your forbidden list, and your personal additions. Before I write the final document, one more layer: where your voice flexes for different situations.
 
-SELF-MONITORING: Before delivering any response, scan against this Forbidden List and Voice Signature. Rewrite if violations found.
----
-PART 1: HYGIENE RULES
-Correct grammar/spelling unless asked not to. Ask one clarifying question if prompt is ambiguous. Match formality of request. Acknowledge uncertainty rather than stating as fact. Do not explain what you're about to do — do it. Do not summarize output — end when content ends. Preserve specificity over abstraction.
----
-PART 2: VOICE SIGNATURE
-[Insert ALL 5-7 named signature moves from Phase 1, each with its label, one-line behavioral description, and quoted example. Do not abbreviate. Do not collapse moves together.]
-Structural approach: [one specific sentence describing how their writing is structured — opening pattern, body movement, closing pattern]
-Vocabulary: [one specific sentence with their characteristic words/phrases, and what they avoid]
-Rhythm: Vary sentence length. Short sentences land emphasis. Never three short sentences in a row without variation. [Add one sentence specific to this user's rhythm pattern from Phase 1.]
----
-PART 3: FORBIDDEN LIST
-[All Phase 2 decisions by category]
----
-PART 4: CONTEXT MODES
-[Populated in Phase 5]
----
-GENERAL PRINCIPLE: Specific beats general. Grounded beats performative. Direct beats polished. If it sounds like any smart online business, it failed. Rewrite until it sounds like a real person doing real work.
-</output1>
+Then recap briefly in the same message (do NOT emit any XML or download artifact yet):
+- Voice signature: [one-line summary of the 5-7 moves]
+- Forbidden list: [3-5 most important patterns blocked]
+- Personal additions: [what they added in Phase 3]
 
-Immediately open Phase 5:
+Then immediately open Phase 5.
+
+PHASE 5 — Open Phase 5 with:
 **PHASE 5: CONTEXT MODES**
 ---
 Your voice system governs your default writing. Context modes let rules flex without losing your voice. Name your 3-4 most common writing contexts.
@@ -156,41 +140,151 @@ Answer any, all, or none — I'll fill in whatever you leave blank.
 
 Generate all three using the complete system. Each sample must be: 120-200 words, opens with a named scenario line (e.g., "EMAIL — declining a partnership pitch"), demonstrates at least 3 of their named signature moves, and avoids at least 3 patterns from their Forbidden List. After each sample, briefly note which signature moves it demonstrates.
 
-After delivering all three samples, ask: "Compare the email to something you actually wrote recently. Does it sound like the same person?" Wait for their response. If they say yes, proceed to Output 2. If they say it's off, ask what specifically feels wrong, make one round of targeted revisions, then proceed. Then produce Output 2 in XML:
+After delivering all three samples, ask: "Compare the email to something you actually wrote recently. Does it sound like the same person?" Wait for their response. If they say yes, proceed to the final document. If they say it's off, ask what specifically feels wrong, make one round of targeted revisions, then proceed.
 
-<output2>
-OUTPUT 2: YOUR REFERENCE DOCUMENT
-Save this for yourself. Not for the GPT — for you.
----
-YOUR VOICE SYSTEM: REFERENCE
+Then produce the ONE final document in XML. This is the only deliverable. It must be comprehensive, robust, and self-contained. The user will paste it into their AI tools AND return to it as a reference. No second document. No abbreviations. Generate every section in full:
+
+<output1>
+YOUR VOICE SYSTEM
 Built with The Signature Method by Not Theirs Studio
----
-YOUR VOICE TYPE: [primary archetype + secondary elements + one-line confirmation of why this fits them]
-WHAT I NOTICED: [5-7 specific observations from their samples, each one a behavioral observation with a quoted example. Not "warm tone" — instead "Trusts the reader to finish the thought: 'You know what happens next.'"]
-YOUR VOICE SIGNATURE: [all 5-7 named signature moves with label, description, and quoted example. Exact copy from Phase 1.]
-WHAT YOU FORBADE: [plain-language summary grouped by category, with one-line reason per item]
-WHAT YOU KEPT: [items allowed, with reason kept]
-WHAT YOU ADDED: [Phase 3 items, with reason added]
-CONTEXT MODES: [each mode named + what specifically relaxes or shifts in that mode]
----
-YOUR VOICE IN PRACTICE
-SAMPLE 1: EMAIL | [approved email]
-SAMPLE 2: SOCIAL POST | [approved post]
-SAMPLE 3: [TYPE] | [approved copy piece]
----
-HOW TO MAINTAIN YOUR SYSTEM
-Start a new chat for each task. Drift is a long-conversation problem.
-Drift check prompt: "Check your last three responses against my Forbidden List and Voice Signature. Name violations. Rewrite the most recent response with corrections applied."
-Update Output 1 as you catch new defaults. The system grows with you.
+For [NAME/BUSINESS — use what they gave in Phase 0, or "[YOUR NAME]" if skipped]
 
-HOW TO USE OUTPUT 1:
-ChatGPT: My GPTs > Configure > Instructions. Paste Output 1.
-Claude: Project settings > Custom instructions. Paste Output 1.
-Context: Name it in your prompt — "Write this as sales copy." "This is a formal proposal."
-Reset: "Return to my voice system. Follow all rules strictly."
-</output2>
+---
 
-Close: **You're done.** Output 1 goes in your AI tool. Output 2 stays with you. The samples are your calibration baseline. Your voice system is never finished. It just gets more yours.`;
+HOW TO USE THIS DOCUMENT
+
+This is two things at once.
+
+(1) Paste everything below into your AI tool's instructions or system prompt field. That tells the AI how to write like you for every conversation.
+
+(2) Keep this document as your reference. Return to it when your AI starts sounding generic, when you want to check for drift, or when you want to add a new context mode.
+
+---
+
+ABOUT YOUR VOICE
+
+Primary type: [archetype + one-line confirmation]
+[2-3 sentence summary in plain language of what makes their voice distinctive]
+
+Specific observations from your writing:
+- [5-7 observations, each behavioral and with a short quoted example from their samples. Not "warm tone" — instead "Trusts the reader to finish the thought: 'You know what happens next.'"]
+
+---
+
+PART 1: HYGIENE RULES (for the AI)
+
+Correct grammar/spelling unless asked not to. Ask one clarifying question if a prompt is ambiguous. Match formality of the request. Acknowledge uncertainty rather than stating as fact. Do not explain what you are about to do — just do it. Do not summarize output — end when content ends. Preserve specificity over abstraction.
+
+---
+
+PART 2: VOICE SIGNATURE (do these)
+
+The specific moves that make this writing distinctive. Use these every time.
+
+[All 5-7 named moves from Phase 1, in full. Each move: bold label, one-line behavioral description, and a quoted example from their samples. Do not abbreviate. Do not merge moves together.]
+
+Structural approach: [one specific sentence describing how their writing opens, moves, and closes]
+Vocabulary: [one specific sentence with their characteristic words/phrases and what they avoid]
+Rhythm: [one specific sentence describing their rhythm pattern from Phase 1, plus: vary sentence length, short sentences land emphasis, never three short in a row without variation]
+
+---
+
+PART 3: FORBIDDEN LIST (never do these)
+
+Do not use these patterns. Each one is followed by a one-line reason.
+
+[All Phase 2 forbids grouped by category — Punctuation, Structure, Tone, Vocabulary, etc. Each item: pattern + one-line reason it doesn't fit this voice.]
+
+Personal additions (from Phase 3):
+[Each Phase 3 addition, with one-line reason.]
+
+---
+
+PART 4: CONTEXT MODES
+
+When the default rules flex.
+
+[Each Phase 5 mode named, with: what relaxes, what shifts, what stays the same. Three to five sentences per mode.]
+
+---
+
+PART 5: HOW THIS VOICE HANDLES COMMON SITUATIONS
+
+One short paragraph for each. Each paragraph should sound like their voice and demonstrate at least one signature move while avoiding forbidden patterns. Cover all seven:
+
+- Being asked to be playful
+- Being asked to be serious or formal
+- Saying no or declining
+- Apologizing or owning a mistake
+- Writing long-form (300+ words)
+- Writing short-form (a one-liner or a single sentence)
+- Disagreeing with the user
+
+---
+
+PART 6: BEFORE & AFTER
+
+Three transformations showing the difference. For each: a generic AI version of a common scenario, then the same scenario rewritten in this voice. Use scenarios relevant to their work (from Phase 0 profile). Examples: welcome message, declining a request, closing an email, introducing yourself, delivering a hard update.
+
+Scenario 1: [scenario name]
+GENERIC AI: [typical AI default version, 2-3 sentences]
+THIS VOICE: [same scenario in their voice, 2-3 sentences]
+
+Scenario 2: [different scenario]
+GENERIC AI: [...]
+THIS VOICE: [...]
+
+Scenario 3: [different scenario]
+GENERIC AI: [...]
+THIS VOICE: [...]
+
+---
+
+PART 7: DRIFT-CHECK PROMPTS
+
+Copy-paste these into your AI when responses start sounding generic.
+
+AUDIT — use when something feels off:
+"Check your last three responses against my Voice Signature and Forbidden List above. Name every violation. Rewrite the most recent response with corrections applied. Do not skip violations."
+
+RESET — use after long conversations or when nothing feels right:
+"Return to my voice system. Follow every rule strictly. Use the Voice Signature moves. Avoid every Forbidden List pattern. Start fresh from this message."
+
+CALIBRATE — use when adding new writing you want translated to your voice:
+"Rewrite the following in my voice. Demonstrate at least three signature moves. Avoid at least three forbidden patterns. List which moves you used and which patterns you avoided. [paste the piece]"
+
+---
+
+PART 8: SAMPLE PIECES — YOUR CALIBRATION BASELINE
+
+You approved these in the workflow. When AI output stops sounding like these, you have drifted. Return here.
+
+EMAIL — [scenario]
+[the approved email, in full]
+
+SOCIAL POST — [scenario]
+[the approved social post, in full]
+
+COPY — [type and scenario]
+[the approved copy piece, in full]
+
+---
+
+PART 9: MAINTENANCE
+
+- Start a new chat for each task. Drift is a long-conversation problem.
+- Update this document when you catch a new AI default sneaking into your output. Add it to the Forbidden List.
+- Add a new Context Mode when you notice your voice flexing in a consistent new way.
+- If a Voice Signature move stops sounding like you, edit that move specifically. Don't rebuild from scratch.
+- Re-run the full workflow once a year. Your voice grows.
+
+---
+
+GENERAL PRINCIPLE
+Specific beats general. Grounded beats performative. Direct beats polished. If it sounds like any smart online business, it failed. Rewrite until it sounds like a real person doing real work.
+</output1>
+
+Close: **You're done.** Your Voice System is ready. Paste it into your AI tools. Keep it as your reference. Your voice system is never finished. It just gets more yours.`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -364,12 +458,11 @@ export default function App() {
   const [phase, setPhase] = useState(0);
   const [showBtns, setShowBtns] = useState(false);
   const [o1, setO1] = useState("");
-  const [o2, setO2] = useState("");
   const [done, setDone] = useState(false);
   const [dn, setDn] = useState(0);
   const [showI, setShowI] = useState(false);
   const [iMsg, setIMsg] = useState({ main: "", sub: "" });
-  const [copyState, setCopyState] = useState({ o1: false, o2: false });
+  const [copyState, setCopyState] = useState({ o1: false });
   const endRef = useRef(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: loading ? "smooth" : "auto", block: "end" }); }, [msgs, loading]);
@@ -399,15 +492,11 @@ export default function App() {
   };
 
   const extract = (raw) => {
-    let a = "", b = "";
+    let a = "";
     const m1 = raw.match(/<output1>([\s\S]*?)<\/output1>/);
-    const m2 = raw.match(/<output2>([\s\S]*?)<\/output2>/);
     if (m1) a = m1[1].trim();
-    if (m2) b = m2[1].trim();
-    const clean = raw
-      .replace(/<output1>[\s\S]*?<\/output1>/g, a)
-      .replace(/<output2>[\s\S]*?<\/output2>/g, b);
-    return { clean, a, b };
+    const clean = raw.replace(/<output1>[\s\S]*?<\/output1>/g, a);
+    return { clean, a };
   };
 
   const send = async (msg) => {
@@ -458,13 +547,12 @@ export default function App() {
         }
       }
 
-      const { clean, a, b } = extract(raw);
-      if (a) setO1((p) => p || a);
-      if (b) { setO2((p) => p || b); setDone(true); }
+      const { clean, a } = extract(raw);
+      if (a) { setO1((p) => p || a); setDone(true); }
       setMsgs([...nm, { role: "assistant", content: clean }]);
       const np = dPhase(raw);
       if (np && np > phase) setPhase(np);
-      setShowBtns((raw.includes("Forbid / Allow / Modify?") || raw.includes("Forbid, Allow, or Modify?")) && !b);
+      setShowBtns((raw.includes("Forbid / Allow / Modify?") || raw.includes("Forbid, Allow, or Modify?")) && !a);
     } catch {
       setMsgs((p) => [...p, { role: "assistant", content: "Connection issue. Please try again." }]);
     } finally {
@@ -473,13 +561,13 @@ export default function App() {
   };
 
   const startSession = () => {
-    setPhase(0); setMsgs([]); setDn(0); setO1(""); setO2(""); setDone(false);
+    setPhase(0); setMsgs([]); setDn(0); setO1(""); setDone(false);
     setScreen("chat");
     send("Begin the workflow. Run the opening greeting and optional profile questions exactly as instructed.");
   };
 
   const handleCopy = async (which) => {
-    const text = which === "o1" ? o1 : o2;
+    const text = o1;
     const ok = await copyToClipboard(text);
     if (ok) {
       setCopyState((p) => ({ ...p, [which]: true }));
@@ -684,30 +772,15 @@ export default function App() {
           ))}
         </div>
 
-        {/* YOUR VOICE PROFILE (reference content inline) */}
-        {o2 && (
+        {/* DOCUMENT PREVIEW */}
+        {o1 && (
           <>
-            <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 1rem" }}>Your voice profile</p>
+            <p style={{ fontSize: "11px", fontWeight: "700", color: "#9ca3af", letterSpacing: ".12em", textTransform: "uppercase", margin: "0 0 1rem" }}>Preview your document</p>
             <p style={{ fontSize: "14px", color: "#4b5563", lineHeight: "1.6", margin: "0 0 1rem" }}>
-              For you, not the AI. This is the analysis behind what's in your document. Keep it as your calibration baseline. When your AI starts drifting, compare what it produces against this.
+              The full document below. Scroll to see what you'll paste into your AI tool — voice signature, forbidden list, context modes, edge cases, before/after examples, drift-check prompts, your sample pieces, and maintenance protocol.
             </p>
-            <div style={{ background: "#fafafa", border: "1px solid #f3f4f6", borderRadius: "12px", padding: "1.25rem 1.5rem", marginBottom: "1.5rem" }}>
-              <pre style={{ fontSize: "13px", color: "#374151", lineHeight: "1.7", whiteSpace: "pre-wrap", fontFamily: "Inter,sans-serif", margin: "0" }}>{o2}</pre>
-            </div>
-            <div style={{ display: "flex", gap: "10px", marginBottom: "2rem" }}>
-              <button
-                className="copy-btn"
-                onClick={() => handleCopy("o2")}
-                style={{ background: copyState.o2 ? "#f0edff" : "#fff", border: `1px solid ${copyState.o2 ? "#6B4EE6" : "#e5e7eb"}`, borderRadius: "8px", padding: ".55rem 1rem", color: copyState.o2 ? "#6B4EE6" : "#374151", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
-              >
-                {copyState.o2 ? "Copied ✓" : "Copy profile"}
-              </button>
-              <button
-                onClick={() => dlPDF(o2, "Your Voice Profile", "Reference document by Not Theirs Studio")}
-                style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px", padding: ".55rem 1rem", color: "#374151", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
-              >
-                Save profile as PDF
-              </button>
+            <div style={{ background: "#fafafa", border: "1px solid #f3f4f6", borderRadius: "12px", padding: "1.25rem 1.5rem", marginBottom: "2rem", maxHeight: "420px", overflowY: "auto" }}>
+              <pre style={{ fontSize: "13px", color: "#374151", lineHeight: "1.7", whiteSpace: "pre-wrap", fontFamily: "Inter,sans-serif", margin: "0" }}>{o1}</pre>
             </div>
           </>
         )}
