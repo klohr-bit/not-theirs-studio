@@ -1,24 +1,34 @@
 import type { AppState, Contradiction, ContentState } from '@/types';
-import {
-  DECISION_MAP,
-  BASELINE_RULES,
-  ANCHOR_INSTRUCTIONS,
-  VISUAL_DIRECTION_INSTRUCTIONS,
-  getIllustrationLabel,
-} from '@/lib/decisions';
+import { DECISION_MAP } from '@/lib/decisions';
 
 export function buildSystemPrompt(): string {
-  return `You are a design strategist for the Kimberly Lohr Signature Method.
-You receive a complete set of design decisions that have already been translated
-into specific instructions. Your job is to write those instructions into a
-personal, owned Signature Prompt that feels specific to this person — not
-like a template, not like a style guide, like a voice.
+  return `You are a creative director briefing a designer on a specific piece of work.
+
+You will receive:
+— A set of design decisions this person made about how they work
+— The content of what they are making
+— The visual structures they are drawn to
+— Any tensions between their stated choices and their visual instincts
+
+Your job is to write a design brief that makes one specific thing instead of a generic thing.
+
+Do not write a style guide. Do not write a list of rules. Do not write prohibitions.
+
+Write art direction. The difference:
+
+Rules say: "Use type scale as the sole organizational system."
+Art direction says: "The word OPEN should behave like architecture, not typography. Its scale should feel slightly irresponsible. The viewer feels its weight before they read it."
+
+Rules say: "Do not use centered layouts."
+Art direction says: "The composition has unequal visual mass. Something heavy on one side creates pressure that the eye resolves by moving."
+
+Write the brief so a designer reading it knows exactly what this piece does — how it moves, what it feels like at a glance, what gets discovered slowly, what creates discomfort, what resolves it.
 
 Return ONLY raw valid JSON with no markdown, no code fences:
 {
-  "voice": "2-3 sentences in warm plain language describing their design voice. Specific to their choices. Sound like a person wrote it.",
-  "tokens": ["exactly 5 short plain-language design DNA phrases, specific not generic"],
-  "signature_prompt": "The complete Signature Prompt — all sections formatted exactly as specified in the user message."
+  "voice": "2-3 sentences describing this person's design instinct. Specific to their choices. Sounds like someone who knows them.",
+  "tokens": ["exactly 5 short phrases describing how they make — behavior not adjectives"],
+  "signature_prompt": "The complete design brief formatted exactly as specified in the user message."
 }`;
 }
 
@@ -59,6 +69,28 @@ export function getTypographicCharacterInstruction(
   return 'Type is a neutral carrier — clean, even, without material presence. The visual character comes from composition, color, and space.';
 }
 
+// ---------- helpers used by the user-prompt builder ----------
+
+function getAnchorDescription(anchor: ContentState['visualAnchor']): string {
+  const map: Record<NonNullable<ContentState['visualAnchor']>, string> = {
+    event_name: 'The event name. It stops the eye first and completely.',
+    date: 'The date. Large enough to be the visual anchor.',
+    organization: 'The organization. It leads because it is why people trust this.',
+    feeling: 'The feeling of the piece. Atmosphere stops the eye before information does.',
+  };
+  return anchor ? map[anchor] : 'the event name';
+}
+
+function getIllustrationDesc(style: string | null): string {
+  const map: Record<string, string> = {
+    A: 'bold and graphic. High contrast. Strong shapes. Screenprint energy. Shapes you could cut as a stencil.',
+    B: 'fine line. Observational not decorative. Something noticed rather than arranged. Partial forms. A hand mid-process. Not staged still life.',
+    C: 'loose and gestural. Energy of the first mark preserved. Nothing over-resolved.',
+    D: 'flat geometric. Pure shape. No texture. No organic edge.',
+  };
+  return style ? map[style] || map.B : map.B;
+}
+
 export function findHumanMoment(content: ContentState): string | null {
   if (content.closingStatement && content.closingStatement.trim().length > 0) {
     return content.closingStatement.trim();
@@ -73,24 +105,53 @@ export function findHumanMoment(content: ContentState): string | null {
   return personal ?? null;
 }
 
+// ---------- the user prompt ----------
+
 export function buildUserPrompt(
   state: AppState,
   instructions: string[],
   contradictions: Contradiction[]
 ): string {
   const lines: string[] = [];
+  const c = state.content;
 
-  lines.push(`Name: ${state.name}`);
-  lines.push(
-    `Making: ${state.content.eventName || '(unspecified)'} — ${state.purpose || '(unspecified)'}`
-  );
-  if (state.format) lines.push(`Format: ${state.format}`);
+  // CONTENT FIRST — read it before making any decisions
+  lines.push('== THE CONTENT ==');
+  if (c.eventName) lines.push(`Event: ${c.eventName}`);
+  if (c.hostedBy) lines.push(`By: ${c.hostedBy}`);
+  if (c.date) lines.push(`Date: ${c.date}`);
+  if (c.time) lines.push(`Time: ${c.time}`);
+  if (c.locationName) lines.push(`Location: ${c.locationName}`);
+  if (c.address) lines.push(`Address: ${c.address}`);
+  if (c.activities.length > 0) {
+    lines.push(`Activities: ${c.activities.join(', ')}`);
+  }
+  if (c.audience) lines.push(`Audience: ${c.audience}`);
+  if (c.contact) lines.push(`Contact: ${c.contact}`);
+  if (c.partners.length > 0) lines.push(`Partners: ${c.partners.join(', ')}`);
+  if (c.other) lines.push(`Also: ${c.other}`);
   lines.push('');
 
-  // ----- decision instructions -----
-  lines.push('== DECISION INSTRUCTIONS ==');
-  lines.push('Each instruction below comes directly from a choice this person made.');
-  lines.push('Use them exactly — do not interpret or soften them.');
+  // TENSION DETECTION — find what's inherently in conflict in this content
+  lines.push('== FIND THE TENSION ==');
+  lines.push('Before writing anything, read the content above and identify:');
+  lines.push("1. What two things in this content shouldn't comfortably coexist?");
+  lines.push('   (Scale difference. Emotional register difference. Institutional vs human. Formal vs intimate.)');
+  lines.push('2. What is the most specific and human moment in this content?');
+  lines.push('   (The line that sounds like a person, not an announcement.)');
+  lines.push('3. What will the AI default to if not directed?');
+  lines.push('   (Predict the most likely generic layout for this type of content.)');
+  lines.push('   Then build counter-decisions against that default.');
+  lines.push('');
+  const humanMoment = findHumanMoment(c);
+  lines.push(`The human moment is: "${humanMoment ?? 'the most personal line in the content'}"`);
+  lines.push(`The visual anchor is: ${getAnchorDescription(c.visualAnchor)}`);
+  lines.push('');
+
+  // PERSON'S DECISIONS
+  lines.push("== THIS PERSON'S DESIGN DECISIONS ==");
+  lines.push('Each line below comes directly from a choice they made.');
+  lines.push('Translate these into compositional behavior, not rules.');
   lines.push('');
   const fullInstructions = [...instructions];
   const physical = getPhysicalQualityInstruction(state.pairs);
@@ -103,141 +164,156 @@ export function buildUserPrompt(
   fullInstructions.forEach((inst, i) => lines.push(`${i + 1}. ${inst}`));
   lines.push('');
 
-  // ----- visual energy -----
+  // VISUAL IDENTITY
   if (state.territory.energyWords.length > 0) {
-    lines.push(`Visual energy: ${state.territory.energyWords.join(', ')}`);
+    lines.push(`Energy: ${state.territory.energyWords.join(', ')}`);
+    lines.push('Translate these as force and pressure, not mood adjectives.');
+    lines.push('"Quiet" means restraint under pressure, not absence of energy.');
+    lines.push('"Inevitable" means every element feels placed for the only reason it could be there.');
   }
+
   if (state.colors.provided && state.colors.hex.length > 0) {
     lines.push(
-      `Brand colors: ${state.colors.hex.join(', ')} — these are the only colors`
+      `Colors: ${state.colors.hex.join(', ')} — these are the only colors. Each one has a structural job.`
     );
   } else if (state.colors.temperature) {
-    lines.push(`Color temperature: ${state.colors.temperature}`);
+    const tempDesc: Record<NonNullable<AppState['colors']['temperature']>, string> = {
+      warm: 'warm — earthy, amber, clay, linen. The color of the material itself, not of warmth as a concept.',
+      neutral: 'neutral — near-black, warm white, one accent used once. Maximum contrast.',
+      cool: 'cool — deep slate, forest, steel. Considered and precise.',
+    };
+    lines.push(`Color territory: ${tempDesc[state.colors.temperature]}`);
   }
 
-  // ----- visual direction -----
+  // VISUAL DIRECTION
   if (state.territory.visualDirection) {
-    let dirLine =
-      VISUAL_DIRECTION_INSTRUCTIONS[state.territory.visualDirection] || '';
-    if (state.territory.visualDirection === 'C') {
-      dirLine = `Illustration — style: ${getIllustrationLabel(state.territory.illustrationStyle)}.`;
-    }
-    lines.push(`Visual direction: ${dirLine}`);
-  }
-  if (state.territory.userPhotos.length > 0) {
-    lines.push(
-      `User has provided ${state.territory.userPhotos.length} photo${state.territory.userPhotos.length > 1 ? 's' : ''} for integration.`
-    );
+    const dirDesc: Record<NonNullable<AppState['territory']['visualDirection']>, string> = {
+      A: 'Type only. The typographic arrangement IS the image. No illustration.',
+      B: 'User photography. Do not generate imagery. Hold space for their photos.',
+      C: `Illustration — ${getIllustrationDesc(state.territory.illustrationStyle)}`,
+      D: 'One graphic element. Abstract. Structural. Not representational.',
+      E: 'Mixed media. Combine type, photo, and graphic element with intent.',
+    };
+    lines.push(`Visual: ${dirDesc[state.territory.visualDirection]}`);
   }
 
-  // ----- visual anchor -----
-  if (state.content.visualAnchor) {
-    const inst = ANCHOR_INSTRUCTIONS[state.content.visualAnchor];
-    if (inst) lines.push(`Visual anchor: ${inst}`);
-  }
-
-  // ----- human moment -----
-  const humanMoment = findHumanMoment(state.content);
-  if (humanMoment) {
-    lines.push(
-      `Human moment: "${humanMoment}" — this is the most specific and personal line in the content. It is not a footnote. It is positioned with more intentional space around it than anything else.`
-    );
-  }
+  // (Physical quality + type character were folded into the decision
+  // instructions stream above. No separate section here.)
   lines.push('');
 
-  // ----- contradictions (context only — UI resolves them after generation) -----
+  // CONTRADICTIONS
   if (contradictions.length > 0) {
-    lines.push('== DETECTED TENSIONS (CONTEXT ONLY — DO NOT WRITE INTO SIGNATURE) ==');
-    lines.push(
-      'These tensions were detected between stated choices and visual preferences.'
-    );
-    lines.push(
-      'Do not include a REVEALED TENSIONS section in the signature_prompt. The user will resolve these in the UI after generation and the chosen resolutions will be appended to the DO section then.'
-    );
+    lines.push('== TENSIONS BETWEEN CHOICES AND INSTINCTS ==');
+    lines.push('These gaps between stated choices and visual preferences are information.');
+    lines.push('Build them into the brief as resolved decisions, not as warnings.');
     lines.push('');
-    contradictions.forEach((c) => {
-      lines.push(`Tension: ${c.tension}`);
-      lines.push(`Option A: ${c.optionA}`);
-      lines.push(`Option B: ${c.optionB}`);
+    contradictions.forEach((ct) => {
+      lines.push(`Gap: ${ct.tension}`);
+      lines.push(`Resolved as: ${ct.optionB}`);
       lines.push('');
     });
   }
 
-  // ----- specimen signals -----
+  // SPECIMEN SIGNALS
   if (state.specimenSelections.length > 0) {
-    lines.push('== VISUAL STRUCTURES THEY RESPOND TO ==');
+    lines.push('== STRUCTURES THEY RESPOND TO ==');
     state.specimenSelections.forEach((s) => {
-      lines.push(`— ${s.label} (${s.signal})`);
+      lines.push(`— ${s.label}`);
     });
     lines.push('');
   }
 
-  // ----- content brief (as input to the model) -----
+  // FORMAT
+  lines.push('== FORMAT ==');
+  const formatDesc: Record<string, string> = {
+    print: 'Printed and posted. Must read from 10 feet before earning detail up close.',
+    social: 'Social media. Must stop a thumb in 0.3 seconds. Reads at thumbnail scale first.',
+    both: 'Both print and social. Primary hierarchy works at thumbnail. Detail rewards close reading.',
+    email_digital: 'Email or digital. Reads on a screen at desk distance. Must survive auto-loaded preview rendering.',
+    projected: 'Projected on screen. Maximum contrast. No thin type. No fine detail.',
+  };
+  lines.push(formatDesc[state.format] || 'Print and social.');
+  lines.push('');
+
+  // OUTPUT FORMAT
+  lines.push('== WRITE THE SIGNATURE PROMPT IN THIS EXACT FORMAT ==');
+  lines.push('');
+  lines.push('== YOUR DESIGN SIGNATURE ==');
+  lines.push('');
+  lines.push('WHAT THIS PIECE DOES:');
+  lines.push('[2-3 sentences. Not what it looks like. What it does. How it moves.');
+  lines.push('What the eye does. What happens in the first half second.');
+  lines.push('What gets discovered. What creates tension. What resolves it.');
+  lines.push('Written as the premise of the design, not a description of it.]');
+  lines.push('');
+  lines.push('DOMINANCE HIERARCHY:');
+  lines.push('Dominant: [one element — what owns the page]');
+  lines.push('Subordinate: [what steps back and by how much]');
+  lines.push('Anchor: [the emotional landing point — the human moment]');
+  lines.push('Discovery: [what gets found slowly — the illustration, the detail, the quiet line]');
+  lines.push('Tension: [what two things are in uncomfortable proximity — the productive conflict]');
+  lines.push('');
+  lines.push('THUMBNAIL EXPERIENCE (0.5 seconds):');
+  lines.push('[One sentence. What is felt before anything is read.');
+  lines.push('Not what is seen. What is felt. Pressure, scale, mood, energy.]');
+  lines.push('');
+  lines.push('CLOSE EXPERIENCE (10 seconds):');
+  lines.push("[One sentence. What gets discovered that wasn't visible at first glance.");
+  lines.push('The detail. The specific line. The thing that makes it personal.]');
+  lines.push('');
+  lines.push('DEFAULT COLLAPSE — what the AI will try to do:');
+  lines.push('[Name the most likely generic behavior for this type of content.');
+  lines.push('Then name the specific counter-decision that prevents it.]');
+  lines.push('');
+  lines.push('ART DIRECTION:');
+  lines.push('[6-8 specific directional statements. Each describes behavior, not appearance.');
+  lines.push('Written as a creative director speaking to a designer.');
+  lines.push('Not rules. Decisions. Not "don\'t center" but "the composition has unequal');
+  lines.push('visual mass — something heavy on the left creates pressure the eye resolves');
+  lines.push('by moving right."');
+  lines.push('The last statement must be:');
+  lines.push('"The composition should feel like it was arranged by eye over several hours,');
+  lines.push('not generated from a system."]');
+  lines.push('');
+  lines.push('BASELINE (catastrophic failure modes only):');
+  lines.push('— No AI-generated photorealistic people unless real photography provided');
+  lines.push('— No gradient backgrounds');
+  lines.push('— No decorative sun, star, or sparkle elements');
+  lines.push('— No colored bottom banner strip');
+  lines.push('— No three-part tagline structure');
+  lines.push('— No texture filters or grain overlays to simulate physical quality');
+  lines.push('');
+  lines.push('EXPERT PASS:');
+  lines.push('[Five questions the AI asks itself after completing the design.');
+  lines.push("Each question targets a specific failure mode for this person's choices.");
+  lines.push('Question 1 names where the AI most likely flinched.');
+  lines.push(`Question 5 asks specifically about "${humanMoment ?? 'the most human line in the content'}"`);
+  lines.push('— whether it landed as the emotional conclusion or disappeared into the details.]');
+  lines.push('');
+  lines.push('Build every decision from this brief.');
+  lines.push('No defaults. No system behavior. No generated layouts.');
+  lines.push('');
   lines.push('== CONTENT BRIEF ==');
-  lines.push('Every item below must appear. Nothing omitted. Nothing added.');
-  const c = state.content;
+  lines.push('Every item below must appear. Nothing added. Nothing omitted.');
+  lines.push('');
+
+  // Content brief inside the output
   if (c.eventName) lines.push(`Event: ${c.eventName}`);
-  if (c.hostedBy) lines.push(`Hosted by: ${c.hostedBy}`);
+  if (c.hostedBy) lines.push(`By: ${c.hostedBy}`);
   if (c.date) lines.push(`Date: ${c.date}`);
   if (c.time) lines.push(`Time: ${c.time}`);
   if (c.locationName) lines.push(`Location: ${c.locationName}`);
   if (c.address) lines.push(`Address: ${c.address}`);
   if (c.activities.length > 0) {
-    lines.push('Activities:');
+    lines.push('');
     c.activities.forEach((a) => lines.push(`  ${a}`));
   }
   if (c.audience) lines.push(`Audience: ${c.audience}`);
   if (c.contact) lines.push(`Contact: ${c.contact}`);
   if (c.partners.length > 0) lines.push(`Partners: ${c.partners.join(', ')}`);
-  if (c.other) lines.push(`Also include: ${c.other}`);
-  lines.push('');
-
-  // ----- signature format (FINAL structure — no REVEALED TENSIONS, no QUALITY STANDARD) -----
-  lines.push('== SIGNATURE FORMAT ==');
-  lines.push('Write the signature_prompt field using exactly this structure, in this order, with no other sections:');
-  lines.push('');
-  lines.push('== YOUR DESIGN SIGNATURE ==');
-  lines.push('');
-  lines.push('CONTEXT:');
-  lines.push(
-    '[What this is for. Format. Content verification instruction. 2-4 sentences.]'
-  );
-  lines.push('');
-  lines.push('DO NOT:');
-  lines.push(
-    '[9-12 specific prohibitions. Each on its own line starting with —. Draw from the decision instructions above and the baseline rules below.]'
-  );
-  lines.push('');
-  lines.push('DO:');
-  lines.push(
-    '[9-12 specific requirements. Each on its own line starting with —. Draw from the decision instructions above.]'
-  );
-  lines.push('');
-  lines.push('VISUAL TERRITORY:');
-  lines.push(
-    '[Energy words translated to design behavior. Color direction with hex codes if provided, or temperature description if not. Surface quality. Illustration or visual direction specifics. Plain language paragraph form, not bullets.]'
-  );
-  lines.push('');
-  lines.push('EXPERT PASS:');
-  lines.push(
-    "[Exactly five numbered questions the AI asks itself after completing the design, before delivering it. Questions must be specific to this person's choices — not generic. Question 5 names the human moment by name (quote it directly).]"
-  );
-  lines.push('');
-  lines.push('Build every design decision from these rules.');
-  lines.push('No defaults. No assumptions. No compromises.');
-  lines.push('');
-  lines.push('== CONTENT BRIEF ==');
-  lines.push('[Every content item listed clearly, one per line.]');
+  if (c.other) lines.push(`  ${c.other}`);
   lines.push('');
   lines.push('Now design the flyer.');
-  lines.push('');
-  lines.push('Do not include a REVEALED TENSIONS section. Do not include a QUALITY STANDARD section. Do not invent additional sections. Do not output any markdown fences.');
-  lines.push('');
-
-  // ----- baseline rules (informational, the model folds these into DO NOT) -----
-  lines.push('== BASELINE RULES ==');
-  lines.push('These apply to every Signature regardless of choices and should appear in DO NOT:');
-  BASELINE_RULES.forEach((r) => lines.push(`— ${r}`));
 
   return lines.join('\n');
 }

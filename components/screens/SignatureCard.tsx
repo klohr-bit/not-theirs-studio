@@ -12,12 +12,13 @@ interface Props {
 
 /**
  * Inject the user's resolved tensions as new bullet lines at the end of the
- * DO: section of the Signature Prompt. Each resolution is the full chosen
- * option text, prefixed with — to match the existing DO formatting.
+ * ART DIRECTION: section of the Signature Prompt. Each resolution is the
+ * full chosen option text, prefixed with — to match the existing bullet
+ * formatting.
  *
  * The original signature_prompt is left untouched — this returns a new
- * string with the resolutions inserted. If the DO: section can't be located
- * (model didn't follow format), the resolutions are appended as a fallback.
+ * string with the resolutions inserted. If the section can't be located
+ * (model deviated from format), the resolutions are appended as a fallback.
  */
 function injectResolutions(prompt: string, resolutions: ResolvedContradiction[]): string {
   const resolved = resolutions.filter((r) => r.resolved === 'A' || r.resolved === 'B');
@@ -27,14 +28,23 @@ function injectResolutions(prompt: string, resolutions: ResolvedContradiction[])
     .map((r) => `— ${r.resolved === 'A' ? r.optionA : r.optionB}`)
     .join('\n');
 
-  // Find the DO: section header, then the boundary that ends it.
-  const doStart = prompt.indexOf('DO:');
-  if (doStart === -1) {
+  // Prefer ART DIRECTION (current format); fall back to DO: (legacy) if needed.
+  const sectionHeader = prompt.indexOf('ART DIRECTION:') !== -1
+    ? 'ART DIRECTION:'
+    : prompt.indexOf('DO:') !== -1
+      ? 'DO:'
+      : null;
+
+  if (!sectionHeader) {
     return prompt + '\n\nRESOLVED TENSIONS:\n' + newBullets;
   }
-  const afterHeader = doStart + 'DO:'.length;
-  // The next section is one of these headers preceded by a blank line.
-  const endRe = /\n\s*\n(VISUAL TERRITORY:|EXPERT PASS:|Build every|== CONTENT BRIEF)/i;
+
+  const start = prompt.indexOf(sectionHeader);
+  const afterHeader = start + sectionHeader.length;
+  // The next section is any ALLCAPS:-style header on its own line, preceded
+  // by a blank line, or the "Build every decision" closer / CONTENT BRIEF
+  // header.
+  const endRe = /\n\s*\n(BASELINE|EXPERT PASS:|VISUAL TERRITORY:|Build every|== CONTENT BRIEF)/i;
   const sliceAfter = prompt.slice(afterHeader);
   const m = sliceAfter.match(endRe);
   const endIdx = m ? afterHeader + (m.index ?? 0) : prompt.length;
