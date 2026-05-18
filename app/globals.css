@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 15 15 14;          /* #0F0F0E */
+  --surface: 22 22 20;      /* slightly lighter for cards */
+  --ink: 242 237 228;       /* #F2EDE4 */
+  --ink-dim: 156 144 128;   /* #9C9080 */
+  --accent: 184 115 51;     /* #B87333 — terracotta */
+  --rule: 242 237 228;      /* used as rgb at alpha 0.12 in --rule-color */
+}
+
+html, body {
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+* { box-sizing: border-box; }
+
+/* ---------- semantic primitives ---------- */
+
+.h-display {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: rgb(var(--ink));
+}
+
+.h-section {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: rgb(var(--ink));
+}
+
+.label-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-dim));
+  font-weight: 500;
+}
+
+.label-section {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-dim));
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.lede {
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgb(var(--ink-dim));
+  max-width: 60ch;
+}
+
+.body-text {
+  color: rgb(var(--ink));
+  line-height: 1.6;
+}
+
+.muted { color: rgb(var(--ink-dim)); }
+
+.rule-h {
+  height: 0;
+  border-top: 0.5px solid rgba(242, 237, 228, 0.12);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+  border: 0.5px solid transparent;
+  cursor: pointer;
+}
+
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-primary {
+  background: rgb(var(--ink));
+  color: rgb(var(--bg));
+}
+
+.btn-primary:hover:not(:disabled) { background: rgb(var(--accent)); color: rgb(var(--ink)); }
+
+.btn-ghost {
+  background: transparent;
+  color: rgb(var(--ink));
+  border-color: rgba(242, 237, 228, 0.18);
+}
+
+.btn-ghost:hover:not(:disabled) { border-color: rgba(242, 237, 228, 0.4); }
+
+.btn-text {
+  background: transparent;
+  color: rgb(var(--ink-dim));
+  padding: 6px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.btn-text:hover { color: rgb(var(--ink)); }
+
+/* ---------- inputs ---------- */
+
+.field {
+  width: 100%;
+  background: rgba(242, 237, 228, 0.04);
+  color: rgb(var(--ink));
+  border: 0.5px solid rgba(242, 237, 228, 0.18);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.field:focus {
+  border-color: rgba(242, 237, 228, 0.5);
+  background: rgba(242, 237, 228, 0.06);
+}
+
+.field::placeholder { color: rgba(242, 237, 228, 0.35); }
+
+textarea.field { min-height: 96px; resize: vertical; line-height: 1.5; }
+
+/* ---------- chips ---------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 0.5px solid rgba(242, 237, 228, 0.18);
+  background: transparent;
+  color: rgb(var(--ink));
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.chip:hover { border-color: rgba(242, 237, 228, 0.4); }
+
+.chip-selected {
+  background: rgb(var(--ink));
+  color: rgb(var(--bg));
+  border-color: rgb(var(--ink));
+}
+
+.chip-disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------- cards ---------- */
+
+.card {
+  background: rgba(242, 237, 228, 0.03);
+  border: 0.5px solid rgba(242, 237, 228, 0.12);
+  border-radius: 12px;
+  padding: 22px;
+}
+
+/* ---------- selectable tile (for galleries and specimens) ---------- */
+
+.tile {
+  display: block;
+  padding: 0;
+  background: rgb(var(--surface));
+  border: 0.5px solid rgba(242, 237, 228, 0.12);
+  border-radius: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  text-align: left;
+}
+
+.tile:hover { border-color: rgba(242, 237, 228, 0.32); }
+
+.tile-selected {
+  border-color: rgb(var(--accent));
+  box-shadow: inset 0 0 0 1px rgb(var(--accent));
+}
+
+/* ---------- progress dots (journey indicator) ---------- */
+
+.journey-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(242, 237, 228, 0.16);
+  transition: background-color 200ms ease;
+}
+
+.journey-dot-current { background: rgb(var(--accent)); }
+.journey-dot-done { background: rgba(242, 237, 228, 0.5); }
