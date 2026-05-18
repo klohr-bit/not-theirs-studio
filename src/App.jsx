@@ -733,7 +733,11 @@ export default function App() {
         body: JSON.stringify({ name, choices }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data?.error || 'Generation failed')
+      if (!res.ok) {
+        const base = data?.error || 'Generation failed'
+        const detail = data?.detail ? ` — ${typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)}` : ''
+        throw new Error(base + detail)
+      }
       const payload = { name, choices, signature: data, created: Date.now() }
       save(payload)
       setSavedState(payload)
