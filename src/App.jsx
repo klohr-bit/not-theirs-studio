@@ -171,6 +171,49 @@ const QUESTIONS = [
 
 const STORAGE_KEY = 'signature_method_v1'
 
+const REFERENCE_ROWS = [
+  {
+    id: 1,
+    label: 'How finished should it feel?',
+    images: [
+      { id: 'r1a', url: 'https://picsum.photos/seed/craft-a/600/600' },
+      { id: 'r1b', url: 'https://picsum.photos/seed/craft-b/600/600' },
+      { id: 'r1c', url: 'https://picsum.photos/seed/craft-c/600/600' },
+    ],
+  },
+  {
+    id: 2,
+    label: 'What world should it belong to?',
+    images: [
+      { id: 'r2a', url: 'https://picsum.photos/seed/world-a/600/600' },
+      { id: 'r2b', url: 'https://picsum.photos/seed/world-b/600/600' },
+      { id: 'r2c', url: 'https://picsum.photos/seed/world-c/600/600' },
+    ],
+  },
+  {
+    id: 3,
+    label: 'What should it feel like it was made with?',
+    images: [
+      { id: 'r3a', url: 'https://picsum.photos/seed/make-a/600/600' },
+      { id: 'r3b', url: 'https://picsum.photos/seed/make-b/600/600' },
+      { id: 'r3c', url: 'https://picsum.photos/seed/make-c/600/600' },
+    ],
+  },
+]
+
+function extractQualityStandard(prompt) {
+  if (typeof prompt !== 'string') return null
+  const idx = prompt.indexOf('QUALITY STANDARD:')
+  if (idx === -1) return null
+  const after = prompt.slice(idx + 'QUALITY STANDARD:'.length)
+  const lines = after
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l.startsWith('—'))
+    .map(l => l.replace(/^—\s*/, '').trim())
+  return lines.length >= 3 ? lines.slice(0, 3) : null
+}
+
 // ---------- localStorage helpers -------------------------------------------
 
 function loadSaved() {
@@ -199,6 +242,9 @@ function PageHeader({ stage, index, total }) {
   if (stage === 'questions') {
     subtitle = `Question ${index + 1}`
     count = `${index + 1} of ${total}`
+  } else if (stage === 'references') {
+    subtitle = 'Reference images · optional'
+    count = 'Bonus step'
   } else if (stage === 'loading') {
     subtitle = 'Building Signature'
     count = 'Almost there'
@@ -487,7 +533,61 @@ function Question({ index, total, data, selected, onSelect, onNext, onBack }) {
           ← Back
         </button>
         <button type="button" onClick={onNext} disabled={!selected} className="btn btn--primary">
-          {index === total - 1 ? 'Build my Signature' : 'Next'} <span className="btn__arrow">→</span>
+          {index === total - 1 ? 'Continue' : 'Next'} <span className="btn__arrow">→</span>
+        </button>
+      </div>
+    </section>
+  )
+}
+
+// ---------- references -----------------------------------------------------
+
+function References({ selections, onSelect, onSubmit, onSkip }) {
+  return (
+    <section className="screen screen--references">
+      <p className="eyebrow">
+        STEP 8 <span className="eyebrow__dot">·</span> OPTIONAL <span className="eyebrow__dot">·</span> REFERENCE IMAGES
+      </p>
+
+      <h1 className="display">
+        One last thing &mdash; <em>optional</em> but worth it.
+      </h1>
+
+      <p className="lede">
+        Show us what good looks like to you. Pick one from each row &mdash; or skip entirely.
+        This raises the quality ceiling of your Signature.
+      </p>
+
+      <div className="refs">
+        {REFERENCE_ROWS.map((row) => (
+          <div key={row.id} className="refs__row">
+            <p className="section-heading">{row.label}</p>
+            <div className="refs__tiles">
+              {row.images.map((img) => {
+                const isSelected = selections[row.id] === img.url
+                return (
+                  <button
+                    key={img.id}
+                    type="button"
+                    onClick={() => onSelect(row.id, isSelected ? null : img.url)}
+                    aria-pressed={isSelected}
+                    className={'refs__tile ' + (isSelected ? 'refs__tile--selected' : '')}
+                  >
+                    <img src={img.url} alt="" loading="lazy" />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="refs__footer">
+        <button type="button" className="btn btn--primary" onClick={onSubmit}>
+          Build my Signature <span className="btn__arrow">&rarr;</span>
+        </button>
+        <button type="button" className="refs__skip" onClick={onSkip}>
+          Skip this step &rarr;
         </button>
       </div>
     </section>
@@ -496,16 +596,18 @@ function Question({ index, total, data, selected, onSelect, onNext, onBack }) {
 
 // ---------- loading --------------------------------------------------------
 
-function Loading() {
+function Loading({ withReferences }) {
   return (
     <section className="screen screen--loading">
       <div className="loading__inner">
         <h2 className="loading__head">
           Building your Signature. <br />
-          <em>Stripping defaults. Injecting you.</em>
+          <em>Stripping defaults. Injecting you.{withReferences ? ' Setting the quality bar.' : ''}</em>
         </h2>
         <p className="loading__sub">
-          Reading your seven choices and writing the prompt that replaces AI defaults with how you see.
+          {withReferences
+            ? 'Reading your seven choices and your reference images, then writing the prompt that replaces AI defaults with how you see.'
+            : 'Reading your seven choices and writing the prompt that replaces AI defaults with how you see.'}
         </p>
         <div className="loading__bar" />
       </div>
@@ -515,7 +617,7 @@ function Loading() {
 
 // ---------- signature card -------------------------------------------------
 
-function SignatureCard({ name, signature, onRestart }) {
+function SignatureCard({ name, signature, qualityStandard, onRestart }) {
   const [copied, setCopied] = useState(false)
   const promptRef = useRef(null)
 
@@ -580,6 +682,17 @@ function SignatureCard({ name, signature, onRestart }) {
           {signature.tokens.map((t, i) => <li key={i}>{t}</li>)}
         </ul>
       </div>
+
+      {qualityStandard && qualityStandard.length === 3 && (
+        <div className="sig__quality-block">
+          <p className="section-heading">Your quality standard</p>
+          <ul className="quality-list">
+            {qualityStandard.map((line, i) => (
+              <li key={i}><span className="quality-list__dash">&mdash;</span>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="sig__prompt-panel">
         <div className="sig__prompt-head">
@@ -679,6 +792,8 @@ export default function App() {
   )
   const [index, setIndex] = useState(0)
   const [signature, setSignature] = useState(initialSaved?.signature || null)
+  const [qualityStandard, setQualityStandard] = useState(initialSaved?.qualityStandard || null)
+  const [references, setReferences] = useState({ 1: null, 2: null, 3: null })
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -689,6 +804,7 @@ export default function App() {
     setName(n)
     setChoices(Array(QUESTIONS.length).fill(null))
     setIndex(0)
+    setReferences({ 1: null, 2: null, 3: null })
     setError(null)
     setStage('questions')
   }
@@ -699,7 +815,9 @@ export default function App() {
     setName('')
     setChoices(Array(QUESTIONS.length).fill(null))
     setIndex(0)
+    setReferences({ 1: null, 2: null, 3: null })
     setSignature(null)
+    setQualityStandard(null)
     setError(null)
     setStage('welcome')
   }
@@ -719,18 +837,29 @@ export default function App() {
     })
   }
 
-  const next = async () => {
+  const next = () => {
     if (index < QUESTIONS.length - 1) {
       setIndex(index + 1)
       return
     }
+    setStage('references')
+  }
+
+  const back = () => { if (index > 0) setIndex(index - 1) }
+
+  const generate = async (includeReferences) => {
     setStage('loading')
     setError(null)
+    const refPayload = includeReferences
+      ? [1, 2, 3]
+          .filter((row) => references[row])
+          .map((row) => ({ row, url: references[row] }))
+      : []
     try {
       const res = await fetch('/api/signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, choices }),
+        body: JSON.stringify({ name, choices, references: refPayload }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -738,18 +867,33 @@ export default function App() {
         const detail = data?.detail ? ` — ${typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)}` : ''
         throw new Error(base + detail)
       }
-      const payload = { name, choices, signature: data, created: Date.now() }
+      const usedRefs = data?._meta?.usedReferences > 0
+      const qs = usedRefs ? extractQualityStandard(data.signature_prompt) : null
+      const payload = {
+        name,
+        choices,
+        references: refPayload,
+        signature: { voice: data.voice, tokens: data.tokens, signature_prompt: data.signature_prompt },
+        qualityStandard: qs,
+        created: Date.now(),
+      }
       save(payload)
       setSavedState(payload)
-      setSignature(data)
+      setSignature(payload.signature)
+      setQualityStandard(qs)
       setStage('signature')
     } catch (err) {
       setError(err.message || String(err))
-      setStage('questions')
+      setStage('references')
     }
   }
 
-  const back = () => { if (index > 0) setIndex(index - 1) }
+  const submitWithReferences = () => generate(true)
+  const skipReferences = () => generate(false)
+
+  const selectReference = (row, url) => {
+    setReferences((prev) => ({ ...prev, [row]: url }))
+  }
 
   return (
     <main className="app">
@@ -782,10 +926,26 @@ export default function App() {
         />
       )}
 
-      {stage === 'loading' && <Loading />}
+      {stage === 'references' && (
+        <References
+          selections={references}
+          onSelect={selectReference}
+          onSubmit={submitWithReferences}
+          onSkip={skipReferences}
+        />
+      )}
+
+      {stage === 'loading' && (
+        <Loading withReferences={Object.values(references).some(Boolean)} />
+      )}
 
       {stage === 'signature' && signature && (
-        <SignatureCard name={name} signature={signature} onRestart={restart} />
+        <SignatureCard
+          name={name}
+          signature={signature}
+          qualityStandard={qualityStandard}
+          onRestart={restart}
+        />
       )}
     </main>
   )

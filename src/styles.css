@@ -540,6 +540,102 @@ input  { font: inherit; color: inherit; }
   gap: 16px;
 }
 
+/* ---------- references ---------- */
+
+.refs {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  margin-bottom: 40px;
+}
+
+.refs__row .section-heading { margin-bottom: 14px; }
+
+.refs__tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 720px) {
+  .refs__tiles { gap: 10px; }
+}
+
+.refs__tile {
+  display: block;
+  padding: 0;
+  background: var(--surface);
+  border: 2px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.refs__tile:hover { border-color: var(--rule-strong); }
+
+.refs__tile--selected {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 4px var(--purple-tint-strong);
+}
+
+.refs__tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.refs__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+}
+
+.refs__skip {
+  font-size: 13px;
+  color: var(--ink-faint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+}
+
+.refs__skip:hover { color: var(--ink); }
+
+/* ---------- quality standard (signature card) ---------- */
+
+.sig__quality-block {
+  margin-bottom: 36px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.quality-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quality-list li {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  padding-left: 26px;
+  position: relative;
+}
+
+.quality-list__dash {
+  position: absolute;
+  left: 0;
+  color: var(--purple);
+}
+
 /* ---------- loading ---------- */
 
 .screen--loading { padding: 64px 0 80px; }
