@@ -19,8 +19,25 @@ const QUESTIONS = [
       'You read structure through type. Scale and weight do the organizing — no color blocks needed.',
     analysisB:
       'You read structure through color and space. Visual zones land before any word does.',
-    specimenA: null,
-    specimenB: null,
+    specimenA: `<div style="background:#FAFAF6;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 24px;text-align:center">
+<div style="font-family:Georgia,serif;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#9C9080;margin-bottom:14px">a curated gathering</div>
+<div style="font-family:Georgia,serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9C9080;margin-bottom:3px">The</div>
+<div style="font-family:Georgia,serif;font-size:38px;font-weight:400;line-height:1;color:#1A1918">Maker's</div>
+<div style="font-family:Georgia,serif;font-size:38px;font-weight:400;line-height:1;color:#1A1918;margin-bottom:14px">Market</div>
+<div style="width:20px;height:1px;background:#C8C2B6;margin-bottom:14px"></div>
+<div style="font-family:Georgia,serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9C9080;line-height:1.9">Saturday, June 20<br>9am · Dillsburg</div>
+</div>`,
+    specimenB: `<div style="min-height:320px;display:flex;flex-direction:column">
+<div style="background:#1C3829;padding:26px 20px 22px">
+<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:9px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:#5C8870;margin-bottom:9px">Dillsburg Town Square</div>
+<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;font-weight:700;line-height:.92;color:#F4EFE4;letter-spacing:-.01em">THE<br>MAKER'S<br>MARKET</div>
+</div>
+<div style="height:3px;background:#B87333"></div>
+<div style="background:#F4EFE4;padding:16px 20px;flex:1">
+<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;color:#2A2018;margin-bottom:4px">Saturday, June 20th</div>
+<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;color:#6B5E4E">9am until 3pm</div>
+</div>
+</div>`,
   },
   {
     id: 2,
