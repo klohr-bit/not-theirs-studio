@@ -28,6 +28,12 @@ export default function App() {
     setHydrated(true);
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [state.currentScreen]);
+
   const screen = useMemo(() => {
     if (!hydrated) return null;
     switch (state.currentScreen) {

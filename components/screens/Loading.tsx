@@ -13,6 +13,7 @@ export function Loading({ state, setState }: Props) {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [messageIndex, setMessageIndex] = useState(0);
+  const [retryToken, setRetryToken] = useState(0);
   const startedRef = useRef(false);
 
   const messages = [
@@ -40,6 +41,8 @@ export function Loading({ state, setState }: Props) {
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _ = retryToken; // tie this effect to retryToken so retry re-fires
 
     (async () => {
       try {
@@ -80,12 +83,13 @@ export function Loading({ state, setState }: Props) {
         setError(err instanceof Error ? err.message : String(err));
       }
     })();
-  }, [state, setState]);
+  }, [state, setState, retryToken]);
 
   const retry = () => {
     startedRef.current = false;
     setError(null);
     setProgress(0);
+    setRetryToken((n) => n + 1);
   };
 
   return (
