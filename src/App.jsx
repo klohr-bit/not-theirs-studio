@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 // ---------------------------------------------------------------------------
-// The Signature Method — Kimberly Lohr
+// The Signature Method — Kimberly Lohr · Not Theirs Studio
 // 7-question reaction test → personal design Signature
 // ---------------------------------------------------------------------------
 // Specimens live in QUESTIONS[i].specimenA / specimenB as raw HTML strings.
-// They are NOT authored here — paste them in one pair at a time. Each
-// specimen renders inside an iframe (srcDoc) so its CSS stays isolated from
-// the app chrome.
+// They are pasted in pair-by-pair. Each renders in an iframe (srcDoc) so the
+// specimen CSS stays isolated from the app chrome.
 // ---------------------------------------------------------------------------
 
 const QUESTIONS = [
@@ -15,6 +14,7 @@ const QUESTIONS = [
     id: 1,
     question: 'What do you notice first?',
     axis: 'Type hierarchy vs color zone hierarchy',
+    sub: 'Same flyer, two ways to organize what you see. Pick the one your eye lands on without arguing.',
     analysisA:
       'You read structure through type. Scale and weight do the organizing — no color blocks needed.',
     analysisB:
@@ -43,10 +43,9 @@ const QUESTIONS = [
     id: 2,
     question: 'One person or a room?',
     axis: 'Intimate vs broadcast register',
-    analysisA:
-      'You speak to one person at conversational distance. Quiet, personal, close.',
-    analysisB:
-      'You command a room. Bold, declarative, readable from across the street.',
+    sub: 'Same announcement, two volumes. Which one would you make?',
+    analysisA: 'You speak to one person at conversational distance. Quiet, personal, close.',
+    analysisB: 'You command a room. Bold, declarative, readable from across the street.',
     specimenA: null,
     specimenB: null,
   },
@@ -54,10 +53,9 @@ const QUESTIONS = [
     id: 3,
     question: 'Everything or only what matters?',
     axis: 'Reduction vs accumulation',
-    analysisA:
-      'You strip until only the essential remains. Negative space is doing work.',
-    analysisB:
-      'You give the full picture. Detail and information are generosity, not clutter.',
+    sub: 'One strips to the essential, one gives you the full picture. Both are correct, for different people.',
+    analysisA: 'You strip until only the essential remains. Negative space is doing work.',
+    analysisB: 'You give the full picture. Detail and information are generosity, not clutter.',
     specimenA: null,
     specimenB: null,
   },
@@ -65,10 +63,9 @@ const QUESTIONS = [
     id: 4,
     question: 'Understand or feel first?',
     axis: 'Legibility vs atmosphere',
-    analysisA:
-      'You want instant comprehension. Maximum contrast, no mood in the way.',
-    analysisB:
-      'You lead with feeling. The mood arrives before the facts and sets the terms.',
+    sub: 'Which arrives at the reader first — the facts, or the mood?',
+    analysisA: 'You want instant comprehension. Maximum contrast, no mood in the way.',
+    analysisB: 'You lead with feeling. The mood arrives before the facts and sets the terms.',
     specimenA: null,
     specimenB: null,
   },
@@ -76,21 +73,19 @@ const QUESTIONS = [
     id: 5,
     question: 'Rules or gut?',
     axis: 'System vs expression',
-    analysisA:
-      'You trust the grid. Consistent spacing and structural logic carry the work.',
-    analysisB:
-      'You trust your hand. Elements land by feel — energy first, formula second.',
+    sub: 'Same content, organized by grid or organized by feel. Which one is yours?',
+    analysisA: 'You trust the grid. Consistent spacing and structural logic carry the work.',
+    analysisB: 'You trust your hand. Elements land by feel — energy first, formula second.',
     specimenA: null,
     specimenB: null,
   },
   {
     id: 6,
-    question: 'One thing dominates or balanced?',
+    question: 'One thing dominates, or balanced?',
     axis: 'Scale drama vs proportion',
-    analysisA:
-      'You let one element take the whole room. Everything else steps back on purpose.',
-    analysisB:
-      'You compose in balance. Nothing overwhelms — the whole thing resolves together.',
+    sub: 'Pick the composition that feels right — one element loud, or everything in conversation.',
+    analysisA: 'You let one element take the whole room. Everything else steps back on purpose.',
+    analysisB: 'You compose in balance. Nothing overwhelms — the whole thing resolves together.',
     specimenA: null,
     specimenB: null,
   },
@@ -98,10 +93,9 @@ const QUESTIONS = [
     id: 7,
     question: 'Computer or hands?',
     axis: 'Screen-born vs physically rooted',
-    analysisA:
-      'You work in digital precision. Flat, exact, pixel-true, no material reference.',
-    analysisB:
-      'You leave a human trace. Tactile, handmade, the analog world is in the work.',
+    sub: 'One feels born inside the file. One feels like it passed through someone’s hands.',
+    analysisA: 'You work in digital precision. Flat, exact, pixel-true, no material reference.',
+    analysisB: 'You leave a human trace. Tactile, handmade, the analog world is in the work.',
     specimenA: null,
     specimenB: null,
   },
@@ -109,7 +103,7 @@ const QUESTIONS = [
 
 const STORAGE_KEY = 'signature_method_v1'
 
-// ---------- helpers ---------------------------------------------------------
+// ---------- localStorage helpers -------------------------------------------
 
 function loadSaved() {
   try {
@@ -118,31 +112,66 @@ function loadSaved() {
     const parsed = JSON.parse(raw)
     if (!parsed?.signature || !parsed?.name) return null
     return parsed
-  } catch {
-    return null
-  }
+  } catch { return null }
 }
 
 function save(payload) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-  } catch {
-    // ignore quota / disabled storage
-  }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)) } catch {}
 }
 
 function clearSaved() {
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch {
-    // ignore
-  }
+  try { localStorage.removeItem(STORAGE_KEY) } catch {}
 }
 
-// ---------- Specimen --------------------------------------------------------
+// ---------- shared header --------------------------------------------------
+
+function PageHeader({ stage, index, total }) {
+  let subtitle = 'Getting started'
+  let count = `0 of ${total}`
+  if (stage === 'questions') {
+    subtitle = `Question ${index + 1}`
+    count = `${index + 1} of ${total}`
+  } else if (stage === 'loading') {
+    subtitle = 'Building Signature'
+    count = 'Almost there'
+  } else if (stage === 'signature') {
+    subtitle = 'Your Signature'
+    count = 'Complete'
+  } else if (stage === 'returning') {
+    subtitle = 'Welcome back'
+    count = 'Saved'
+  }
+
+  const filledThrough =
+    stage === 'welcome' || stage === 'returning' ? -1 :
+    stage === 'questions' ? index :
+    total - 1
+
+  return (
+    <header className="pageheader">
+      <div className="pageheader__brand">
+        <span className="pageheader__wordmark">Not Theirs Studio</span>
+        <span className="pageheader__subtitle">{subtitle}</span>
+      </div>
+      <div className="pageheader__progress" aria-hidden="true">
+        {Array.from({ length: total }).map((_, i) => (
+          <span
+            key={i}
+            className={
+              'pageheader__segment ' +
+              (i <= filledThrough ? 'pageheader__segment--filled' : '')
+            }
+          />
+        ))}
+      </div>
+      <div className="pageheader__count">{count}</div>
+    </header>
+  )
+}
+
+// ---------- specimen -------------------------------------------------------
 
 function Specimen({ html, label, selected, onSelect }) {
-  const placeholder = !html
   const srcDoc = html
     ? `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:#fff;font-family:Inter,system-ui,sans-serif;}</style></head><body>${html}</body></html>`
     : null
@@ -155,97 +184,213 @@ function Specimen({ html, label, selected, onSelect }) {
       className={`specimen ${selected ? 'specimen--selected' : ''}`}
     >
       <div className="specimen__frame">
-        {placeholder ? (
-          <div className="specimen__placeholder">
-            Specimen {label} — awaiting paste
-          </div>
+        {html ? (
+          <iframe title={`Specimen ${label}`} srcDoc={srcDoc} sandbox="" scrolling="no" />
         ) : (
-          <iframe
-            title={`Specimen ${label}`}
-            srcDoc={srcDoc}
-            sandbox=""
-            scrolling="no"
-          />
+          <div className="specimen__placeholder">Specimen {label} — awaiting paste</div>
         )}
       </div>
-      <div className="specimen__label">
+      <div className="specimen__foot">
         <span className="specimen__letter">{label}</span>
+        <span className="specimen__chip">Selected</span>
       </div>
     </button>
   )
 }
 
-// ---------- Screens ---------------------------------------------------------
+// ---------- welcome --------------------------------------------------------
 
-function Welcome({ onStart }) {
+function Welcome({ onStart, saved, onResume, onDiscardSaved }) {
   const [name, setName] = useState('')
   const trimmed = name.trim()
 
   return (
-    <section className="screen screen--welcome">
-      <p className="eyebrow">The Signature Method</p>
-      <h1 className="display">
-        Seven choices. <br />
-        One design voice that is yours.
-      </h1>
-      <p className="lede">
-        A short reaction test. You will choose between two pieces of the same
-        thing — a flyer for a Saturday market in Dillsburg — seven times. From
-        your choices, we write your Signature: the prompt that replaces AI
-        design defaults with the way you actually see.
-      </p>
+    <section className="screen screen--welcome two-col">
+      <div>
+        <p className="eyebrow">
+          THE SIGNATURE METHOD
+          <span className="eyebrow__dot">·</span>
+          NOT THEIRS STUDIO
+          <span className="eyebrow__dot">·</span>
+          VOLUME 2: DESIGN
+        </p>
 
-      <form
-        className="welcome__form"
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (trimmed) onStart(trimmed)
-        }}
-      >
-        <label htmlFor="name" className="welcome__label">
-          Your name
-        </label>
-        <input
-          id="name"
-          type="text"
-          autoComplete="given-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Kimberly"
-          className="welcome__input"
-        />
-        <button
-          type="submit"
-          disabled={!trimmed}
-          className="btn btn--primary"
+        <span className="chip">7 reaction pairs · same flyer, 14 ways</span>
+
+        <h1 className="display">
+          Seven choices. <br />
+          One design voice that is <em>yours</em>.
+        </h1>
+
+        <p className="lede">
+          Most AI design prompts inherit the model&rsquo;s defaults: editorial serif, sparkle
+          icons, color-blocked sections, the same six moves. The Signature Method runs you
+          through seven reaction pairs &mdash; you choose without thinking &mdash; and from those
+          choices writes the prompt that replaces those defaults with how you actually see.
+        </p>
+
+        <p className="section-heading">How it works</p>
+        <ol className="steps">
+          <li className="step">
+            <span className="step__num">1</span>
+            <div>
+              <div className="step__title">Choose your name</div>
+              <div className="step__body">Your Signature will be addressed to you and saved on this device.</div>
+            </div>
+          </li>
+          <li className="step">
+            <span className="step__num">2</span>
+            <div>
+              <div className="step__title">React, don&rsquo;t deliberate</div>
+              <div className="step__body">Seven pairs of the same flyer, A or B. Pick the one your eye lands on first.</div>
+            </div>
+          </li>
+          <li className="step">
+            <span className="step__num">3</span>
+            <div>
+              <div className="step__title">Get your Signature</div>
+              <div className="step__body">A voice paragraph, five DNA tokens, and a prompt block you paste into any AI design tool.</div>
+            </div>
+          </li>
+        </ol>
+
+        {saved && (
+          <div className="saved-banner">
+            <div className="saved-banner__title">You have a saved Signature</div>
+            <div className="saved-banner__body">
+              You took the method already as <strong>{saved.name}</strong>. Open it, or start over with a new name.
+            </div>
+            <div className="saved-banner__row">
+              <button type="button" className="btn btn--primary btn--small" onClick={onResume}>
+                Open my Signature
+              </button>
+              <button type="button" className="btn btn--ghost btn--small" onClick={onDiscardSaved}>
+                Start over
+              </button>
+            </div>
+          </div>
+        )}
+
+        <form
+          className="welcome__name"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (trimmed) onStart(trimmed)
+          }}
         >
-          Begin
-        </button>
-      </form>
+          <label htmlFor="name" className="welcome__label">Your name</label>
+          <input
+            id="name"
+            type="text"
+            autoComplete="given-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Kimberly"
+            className="welcome__input"
+          />
+          <button
+            type="submit"
+            disabled={!trimmed}
+            className="btn btn--primary welcome__cta"
+          >
+            Begin the Signature Method <span className="btn__arrow">→</span>
+          </button>
+        </form>
+      </div>
+
+      <aside>
+        <p className="section-heading">What you walk away with</p>
+        <h2 className="h2-bold">A prompt that strips defaults and injects you.</h2>
+        <p className="lede" style={{ marginBottom: 24 }}>
+          The Signature is yours to paste at the top of any AI design conversation. Here is the shape of what gets generated.
+        </p>
+
+        <div className="panel panel--accent">
+          <div className="panel__head">
+            <span className="panel__title">A sample Signature</span>
+            <span className="panel__meta">Voice · Tokens · Prompt</span>
+          </div>
+
+          <div className="preview-row">
+            <span className="preview-row__label">Voice</span>
+            <div>
+              <div className="preview-row__title">2&ndash;3 sentences</div>
+              <div className="preview-row__sample">
+                &ldquo;You work in restraint &mdash; type does all the structural work, color stays out of the way&hellip;&rdquo;
+              </div>
+            </div>
+          </div>
+
+          <div className="preview-row">
+            <span className="preview-row__label">Tokens</span>
+            <div>
+              <div className="preview-row__title">5 DNA tokens</div>
+              <div className="preview-row__sample">
+                &ldquo;type-only hierarchy&rdquo; &middot; &ldquo;active negative space&rdquo; &middot; &ldquo;conversational scale&rdquo;&hellip;
+              </div>
+            </div>
+          </div>
+
+          <div className="preview-row">
+            <span className="preview-row__label">Prompt</span>
+            <div>
+              <div className="preview-row__title">DO / DO NOT</div>
+              <div className="preview-row__sample">
+                &ldquo;Do not use color blocks for hierarchy. Use type scale and weight as the only organizational system&hellip;&rdquo;
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="panel panel--alert">
+          <div className="panel__head">
+            <span className="panel__title">&times; What it replaces</span>
+            <span className="panel__meta">AI design defaults</span>
+          </div>
+          <div className="preview-row" style={{ borderTopColor: 'transparent' }}>
+            <span className="preview-row__label" style={{ borderColor: 'var(--red-tint-strong)', color: 'var(--red)' }}>Color</span>
+            <div>
+              <div className="preview-row__title">Color-blocked sections</div>
+              <div className="preview-row__sample">Hero, value-prop, CTA, footer &mdash; each in its own tinted band.</div>
+            </div>
+          </div>
+          <div className="preview-row" style={{ borderTopColor: 'var(--red-tint-strong)' }}>
+            <span className="preview-row__label" style={{ borderColor: 'var(--red-tint-strong)', color: 'var(--red)' }}>Icons</span>
+            <div>
+              <div className="preview-row__title">Sparkles &amp; checkmarks</div>
+              <div className="preview-row__sample">Decorative emoji and three-bullet lists with leading symbols.</div>
+            </div>
+          </div>
+          <div className="preview-row" style={{ borderTopColor: 'var(--red-tint-strong)' }}>
+            <span className="preview-row__label" style={{ borderColor: 'var(--red-tint-strong)', color: 'var(--red)' }}>Voice</span>
+            <div>
+              <div className="preview-row__title">&ldquo;Empower your journey&rdquo;</div>
+              <div className="preview-row__sample">Tricolon taglines, ornamental adjectives, hollow imperatives.</div>
+            </div>
+          </div>
+        </div>
+      </aside>
     </section>
   )
 }
 
+// ---------- question -------------------------------------------------------
+
 function Question({ index, total, data, selected, onSelect, onNext, onBack }) {
-  const progress = ((index + 1) / total) * 100
   const analysis =
     selected === 'A' ? data.analysisA : selected === 'B' ? data.analysisB : null
 
   return (
     <section className="screen screen--question">
-      <header className="qheader">
-        <div className="qheader__row">
-          <span className="qcount">
-            {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
-          </span>
-          <span className="qaxis">{data.axis}</span>
-        </div>
-        <div className="progress">
-          <div className="progress__bar" style={{ width: `${progress}%` }} />
-        </div>
-      </header>
+      <div className="qbreadcrumb">
+        <span className="qbreadcrumb__step">
+          Step {String(index + 1).padStart(2, '0')} of {String(total).padStart(2, '0')}
+        </span>
+        <span className="qbreadcrumb__axis">{data.axis}</span>
+      </div>
 
       <h2 className="qprompt">{data.question}</h2>
+      {data.sub && <p className="qsub">{data.sub}</p>}
 
       <div className="specimens">
         <Specimen
@@ -262,41 +407,45 @@ function Question({ index, total, data, selected, onSelect, onNext, onBack }) {
         />
       </div>
 
-      <div className={`analysis ${analysis ? 'analysis--shown' : ''}`}>
-        {analysis && <p>{analysis}</p>}
+      <div className={'analysis ' + (analysis ? 'analysis--shown' : '')}>
+        <div className="analysis__title">What that says about you</div>
+        <div className="analysis__body">
+          {analysis || 'Pick A or B to see what it says about how you organize design.'}
+        </div>
       </div>
 
       <div className="qfooter">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={index === 0}
-          className="btn btn--ghost"
-        >
-          Back
+        <button type="button" onClick={onBack} disabled={index === 0} className="btn btn--ghost">
+          ← Back
         </button>
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={!selected}
-          className="btn btn--primary"
-        >
-          {index === total - 1 ? 'Build my Signature' : 'Next'}
+        <button type="button" onClick={onNext} disabled={!selected} className="btn btn--primary">
+          {index === total - 1 ? 'Build my Signature' : 'Next'} <span className="btn__arrow">→</span>
         </button>
       </div>
     </section>
   )
 }
+
+// ---------- loading --------------------------------------------------------
 
 function Loading() {
   return (
     <section className="screen screen--loading">
-      <div className="loading__pulse" aria-hidden="true" />
-      <h2 className="loading__title">Building your Signature…</h2>
-      <p className="loading__sub">Stripping defaults. Injecting you.</p>
+      <div className="loading__inner">
+        <h2 className="loading__head">
+          Building your Signature. <br />
+          <em>Stripping defaults. Injecting you.</em>
+        </h2>
+        <p className="loading__sub">
+          Reading your seven choices and writing the prompt that replaces AI defaults with how you see.
+        </p>
+        <div className="loading__bar" />
+      </div>
     </section>
   )
 }
+
+// ---------- signature card -------------------------------------------------
 
 function SignatureCard({ name, signature, onRestart }) {
   const [copied, setCopied] = useState(false)
@@ -344,50 +493,73 @@ function SignatureCard({ name, signature, onRestart }) {
 
   return (
     <section className="screen screen--signature">
-      <p className="eyebrow">Your Signature</p>
-      <h1 className="display display--small">{name}</h1>
+      <p className="eyebrow">
+        THE SIGNATURE METHOD
+        <span className="eyebrow__dot">·</span>
+        GENERATED FOR {name.toUpperCase()}
+      </p>
 
-      <div className="sig__voice">
-        <h3 className="sig__heading">Voice</h3>
-        <p>{signature.voice}</p>
-      </div>
+      <h1 className="display display--small">
+        <em>{name}</em>&rsquo;s design voice.
+      </h1>
 
-      <div className="sig__tokens">
-        <h3 className="sig__heading">DNA tokens</h3>
-        <ul>
-          {signature.tokens.map((t, i) => (
-            <li key={i}>{t}</li>
-          ))}
+      <p className="section-heading">Voice</p>
+      <p className="sig__voice">{signature.voice}</p>
+
+      <div className="sig__tokens-block">
+        <p className="section-heading">DNA tokens</p>
+        <ul className="tokens">
+          {signature.tokens.map((t, i) => <li key={i}>{t}</li>)}
         </ul>
       </div>
 
-      <div className="sig__prompt">
+      <div className="sig__prompt-panel">
         <div className="sig__prompt-head">
-          <h3 className="sig__heading">Signature prompt</h3>
+          <p className="section-heading" style={{ marginBottom: 0 }}>Signature prompt</p>
           <button type="button" className="btn btn--ghost btn--small" onClick={copyPrompt}>
             {copied ? 'Copied' : 'Copy'}
           </button>
         </div>
         <pre ref={promptRef} className="sig__prompt-block">
-          {signature.signature_prompt}
+{signature.signature_prompt}
         </pre>
       </div>
 
-      <div className="next">
-        <h3 className="sig__heading">What now</h3>
-        <ol>
-          <li>Paste your Signature at the top of any AI design prompt — Claude, ChatGPT, Midjourney prefaces, whatever you use.</li>
-          <li>
-            <button type="button" className="linklike" onClick={downloadCard}>
-              Download your Signature card
-            </button>{' '}
-            and keep it where you work.
+      <div className="next-steps">
+        <p className="section-heading">What now</p>
+        <ol className="steps">
+          <li className="step">
+            <span className="step__num">1</span>
+            <div>
+              <div className="step__title">Paste at the top of any AI design prompt</div>
+              <div className="step__body">Claude, ChatGPT, Midjourney prefaces &mdash; anywhere AI is helping you design.</div>
+            </div>
           </li>
-          <li>Return anytime — your Signature is saved on this device.</li>
+          <li className="step">
+            <span className="step__num">2</span>
+            <div>
+              <div className="step__title">
+                <button type="button" className="linklike" onClick={downloadCard}>
+                  Download your Signature card
+                </button>
+              </div>
+              <div className="step__body">A plain-text file you can keep where you work.</div>
+            </div>
+          </li>
+          <li className="step">
+            <span className="step__num">3</span>
+            <div>
+              <div className="step__title">Come back anytime</div>
+              <div className="step__body">Your Signature is saved on this device. Closing the tab is fine.</div>
+            </div>
+          </li>
         </ol>
       </div>
 
       <div className="sig__footer">
+        <span style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
+          Saved on this device. To take it again, start over.
+        </span>
         <button type="button" className="btn btn--ghost" onClick={onRestart}>
           Start over
         </button>
@@ -395,19 +567,29 @@ function SignatureCard({ name, signature, onRestart }) {
     </section>
   )
 }
+
+// ---------- returning ------------------------------------------------------
 
 function Returning({ saved, onView, onRestart }) {
   return (
     <section className="screen screen--returning">
-      <p className="eyebrow">Welcome back, {saved.name}</p>
-      <h1 className="display">Your Signature is here.</h1>
-      <p className="lede">
-        You took the method already. We kept your Signature on this device.
-        Open it, or start fresh.
+      <p className="eyebrow">
+        THE SIGNATURE METHOD
+        <span className="eyebrow__dot">·</span>
+        WELCOME BACK, {saved.name.toUpperCase()}
       </p>
-      <div className="returning__actions">
+
+      <h1 className="display">
+        Your Signature is <em>here</em>.
+      </h1>
+
+      <p className="lede">
+        You took the method already &mdash; we kept your Signature on this device. Open it, or start fresh.
+      </p>
+
+      <div className="returning__row">
         <button type="button" className="btn btn--primary" onClick={onView}>
-          View my Signature
+          Open my Signature <span className="btn__arrow">→</span>
         </button>
         <button type="button" className="btn btn--ghost" onClick={onRestart}>
           Start over
@@ -417,17 +599,18 @@ function Returning({ saved, onView, onRestart }) {
   )
 }
 
-// ---------- App -------------------------------------------------------------
+// ---------- app ------------------------------------------------------------
 
 export default function App() {
-  const saved = useMemo(() => loadSaved(), [])
-  const [stage, setStage] = useState(saved ? 'returning' : 'welcome')
-  const [name, setName] = useState(saved?.name || '')
+  const initialSaved = useMemo(() => loadSaved(), [])
+  const [savedState, setSavedState] = useState(initialSaved)
+  const [stage, setStage] = useState(initialSaved ? 'returning' : 'welcome')
+  const [name, setName] = useState(initialSaved?.name || '')
   const [choices, setChoices] = useState(
-    saved?.choices || Array(QUESTIONS.length).fill(null)
+    initialSaved?.choices || Array(QUESTIONS.length).fill(null)
   )
   const [index, setIndex] = useState(0)
-  const [signature, setSignature] = useState(saved?.signature || null)
+  const [signature, setSignature] = useState(initialSaved?.signature || null)
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -444,12 +627,20 @@ export default function App() {
 
   const restart = () => {
     clearSaved()
+    setSavedState(null)
     setName('')
     setChoices(Array(QUESTIONS.length).fill(null))
     setIndex(0)
     setSignature(null)
     setError(null)
     setStage('welcome')
+  }
+
+  const openSaved = () => {
+    if (!savedState) return
+    setName(savedState.name)
+    setSignature(savedState.signature)
+    setStage('signature')
   }
 
   const select = (letter) => {
@@ -474,11 +665,10 @@ export default function App() {
         body: JSON.stringify({ name, choices }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data?.error || 'Generation failed')
-      }
+      if (!res.ok) throw new Error(data?.error || 'Generation failed')
       const payload = { name, choices, signature: data, created: Date.now() }
       save(payload)
+      setSavedState(payload)
       setSignature(data)
       setStage('signature')
     } catch (err) {
@@ -487,31 +677,26 @@ export default function App() {
     }
   }
 
-  const back = () => {
-    if (index > 0) setIndex(index - 1)
-  }
+  const back = () => { if (index > 0) setIndex(index - 1) }
 
   return (
     <main className="app">
-      {error && (
-        <div className="error" role="alert">
-          {error}
-        </div>
+      <PageHeader stage={stage} index={index} total={QUESTIONS.length} />
+
+      {error && <div className="error" role="alert">{error}</div>}
+
+      {stage === 'returning' && savedState && (
+        <Returning saved={savedState} onView={openSaved} onRestart={restart} />
       )}
 
-      {stage === 'returning' && saved && (
-        <Returning
-          saved={saved}
-          onView={() => {
-            setSignature(saved.signature)
-            setName(saved.name)
-            setStage('signature')
-          }}
-          onRestart={restart}
+      {stage === 'welcome' && (
+        <Welcome
+          onStart={begin}
+          saved={savedState}
+          onResume={openSaved}
+          onDiscardSaved={restart}
         />
       )}
-
-      {stage === 'welcome' && <Welcome onStart={begin} />}
 
       {stage === 'questions' && (
         <Question
