@@ -20,7 +20,6 @@ export function Loading({ state, setState }: Props) {
     'Building your Signature…',
     'Stripping defaults.',
     'Injecting you.',
-    ...(state.qualityReference ? ['Setting your quality bar.'] : []),
   ];
 
   useEffect(() => {

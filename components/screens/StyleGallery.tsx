@@ -17,16 +17,21 @@ export function StyleGallery({ state, setState }: Props) {
       const current = s.specimenSelections;
       const exists = current.some((x) => x.id === id);
       if (exists) {
+        // clicking a selected tile always deselects
         return { ...s, specimenSelections: current.filter((x) => x.id !== id) };
       }
+      // not selected — only add if we have room. No ring buffer, no toast.
+      if (current.length >= 3) return s;
       const item = SPECIMEN_GALLERY.find((x) => x.id === id);
       if (!item) return s;
-      const entry = { id: item.id, label: item.label, signal: item.signal };
-      // ring buffer: max 3, oldest out
-      const next = current.length >= 3 ? [...current.slice(1), entry] : [...current, entry];
-      return { ...s, specimenSelections: next };
+      return {
+        ...s,
+        specimenSelections: [...current, { id: item.id, label: item.label, signal: item.signal }],
+      };
     });
   };
+
+  const atCap = selectedIds.length >= 3;
 
   const goNext = () => setState((s) => ({ ...s, currentScreen: 'territory' }));
   const skip = () => setState((s) => ({ ...s, specimenSelections: [], currentScreen: 'territory' }));
@@ -43,13 +48,20 @@ export function StyleGallery({ state, setState }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
         {SPECIMEN_GALLERY.map((item) => {
           const isSelected = selectedIds.includes(item.id);
+          const isLocked = !isSelected && atCap;
           return (
             <button
               key={item.id}
               type="button"
               onClick={() => toggle(item.id)}
               aria-pressed={isSelected}
-              className={'tile w-full ' + (isSelected ? 'tile-selected' : '')}
+              aria-disabled={isLocked}
+              title={isLocked ? 'Deselect one to choose this' : undefined}
+              className={
+                'tile w-full transition-opacity ' +
+                (isSelected ? 'tile-selected ' : '') +
+                (isLocked ? 'opacity-40 cursor-not-allowed' : '')
+              }
             >
               <div className="relative w-full" style={{ aspectRatio: '1 / 1' }}>
                 <img
@@ -82,6 +94,24 @@ export function StyleGallery({ state, setState }: Props) {
                       />
                     </svg>
                   </span>
+                )}
+                {isLocked && (
+                  <div
+                    className="absolute inset-0 flex items-end p-3"
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <span
+                      className="text-[10px] tracking-[0.12em] uppercase font-semibold"
+                      style={{
+                        background: 'rgba(15,15,14,0.85)',
+                        color: 'rgb(var(--ink))',
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                      }}
+                    >
+                      Deselect one to choose this
+                    </span>
+                  </div>
                 )}
               </div>
               <div

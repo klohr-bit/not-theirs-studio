@@ -33,6 +33,32 @@ export function buildPairInstructions(state: AppState): string[] {
   return out;
 }
 
+/**
+ * Derived physical-quality instruction. Only present when the user chose
+ * physically-rooted (pair 7 = B). The user never sees this question — it
+ * comes from their material/screen choice in the seven pairs.
+ */
+export function getPhysicalQualityInstruction(pairs: AppState['pairs']): string | null {
+  if (pairs[7] !== 'B') return null;
+  return 'Physical quality lives simultaneously in: (1) Stroke weight — type is heavy because it was drawn heavy, not because a filter was applied. Letterforms are clean. (2) Ground warmth — the background is the paper. Warm, slightly tonal, temperature of uncoated stock. No texture added. The warmth is the color itself. (3) Spacing breath — the gaps between elements have the breath of hand-set type. The silence is as considered as the marks.';
+}
+
+/**
+ * Derived typographic-character instruction. Only present when pair 7 = B
+ * (physically-rooted). Refines the typographic register based on the
+ * illustration sub-style.
+ */
+export function getTypographicCharacterInstruction(
+  pairs: AppState['pairs'],
+  illustrationStyle: string | null
+): string | null {
+  if (pairs[7] !== 'B') return null;
+  if (illustrationStyle === 'B' || illustrationStyle === 'C') {
+    return 'Type feels drawn — letterforms feel made by a tool moving through space. Weight reflects the hand. No texture applied. The drawn quality is in the form of the letters themselves.';
+  }
+  return 'Type is a neutral carrier — clean, even, without material presence. The visual character comes from composition, color, and space.';
+}
+
 export function findHumanMoment(content: ContentState): string | null {
   if (content.closingStatement && content.closingStatement.trim().length > 0) {
     return content.closingStatement.trim();
@@ -66,7 +92,15 @@ export function buildUserPrompt(
   lines.push('Each instruction below comes directly from a choice this person made.');
   lines.push('Use them exactly — do not interpret or soften them.');
   lines.push('');
-  instructions.forEach((inst, i) => lines.push(`${i + 1}. ${inst}`));
+  const fullInstructions = [...instructions];
+  const physical = getPhysicalQualityInstruction(state.pairs);
+  if (physical) fullInstructions.push(physical);
+  const typographic = getTypographicCharacterInstruction(
+    state.pairs,
+    state.territory.illustrationStyle
+  );
+  if (typographic) fullInstructions.push(typographic);
+  fullInstructions.forEach((inst, i) => lines.push(`${i + 1}. ${inst}`));
   lines.push('');
 
   // ----- visual energy -----
@@ -111,14 +145,14 @@ export function buildUserPrompt(
   }
   lines.push('');
 
-  // ----- contradictions -----
+  // ----- contradictions (context only — UI resolves them after generation) -----
   if (contradictions.length > 0) {
-    lines.push('== CONTRADICTIONS TO RESOLVE ==');
+    lines.push('== DETECTED TENSIONS (CONTEXT ONLY — DO NOT WRITE INTO SIGNATURE) ==');
     lines.push(
       'These tensions were detected between stated choices and visual preferences.'
     );
     lines.push(
-      'For each tension, present both resolution options in the REVEALED TENSIONS section.'
+      'Do not include a REVEALED TENSIONS section in the signature_prompt. The user will resolve these in the UI after generation and the chosen resolutions will be appended to the DO section then.'
     );
     lines.push('');
     contradictions.forEach((c) => {
@@ -158,55 +192,51 @@ export function buildUserPrompt(
   if (c.other) lines.push(`Also include: ${c.other}`);
   lines.push('');
 
-  // ----- signature format -----
+  // ----- signature format (FINAL structure — no REVEALED TENSIONS, no QUALITY STANDARD) -----
   lines.push('== SIGNATURE FORMAT ==');
-  lines.push('Write the signature_prompt field using exactly this structure:');
+  lines.push('Write the signature_prompt field using exactly this structure, in this order, with no other sections:');
   lines.push('');
   lines.push('== YOUR DESIGN SIGNATURE ==');
   lines.push('');
   lines.push('CONTEXT:');
   lines.push(
-    '[What this is for. Format and where people see it. Content verification instruction.]'
+    '[What this is for. Format. Content verification instruction. 2-4 sentences.]'
   );
   lines.push('');
   lines.push('DO NOT:');
   lines.push(
-    '[9-12 specific prohibitions. Each starts with —. From the decision instructions above plus the baseline rules below.]'
+    '[9-12 specific prohibitions. Each on its own line starting with —. Draw from the decision instructions above and the baseline rules below.]'
   );
   lines.push('');
   lines.push('DO:');
   lines.push(
-    '[9-12 specific requirements. Each starts with —. From the decision instructions above.]'
+    '[9-12 specific requirements. Each on its own line starting with —. Draw from the decision instructions above.]'
   );
   lines.push('');
   lines.push('VISUAL TERRITORY:');
   lines.push(
-    '[Energy words translated to design behavior. Color direction with hex codes if provided. Surface quality. Illustration or visual direction specifics.]'
+    '[Energy words translated to design behavior. Color direction with hex codes if provided, or temperature description if not. Surface quality. Illustration or visual direction specifics. Plain language paragraph form, not bullets.]'
   );
   lines.push('');
-  if (contradictions.length > 0) {
-    lines.push('REVEALED TENSIONS:');
-    lines.push(
-      '[Each tension with both resolution options. User resolves before designing.]'
-    );
-    lines.push('');
-  }
   lines.push('EXPERT PASS:');
   lines.push(
-    "[Five questions the AI asks itself after completing the design, before delivering it. Questions must be specific to this person's choices — not generic. The fifth question names the human moment specifically.]"
+    "[Exactly five numbered questions the AI asks itself after completing the design, before delivering it. Questions must be specific to this person's choices — not generic. Question 5 names the human moment by name (quote it directly).]"
   );
   lines.push('');
-  lines.push(
-    'Build every design decision from these rules. No defaults. No assumptions. No compromises.'
-  );
+  lines.push('Build every design decision from these rules.');
+  lines.push('No defaults. No assumptions. No compromises.');
   lines.push('');
   lines.push('== CONTENT BRIEF ==');
-  lines.push('[Every content item listed clearly. Ends with: Now design the flyer.]');
+  lines.push('[Every content item listed clearly, one per line.]');
+  lines.push('');
+  lines.push('Now design the flyer.');
+  lines.push('');
+  lines.push('Do not include a REVEALED TENSIONS section. Do not include a QUALITY STANDARD section. Do not invent additional sections. Do not output any markdown fences.');
   lines.push('');
 
   // ----- baseline rules (informational, the model folds these into DO NOT) -----
   lines.push('== BASELINE RULES ==');
-  lines.push('These apply to every Signature regardless of choices:');
+  lines.push('These apply to every Signature regardless of choices and should appear in DO NOT:');
   BASELINE_RULES.forEach((r) => lines.push(`— ${r}`));
 
   return lines.join('\n');

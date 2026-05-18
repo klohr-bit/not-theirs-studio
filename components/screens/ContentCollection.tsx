@@ -16,17 +16,15 @@ const ANCHOR_OPTIONS: Array<{ value: NonNullable<ContentState['visualAnchor']>; 
   { value: 'feeling',      label: 'The feeling of the thing' },
 ];
 
-type ColorMode = 'yes' | 'no' | 'unsure' | null;
-
 export function ContentCollection({ state, setState }: Props) {
   const [activitiesText, setActivitiesText] = useState(state.content.activities.join('\n'));
   const [partnersText, setPartnersText] = useState(state.content.partners.join(', '));
-  const [colorMode, setColorMode] = useState<ColorMode>(state.colors.provided ? 'yes' : null);
-  const [colorFields, setColorFields] = useState<Array<{ hex: string; label: string }>>(
-    state.colors.hex.length > 0
-      ? state.colors.hex.map((h) => ({ hex: h, label: '' }))
-      : [{ hex: '', label: '' }]
-  );
+  const initialRows = (() => {
+    const rows = state.colors.hex.map((h) => ({ hex: h, label: '' }));
+    while (rows.length < 4) rows.push({ hex: '', label: '' });
+    return rows;
+  })();
+  const [colorFields, setColorFields] = useState<Array<{ hex: string; label: string }>>(initialRows);
   const [extractStatus, setExtractStatus] = useState<string | null>(null);
   const logoRef = useRef<HTMLInputElement | null>(null);
 
@@ -40,31 +38,23 @@ export function ContentCollection({ state, setState }: Props) {
   const setColors = (patch: Partial<ColorsState>) =>
     setState((s) => ({ ...s, colors: { ...s.colors, ...patch } }));
 
-  const commitColors = (rows: Array<{ hex: string; label: string }>, provided: boolean) => {
+  // commit: derive provided + hex array from filled rows.
+  // provided is true iff at least one valid hex is present; otherwise the user
+  // will pick temperature on the visual-territory color screen.
+  const commitColors = (rows: Array<{ hex: string; label: string }>) => {
     const hex = rows.map((r) => r.hex.trim()).filter(isValidHex).map(normalizeHex);
-    setColors({ provided, hex });
+    setColors({ provided: hex.length > 0, hex });
   };
 
   const onColorChange = (i: number, hex: string) => {
     const next = colorFields.map((row, idx) => (idx === i ? { ...row, hex } : row));
     setColorFields(next);
-    commitColors(next, true);
+    commitColors(next);
   };
 
   const onLabelChange = (i: number, label: string) => {
     const next = colorFields.map((row, idx) => (idx === i ? { ...row, label } : row));
     setColorFields(next);
-  };
-
-  const addColorRow = () => {
-    if (colorFields.length >= 4) return;
-    setColorFields([...colorFields, { hex: '', label: '' }]);
-  };
-
-  const removeColorRow = (i: number) => {
-    const next = colorFields.filter((_, idx) => idx !== i);
-    setColorFields(next.length > 0 ? next : [{ hex: '', label: '' }]);
-    commitColors(next, true);
   };
 
   const onLogoUpload = async (file: File) => {
@@ -75,7 +65,8 @@ export function ContentCollection({ state, setState }: Props) {
         setExtractStatus('No dominant colors found — try a different image.');
         return;
       }
-      const rows = colors.map((c) => ({ hex: c, label: '' }));
+      const rows: Array<{ hex: string; label: string }> = colors.map((c) => ({ hex: c, label: '' }));
+      while (rows.length < 4) rows.push({ hex: '', label: '' });
       setColorFields(rows);
       setColors({ provided: true, hex: colors, extractedFromLogo: true });
       setExtractStatus(`Colors found (${colors.length}). Adjust any if needed.`);
@@ -244,110 +235,60 @@ export function ContentCollection({ state, setState }: Props) {
         <div className="rule-h" />
 
         <div>
-          <p className="label-section">Brand colors</p>
-          <p className="lede mb-4">Do you have brand colors?</p>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {[
-              { v: 'yes', l: 'Yes' },
-              { v: 'no', l: 'No' },
-              { v: 'unsure', l: 'Not sure' },
-            ].map((o) => (
-              <button
-                key={o.v}
-                type="button"
-                onClick={() => {
-                  setColorMode(o.v as ColorMode);
-                  if (o.v === 'yes') {
-                    setColors({ provided: true });
-                  } else {
-                    setColors({ provided: false, hex: [], extractedFromLogo: false });
-                    setColorFields([{ hex: '', label: '' }]);
-                  }
-                }}
-                className={'chip ' + (colorMode === o.v ? 'chip-selected' : '')}
-              >
-                {o.l}
-              </button>
-            ))}
-          </div>
-
-          {colorMode === 'yes' && (
-            <div className="card space-y-4">
-              {colorFields.map((row, i) => (
-                <div key={i} className="grid grid-cols-[44px_1fr_1fr_auto] gap-3 items-center">
-                  <input
-                    type="color"
-                    value={isValidHex(row.hex) ? normalizeHex(row.hex) : '#666666'}
-                    onChange={(e) => onColorChange(i, e.target.value.toUpperCase())}
-                    className="h-11 w-11 rounded-input border-0 cursor-pointer bg-transparent"
-                    style={{ padding: 0 }}
-                    aria-label={`Color ${i + 1} swatch`}
-                  />
-                  <input
-                    type="text"
-                    placeholder="#RRGGBB"
-                    value={row.hex}
-                    onChange={(e) => onColorChange(i, e.target.value.toUpperCase())}
-                    className="field font-mono text-sm"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Label (optional)"
-                    value={row.label}
-                    onChange={(e) => onLabelChange(i, e.target.value)}
-                    className="field text-sm"
-                  />
-                  {colorFields.length > 1 && (
-                    <button
-                      type="button"
-                      className="btn-text text-xs"
-                      onClick={() => removeColorRow(i)}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              ))}
-              <div className="flex items-center gap-3 flex-wrap">
-                {colorFields.length < 4 && (
-                  <button type="button" className="btn-text text-xs" onClick={addColorRow}>
-                    + Add color
-                  </button>
-                )}
-                <span className="muted text-xs">— or —</span>
+          <p className="label-section">Brand colors — optional</p>
+          <p className="muted text-sm mb-4">
+            Leave blank and we&rsquo;ll pick a temperature with you on a later screen.
+          </p>
+          <div className="card space-y-4">
+            {colorFields.map((row, i) => (
+              <div key={i} className="grid grid-cols-[44px_1fr_1fr] gap-3 items-center">
                 <input
-                  ref={logoRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) onLogoUpload(f);
-                    e.target.value = '';
-                  }}
+                  type="color"
+                  value={isValidHex(row.hex) ? normalizeHex(row.hex) : '#666666'}
+                  onChange={(e) => onColorChange(i, e.target.value.toUpperCase())}
+                  className="h-11 w-11 rounded-input border-0 cursor-pointer bg-transparent"
+                  style={{ padding: 0 }}
+                  aria-label={`Color ${i + 1} swatch`}
                 />
-                <button
-                  type="button"
-                  className="btn-text text-xs"
-                  onClick={() => logoRef.current?.click()}
-                >
-                  Upload your logo — we&rsquo;ll pull the colors
-                </button>
+                <input
+                  type="text"
+                  placeholder="#RRGGBB"
+                  value={row.hex}
+                  onChange={(e) => onColorChange(i, e.target.value.toUpperCase())}
+                  className="field font-mono text-sm"
+                />
+                <input
+                  type="text"
+                  placeholder="Label (optional)"
+                  value={row.label}
+                  onChange={(e) => onLabelChange(i, e.target.value)}
+                  className="field text-sm"
+                />
               </div>
-              {extractStatus && <p className="muted text-xs">{extractStatus}</p>}
+            ))}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="muted text-xs">Or upload a logo:</span>
+              <input
+                ref={logoRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) onLogoUpload(f);
+                  e.target.value = '';
+                }}
+              />
+              <button
+                type="button"
+                className="btn-text text-xs"
+                onClick={() => logoRef.current?.click()}
+              >
+                Upload your logo — we&rsquo;ll pull the colors
+              </button>
             </div>
-          )}
-
-          {colorMode === 'no' && (
-            <p className="muted text-sm">
-              Skip it. We&rsquo;ll pick a temperature with you on the next screen.
-            </p>
-          )}
-          {colorMode === 'unsure' && (
-            <p className="muted text-sm">
-              Skip it. We&rsquo;ll pick a temperature with you on the next screen.
-            </p>
-          )}
+            {extractStatus && <p className="muted text-xs">{extractStatus}</p>}
+          </div>
         </div>
 
         <div className="rule-h" />

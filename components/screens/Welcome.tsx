@@ -1,8 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
 import type { AppState } from '@/types';
-import { fileToDataUrl } from '@/lib/colors';
 
 interface Props {
   state: AppState;
@@ -28,24 +26,7 @@ const FORMAT_OPTIONS: Array<{ value: string; label: string }> = [
 ];
 
 export function Welcome({ state, setState }: Props) {
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement | null>(null);
-
   const canContinue = state.name.trim().length > 0 && state.purpose !== '';
-
-  const onUpload = async (file: File) => {
-    setUploadError(null);
-    if (file.size > 6 * 1024 * 1024) {
-      setUploadError('Image is larger than 6 MB — please pick a smaller one.');
-      return;
-    }
-    try {
-      const dataUrl = await fileToDataUrl(file);
-      setState((s) => ({ ...s, qualityReference: dataUrl }));
-    } catch {
-      setUploadError("Couldn't read that file.");
-    }
-  };
 
   return (
     <section className="max-w-screen mx-auto">
@@ -106,82 +87,6 @@ export function Welcome({ state, setState }: Props) {
                 {opt.label}
               </button>
             ))}
-          </div>
-        </div>
-
-        <div>
-          <p className="label-section">Optional: a reference for quality</p>
-          <div
-            className="card"
-            style={{
-              borderStyle: 'dashed',
-              borderColor: 'rgba(242,237,228,0.22)',
-              background: 'transparent',
-            }}
-          >
-            {state.qualityReference ? (
-              <div className="flex items-center gap-4">
-                <img
-                  src={state.qualityReference}
-                  alt="Quality reference"
-                  className="h-20 w-20 object-cover rounded-input"
-                  style={{ border: '0.5px solid rgba(242,237,228,0.18)' }}
-                />
-                <div className="flex-1">
-                  <p className="body-text text-sm mb-1">Quality reference uploaded.</p>
-                  <p className="muted text-xs">This will set the bar the model holds your design to.</p>
-                </div>
-                <button
-                  type="button"
-                  className="btn-text"
-                  onClick={() => setState((s) => ({ ...s, qualityReference: null }))}
-                >
-                  Remove
-                </button>
-              </div>
-            ) : (
-              <>
-                <p className="body-text mb-1">
-                  Show us one thing you think is excellently designed.
-                </p>
-                <p className="muted text-sm mb-4">
-                  Anything — a photo, a screenshot, something you walked past. This sets your quality bar.
-                </p>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) onUpload(f);
-                      e.target.value = '';
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={() => fileRef.current?.click()}
-                  >
-                    Upload image
-                  </button>
-                  <span className="muted text-xs">— or —</span>
-                  <button
-                    type="button"
-                    className="btn-text"
-                    onClick={() => setState((s) => ({ ...s, qualityReference: null }))}
-                  >
-                    Skip →
-                  </button>
-                </div>
-                {uploadError && (
-                  <p className="muted text-xs mt-2" style={{ color: '#dcb088' }}>
-                    {uploadError}
-                  </p>
-                )}
-              </>
-            )}
           </div>
         </div>
 

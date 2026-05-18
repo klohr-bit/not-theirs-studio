@@ -80,7 +80,6 @@ export interface AppState {
   name: string;
   purpose: string;
   format: string;
-  qualityReference: string | null;
 
   content: ContentState;
   colors: ColorsState;
@@ -102,7 +101,6 @@ export const INITIAL_STATE: AppState = {
   name: '',
   purpose: '',
   format: '',
-  qualityReference: null,
   content: {
     eventName: '',
     hostedBy: '',

@@ -5,16 +5,6 @@ import { detectContradictions } from '@/lib/contradictions';
 
 const MODEL = 'claude-sonnet-4-6';
 
-function parseDataUrl(dataUrl: string): { mediaType: string; data: string } | null {
-  const match = dataUrl.match(/^data:([^;,]+);base64,(.+)$/);
-  if (!match) return null;
-  const mediaType = match[1];
-  const data = match[2];
-  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-  if (!allowed.includes(mediaType)) return null;
-  return { mediaType, data };
-}
-
 export async function POST(request: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
@@ -38,32 +28,11 @@ export async function POST(request: Request) {
 
   const client = new Anthropic();
 
-  // Build the user message, including the quality-reference image if uploaded.
-  const messages: Anthropic.MessageParam[] = [];
-  if (state.qualityReference) {
-    const parsed = parseDataUrl(state.qualityReference);
-    if (parsed) {
-      messages.push({
-        role: 'user',
-        content: [
-          {
-            type: 'image',
-            source: { type: 'base64', media_type: parsed.mediaType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp', data: parsed.data },
-          },
-          {
-            type: 'text',
-            text:
-              'This image sets the quality bar. Extract: craft confidence level, audience relationship, production logic. Then:\n\n' +
-              userPrompt,
-          },
-        ],
-      });
-    } else {
-      messages.push({ role: 'user', content: userPrompt });
-    }
-  } else {
-    messages.push({ role: 'user', content: userPrompt });
-  }
+  // Always send plain text. The quality-reference image was removed in the
+  // update brief — Signature generation is text-only.
+  const messages: Anthropic.MessageParam[] = [
+    { role: 'user', content: userPrompt },
+  ];
 
   let response: Anthropic.Message;
   try {
@@ -124,7 +93,6 @@ export async function POST(request: Request) {
     signature_prompt: parsed.signature_prompt,
     contradictions,
     _meta: {
-      qualityReferenceUsed: !!state.qualityReference,
       contradictionsCount: contradictions.length,
       instructionsCount: instructions.length,
     },

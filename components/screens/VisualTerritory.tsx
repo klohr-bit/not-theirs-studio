@@ -10,8 +10,7 @@ import {
   type VisualDirection,
   type IllustrationStyle,
 } from '@/lib/territory';
-import { ColorTile } from '@/components/specimens/ColorTile';
-import { fileToDataUrl, isValidHex, normalizeHex } from '@/lib/colors';
+import { fileToDataUrl } from '@/lib/colors';
 
 interface Props {
   state: AppState;
@@ -140,6 +139,30 @@ function EnergyWords({
 
 // ---------- Part 2: Color direction ---------------------------------------
 
+const BRAND_ARRANGEMENTS: Array<{
+  value: 'A' | 'B' | 'C';
+  label: string;
+  blurb: string;
+  ratios: [number, number]; // primary fraction, accent fraction
+  swap: boolean; // C inverts roles
+}> = [
+  { value: 'A', label: 'Primary leads', blurb: 'Your main color owns most of the space. Accent used once, for the single most important element.', ratios: [0.7, 0.3], swap: false },
+  { value: 'B', label: 'Balanced',      blurb: 'Colors share the space. Neither dominates. The layout feels complete and even.', ratios: [0.5, 0.5], swap: false },
+  { value: 'C', label: 'Inverted',      blurb: 'The relationship flips. What was accent becomes the ground. Creates surprise.', ratios: [0.3, 0.7], swap: true },
+];
+
+const TEMPERATURE_CARDS: Array<{
+  value: 'A' | 'B' | 'C';
+  temp: 'warm' | 'neutral' | 'cool';
+  label: string;
+  blurb: string;
+  hexes: [string, string];
+}> = [
+  { value: 'A', temp: 'warm',    label: 'Warm',    blurb: 'Earthy tones — terracotta, amber, cream. Nothing clinical. Nothing cool.',     hexes: ['#8B4A2B', '#F4EFE6'] },
+  { value: 'B', temp: 'neutral', label: 'Neutral', blurb: 'Black, white, one restrained accent. Maximum contrast is the aesthetic.',     hexes: ['#1A1918', '#FAFAF6'] },
+  { value: 'C', temp: 'cool',    label: 'Cool',    blurb: 'Deep slate, forest, steel. Considered and precise.',                            hexes: ['#1C3829', '#8B95A8'] },
+];
+
 function ColorDirection({
   state,
   setColors,
@@ -154,71 +177,90 @@ function ColorDirection({
   onBack: () => void;
 }) {
   const hasBrand = state.colors.provided && state.colors.hex.length > 0;
-  const [showColorEditor, setShowColorEditor] = useState(false);
   const selectedDirection = state.territory.colorDirection;
 
-  const setSelection = (dir: 'A' | 'B' | 'C') => {
-    if (hasBrand) {
-      setTerritory({ colorDirection: dir });
-    } else {
-      const temp = dir === 'A' ? 'warm' : dir === 'B' ? 'neutral' : 'cool';
-      setColors({ temperature: temp });
-      setTerritory({ colorDirection: dir });
-    }
+  const primary = state.colors.hex[0] || '#1A1A18';
+  const accent = state.colors.hex[1] || state.colors.hex[0] || '#B87333';
+
+  const setBrand = (dir: 'A' | 'B' | 'C') => setTerritory({ colorDirection: dir });
+  const setTemp = (dir: 'A' | 'B' | 'C', temp: 'warm' | 'neutral' | 'cool') => {
+    setColors({ temperature: temp });
+    setTerritory({ colorDirection: dir });
   };
 
   return (
     <>
       <h1 className="h-section mb-3">
         {hasBrand
-          ? 'Here&rsquo;s your content in three color arrangements.'
+          ? 'How should your colors be arranged?'
           : 'What temperature should this run at?'}
       </h1>
       <p className="lede mb-8">
         {hasBrand
-          ? 'Pick the one that feels most like you.'
+          ? 'Pick the relationship that feels right.'
           : 'Pick the one that fits the feeling you want.'}
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        <ColorTile
-          arrangement="A"
-          hexes={hasBrand ? state.colors.hex : []}
-          content={state.content}
-          temperature={hasBrand ? null : 'warm'}
-          selected={selectedDirection === 'A'}
-          onSelect={() => setSelection('A')}
-        />
-        <ColorTile
-          arrangement="B"
-          hexes={hasBrand ? state.colors.hex : []}
-          content={state.content}
-          temperature={hasBrand ? null : 'neutral'}
-          selected={selectedDirection === 'B'}
-          onSelect={() => setSelection('B')}
-        />
-        <ColorTile
-          arrangement="C"
-          hexes={hasBrand ? state.colors.hex : []}
-          content={state.content}
-          temperature={hasBrand ? null : 'cool'}
-          selected={selectedDirection === 'C'}
-          onSelect={() => setSelection('C')}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+        {hasBrand
+          ? BRAND_ARRANGEMENTS.map((opt) => {
+              const isSel = selectedDirection === opt.value;
+              const ground = opt.swap ? accent : primary;
+              const mark = opt.swap ? primary : accent;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setBrand(opt.value)}
+                  aria-pressed={isSel}
+                  className={'tile w-full ' + (isSel ? 'tile-selected' : '')}
+                >
+                  <div
+                    className="w-full"
+                    style={{
+                      aspectRatio: '4 / 5',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <div style={{ background: ground, flex: opt.ratios[opt.swap ? 1 : 0] }} />
+                    <div style={{ background: mark, flex: opt.ratios[opt.swap ? 0 : 1] }} />
+                  </div>
+                  <div
+                    className="px-4 py-3"
+                    style={{ borderTop: '0.5px solid rgba(242,237,228,0.12)' }}
+                  >
+                    <p className="text-[13px] font-semibold mb-1">{opt.label}</p>
+                    <p className="muted text-[12px] leading-[1.5]">{opt.blurb}</p>
+                  </div>
+                </button>
+              );
+            })
+          : TEMPERATURE_CARDS.map((opt) => {
+              const isSel = selectedDirection === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setTemp(opt.value, opt.temp)}
+                  aria-pressed={isSel}
+                  className={'tile w-full ' + (isSel ? 'tile-selected' : '')}
+                >
+                  <div className="w-full" style={{ aspectRatio: '4 / 5', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ background: opt.hexes[0], flex: 1 }} />
+                    <div style={{ background: opt.hexes[1], flex: 1 }} />
+                  </div>
+                  <div
+                    className="px-4 py-3"
+                    style={{ borderTop: '0.5px solid rgba(242,237,228,0.12)' }}
+                  >
+                    <p className="text-[13px] font-semibold mb-1">{opt.label}</p>
+                    <p className="muted text-[12px] leading-[1.5]">{opt.blurb}</p>
+                  </div>
+                </button>
+              );
+            })}
       </div>
-
-      <details
-        open={showColorEditor}
-        onToggle={(e) => setShowColorEditor((e.target as HTMLDetailsElement).open)}
-        className="mb-10"
-      >
-        <summary className="cursor-pointer btn-text text-sm inline-flex items-center gap-1">
-          {hasBrand ? 'Want to adjust the colors?' : 'Want to provide specific colors?'} ▸
-        </summary>
-        <div className="card mt-3">
-          <BrandColorEditor state={state} setColors={setColors} />
-        </div>
-      </details>
 
       <Footer
         onBack={onBack}
@@ -227,64 +269,6 @@ function ColorDirection({
         onSkip={onNext}
       />
     </>
-  );
-}
-
-function BrandColorEditor({
-  state,
-  setColors,
-}: {
-  state: AppState;
-  setColors: (patch: Partial<ColorsState>) => void;
-}) {
-  const [rows, setRows] = useState<string[]>(
-    state.colors.hex.length > 0 ? state.colors.hex : ['']
-  );
-
-  const commit = (next: string[]) => {
-    setRows(next);
-    const cleaned = next.map((h) => h.trim()).filter(isValidHex).map(normalizeHex);
-    setColors({ provided: cleaned.length > 0, hex: cleaned });
-  };
-
-  return (
-    <div className="space-y-3">
-      {rows.map((hex, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <input
-            type="color"
-            value={isValidHex(hex) ? normalizeHex(hex) : '#666666'}
-            onChange={(e) =>
-              commit(rows.map((v, idx) => (idx === i ? e.target.value.toUpperCase() : v)))
-            }
-            className="h-11 w-11 rounded-input border-0 cursor-pointer bg-transparent"
-            style={{ padding: 0 }}
-            aria-label={`Color ${i + 1} swatch`}
-          />
-          <input
-            type="text"
-            placeholder="#RRGGBB"
-            value={hex}
-            onChange={(e) => commit(rows.map((v, idx) => (idx === i ? e.target.value.toUpperCase() : v)))}
-            className="field font-mono text-sm"
-          />
-          {rows.length > 1 && (
-            <button
-              type="button"
-              className="btn-text text-xs"
-              onClick={() => commit(rows.filter((_, idx) => idx !== i))}
-            >
-              Remove
-            </button>
-          )}
-        </div>
-      ))}
-      {rows.length < 4 && (
-        <button type="button" className="btn-text text-xs" onClick={() => commit([...rows, ''])}>
-          + Add color
-        </button>
-      )}
-    </div>
   );
 }
 
