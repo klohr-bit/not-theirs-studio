@@ -17,7 +17,6 @@ import { ReturnVisit } from '@/components/screens/ReturnVisit';
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
   const [saved, setSaved] = useState<SavedSignature | null>(null);
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const existing = loadSignature();
@@ -25,7 +24,6 @@ export default function App() {
       setSaved(existing);
       setState((s) => ({ ...s, currentScreen: 'return' }));
     }
-    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -35,7 +33,6 @@ export default function App() {
   }, [state.currentScreen]);
 
   const screen = useMemo(() => {
-    if (!hydrated) return null;
     switch (state.currentScreen) {
       case 'welcome':
         return <Welcome state={state} setState={setState} />;
@@ -60,7 +57,7 @@ export default function App() {
       default:
         return <Welcome state={state} setState={setState} />;
     }
-  }, [hydrated, state, saved]);
+  }, [state, saved]);
 
   return (
     <main className="min-h-screen flex flex-col">
