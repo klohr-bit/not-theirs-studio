@@ -1,7 +1,9 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AppState, ResolvedContradiction } from '@/types';
+import { saveSignature, clearSignature } from '@/lib/storage';
+import { INITIAL_STATE } from '@/types';
 
 interface Props {
   state: AppState;
@@ -58,10 +60,19 @@ export function SignatureCard({ state, setState }: Props) {
   );
 
   const resolve = (id: string, choice: 'A' | 'B') => {
-    setTensions((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, resolved: choice } : t))
-    );
+    setTensions((prev) => {
+      const next = prev.map((t) => (t.id === id ? { ...t, resolved: choice } : t));
+      if (signature) saveSignature({ ...state, contradictions: next }, signature, next);
+      setState((s) => ({ ...s, contradictions: next }));
+      return next;
+    });
   };
+
+  // Keep local tensions in sync when external state.contradictions changes
+  // (e.g., after restoring a saved signature on a return visit).
+  useEffect(() => {
+    setTensions(state.contradictions);
+  }, [state.contradictions]);
 
   const copy = async () => {
     try {
@@ -250,7 +261,10 @@ export function SignatureCard({ state, setState }: Props) {
         <button
           type="button"
           className="btn-text text-sm"
-          onClick={() => setState((s) => ({ ...s, currentScreen: 'welcome' }))}
+          onClick={() => {
+            clearSignature();
+            setState(() => ({ ...INITIAL_STATE, currentScreen: 'welcome' }));
+          }}
         >
           Start over
         </button>

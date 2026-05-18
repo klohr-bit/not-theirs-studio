@@ -1,4 +1,4 @@
-import type { AppState, Contradiction, GeneratedSignature } from '@/types';
+import type { AppState, GeneratedSignature, ResolvedContradiction } from '@/types';
 
 export const STORAGE_KEY = 'ynt_signature_v1';
 
@@ -8,7 +8,7 @@ export interface SavedSignature {
   voice: string;
   tokens: string[];
   signaturePrompt: string;
-  contradictions: Contradiction[];
+  contradictions: ResolvedContradiction[];
   allChoices: {
     pairs: AppState['pairs'];
     territory: AppState['territory'];
@@ -34,7 +34,7 @@ export function loadSignature(): SavedSignature | null {
 export function saveSignature(
   state: AppState,
   signature: GeneratedSignature,
-  contradictions: Contradiction[]
+  contradictions: ResolvedContradiction[]
 ): SavedSignature {
   const payload: SavedSignature = {
     name: state.name,

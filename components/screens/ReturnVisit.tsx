@@ -1,6 +1,7 @@
 'use client';
 
 import type { AppState } from '@/types';
+import { INITIAL_STATE } from '@/types';
 import type { SavedSignature } from '@/lib/storage';
 import { clearSignature, daysSince } from '@/lib/storage';
 
@@ -28,12 +29,18 @@ export function ReturnVisit({ saved, setState }: Props) {
             setState((s) => ({
               ...s,
               name: saved.name,
+              content: saved.allChoices?.content ?? s.content,
+              colors: saved.allChoices?.colors ?? s.colors,
+              pairs: saved.allChoices?.pairs ?? s.pairs,
+              specimenSelections: saved.allChoices?.specimenSelections ?? s.specimenSelections,
+              territory: saved.allChoices?.territory ?? s.territory,
               signature: {
                 voice: saved.voice,
                 tokens: saved.tokens,
                 signature_prompt: saved.signaturePrompt,
               },
               contradictions: saved.contradictions.map((c) => ({ ...c })),
+              savedAt: saved.savedAt,
               currentScreen: 'card',
             }))
           }
@@ -45,7 +52,7 @@ export function ReturnVisit({ saved, setState }: Props) {
           className="btn btn-ghost"
           onClick={() => {
             clearSignature();
-            setState((s) => ({ ...s, currentScreen: 'welcome' }));
+            setState(() => ({ ...INITIAL_STATE, currentScreen: 'welcome' }));
           }}
         >
           Start fresh →
