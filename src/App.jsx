@@ -201,17 +201,128 @@ const REFERENCE_ROWS = [
   },
 ]
 
-function extractQualityStandard(prompt) {
+function extractVisualTerritory(prompt) {
   if (typeof prompt !== 'string') return null
-  const idx = prompt.indexOf('QUALITY STANDARD:')
+  const idx = prompt.indexOf('VISUAL TERRITORY:')
   if (idx === -1) return null
-  const after = prompt.slice(idx + 'QUALITY STANDARD:'.length)
-  const lines = after
+  const after = prompt.slice(idx + 'VISUAL TERRITORY:'.length)
+  // stop at the next ALLCAPS section header or end of string
+  const endIdx = after.search(/\n\s*[A-Z][A-Z ]+:/)
+  const block = endIdx === -1 ? after : after.slice(0, endIdx)
+  const lines = block
     .split('\n')
     .map(l => l.trim())
     .filter(l => l.startsWith('—'))
     .map(l => l.replace(/^—\s*/, '').trim())
   return lines.length >= 3 ? lines.slice(0, 3) : null
+}
+
+function extractRevealedTensions(prompt) {
+  if (typeof prompt !== 'string') return null
+  const idx = prompt.indexOf('REVEALED TENSIONS:')
+  if (idx === -1) return null
+  const after = prompt.slice(idx + 'REVEALED TENSIONS:'.length)
+  // section ends at "Build every design decision" final line or end of string
+  const stopIdx = after.search(/\n\s*Build every design decision/i)
+  const block = stopIdx === -1 ? after : after.slice(0, stopIdx)
+  // split into per-tension groups by lines starting with "— Tension:"
+  const groups = []
+  let current = null
+  for (const rawLine of block.split('\n')) {
+    const line = rawLine.trim()
+    if (!line) continue
+    if (line.startsWith('— Tension:') || line.startsWith('—Tension:')) {
+      if (current) groups.push(current)
+      current = { tension: line.replace(/^—\s*Tension:\s*/i, '').trim(), optionA: '', optionB: '' }
+    } else if (/^Option\s*1\s*:/i.test(line)) {
+      if (current) current.optionA = line.replace(/^Option\s*1\s*:\s*/i, '').trim()
+    } else if (/^Option\s*2\s*:/i.test(line)) {
+      if (current) current.optionB = line.replace(/^Option\s*2\s*:\s*/i, '').trim()
+    } else if (current && current.optionB === '' && current.optionA !== '') {
+      // continuation lines for option 2 (model may wrap)
+      current.optionB += (current.optionB ? ' ' : '') + line
+    } else if (current && current.optionA !== '' && /^[A-Z]/.test(line) === false) {
+      // continuation of option 1
+      current.optionA += ' ' + line
+    }
+  }
+  if (current) groups.push(current)
+  const valid = groups.filter(g => g.tension && (g.optionA || g.optionB))
+  return valid.length > 0 ? valid : null
+}
+
+const SPECIMEN_DATA = [
+  { id: 1,  src: '/specimens/specimen-01.jpg', label: '01 — Type is the design',            signal: 'typographic_dominance' },
+  { id: 2,  src: '/specimens/specimen-02.jpg', label: '02 — Image owns the canvas',         signal: 'full_bleed_image' },
+  { id: 3,  src: '/specimens/specimen-03.jpg', label: '03 — Everything at equal weight',    signal: 'information_dense' },
+  { id: 4,  src: '/specimens/specimen-04.jpg', label: '04 — Color fields organize the space', signal: 'color_block' },
+  { id: 5,  src: '/specimens/specimen-05.jpg', label: '05 — Color and photo together',      signal: 'color_block_photo' },
+  { id: 6,  src: '/specimens/specimen-06.jpg', label: '06 — Type plus line illustration',   signal: 'type_illustration' },
+  { id: 7,  src: '/specimens/specimen-07.jpg', label: '07 — Layered and collaged',          signal: 'collage_layered' },
+  { id: 8,  src: '/specimens/specimen-08.jpg', label: '08 — Diagonal creates movement',     signal: 'diagonal_dynamic' },
+  { id: 9,  src: '/specimens/specimen-09.jpg', label: '09 — Illustration leads',            signal: 'illustrated_grid' },
+  { id: 10, src: '/specimens/specimen-10.jpg', label: '10 — Frame contains everything',     signal: 'framed_contained' },
+]
+
+function detectContradictions(pairs, specimens) {
+  const tensions = []
+  const signals = specimens.map(s => s.signal)
+
+  if (pairs[1] === 'A' &&
+      signals.some(s => ['full_bleed_image', 'color_block_photo'].includes(s))) {
+    tensions.push({
+      tension: 'You said type carries all hierarchy — but you’re drawn to designs where an image or color field lands first.',
+      optionA: 'Let the visual element lead and have type organize the information beneath it.',
+      optionB: 'Keep type dominant but push the scale so dramatically that it creates the same visual impact as an image.',
+    })
+  }
+
+  if (pairs[2] === 'A' &&
+      signals.some(s => ['full_bleed_image', 'diagonal_dynamic', 'color_block'].includes(s))) {
+    tensions.push({
+      tension: 'You said this should speak to one person — but the structures you’re drawn to are designed to command a room.',
+      optionA: 'Use the bold structure at intimate scale — smaller, closer, the drama is in the detail not the distance.',
+      optionB: 'Reconsider the register — perhaps this piece wants to announce more than you thought.',
+    })
+  }
+
+  if (pairs[3] === 'A' &&
+      signals.some(s => ['information_dense', 'illustrated_grid'].includes(s))) {
+    tensions.push({
+      tension: 'You said only what matters most — but you’re drawn to designs that give you everything.',
+      optionA: 'Apply reduction discipline to a dense structure — include everything but organize it so ruthlessly that nothing feels like clutter.',
+      optionB: 'Trust the reduction — what feels sparse in the abstract will feel right when it’s your actual content.',
+    })
+  }
+
+  if (pairs[7] === 'A' &&
+      signals.some(s => ['collage_layered', 'organic_casual'].includes(s))) {
+    tensions.push({
+      tension: 'You said digital precision — but you’re drawn to designs that feel assembled by hand.',
+      optionA: 'Achieve the layered quality through careful digital construction — precise overlaps, exact positioning, the appearance of collage without the accident.',
+      optionB: 'Allow one element to break the digital precision and introduce a handmade quality into an otherwise precise design.',
+    })
+  }
+
+  if (pairs[5] === 'A' &&
+      signals.some(s => ['diagonal_dynamic'].includes(s))) {
+    tensions.push({
+      tension: 'You said follow the rules — but you’re drawn to a design that deliberately breaks the grid.',
+      optionA: 'One calculated grid break — a single diagonal or offset element — within an otherwise strict system.',
+      optionB: 'The diagonal IS a system. Define the angle, commit to it, apply it consistently.',
+    })
+  }
+
+  if (signals.includes('typographic_dominance') &&
+      signals.includes('framed_contained')) {
+    tensions.push({
+      tension: 'You selected both type-bleeds-off-the-edge and frame-contains-everything — those two structures are direct opposites.',
+      optionA: 'Type dominates within the frame — the boundary is present but the type pushes against it with tension.',
+      optionB: 'Choose one: the frame or the bleed. Both in the same design will fight each other.',
+    })
+  }
+
+  return tensions
 }
 
 // ---------- localStorage helpers -------------------------------------------
@@ -242,6 +353,9 @@ function PageHeader({ stage, index, total }) {
   if (stage === 'questions') {
     subtitle = `Question ${index + 1}`
     count = `${index + 1} of ${total}`
+  } else if (stage === 'specimens') {
+    subtitle = 'Style specimens · optional'
+    count = 'Bonus step'
   } else if (stage === 'references') {
     subtitle = 'Reference images · optional'
     count = 'Bonus step'
@@ -259,7 +373,7 @@ function PageHeader({ stage, index, total }) {
   const filledThrough =
     stage === 'welcome' || stage === 'returning' ? -1 :
     stage === 'questions' ? index :
-    total - 1
+    total - 1 // specimens / references / loading / signature all show 7/7 filled
 
   return (
     <header className="pageheader">
@@ -540,6 +654,78 @@ function Question({ index, total, data, selected, onSelect, onNext, onBack }) {
   )
 }
 
+// ---------- style specimens (gallery) --------------------------------------
+
+function StyleSpecimens({ selectedIds, onToggle, onSubmit, onSkip }) {
+  const has04 = selectedIds.includes(4)
+  return (
+    <section className="screen screen--specgallery">
+      <p className="eyebrow">
+        STEP 8 <span className="eyebrow__dot">·</span> OPTIONAL <span className="eyebrow__dot">·</span> STYLE SPECIMENS
+      </p>
+
+      <h1 className="display">
+        What structures are you <em>drawn to</em>?
+      </h1>
+
+      <p className="lede">
+        Pick up to three. You don&rsquo;t need to explain why.
+      </p>
+
+      <p className="speclede">
+        These are real designs with real content &mdash; you&rsquo;re reacting to how they&rsquo;re organized, not what they&rsquo;re about.
+      </p>
+
+      <div className="specgrid">
+        {SPECIMEN_DATA.map((item) => {
+          const isSelected = selectedIds.includes(item.id)
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onToggle(item.id)}
+              aria-pressed={isSelected}
+              className={'specgrid__tile ' + (isSelected ? 'specgrid__tile--selected' : '')}
+            >
+              <div className="specgrid__frame">
+                <img src={item.src} alt="" loading="lazy" />
+                {isSelected && (
+                  <span className="specgrid__check" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" width="14" height="14">
+                      <path d="M3 8.5 L6.5 12 L13 4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                )}
+              </div>
+              <span className="specgrid__label">{item.label}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {has04 && (
+        <div className="specnote">
+          One of your selections uses several common AI design defaults &mdash; color bottom banner, icon trio, bullet lists, stock photography. We&rsquo;ll use your selection to understand what appeals to you in that structure, then achieve it without the defaults.
+        </div>
+      )}
+
+      <div className="specfooter">
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={onSubmit}
+          disabled={selectedIds.length === 0}
+        >
+          Use these to sharpen my Signature <span className="btn__arrow">&rarr;</span>
+        </button>
+        <button type="button" className="refs__skip" onClick={onSkip}>
+          Skip this step &rarr;
+        </button>
+      </div>
+    </section>
+  )
+}
+
 // ---------- references -----------------------------------------------------
 
 function References({ selections, onSelect, onSubmit, onSkip }) {
@@ -596,18 +782,19 @@ function References({ selections, onSelect, onSubmit, onSkip }) {
 
 // ---------- loading --------------------------------------------------------
 
-function Loading({ withReferences }) {
+function Loading({ withReferences, withSpecimens, withTensions }) {
+  const trailing = []
+  if (withReferences) trailing.push('Setting the quality bar.')
+  if (withSpecimens) trailing.push(withTensions ? 'Surfacing tensions.' : 'Reading what you’re drawn to.')
   return (
     <section className="screen screen--loading">
       <div className="loading__inner">
         <h2 className="loading__head">
           Building your Signature. <br />
-          <em>Stripping defaults. Injecting you.{withReferences ? ' Setting the quality bar.' : ''}</em>
+          <em>Stripping defaults. Injecting you.{trailing.length ? ' ' + trailing.join(' ') : ''}</em>
         </h2>
         <p className="loading__sub">
-          {withReferences
-            ? 'Reading your seven choices and your reference images, then writing the prompt that replaces AI defaults with how you see.'
-            : 'Reading your seven choices and writing the prompt that replaces AI defaults with how you see.'}
+          Reading your seven choices{withSpecimens ? ', the structures you’re drawn to' : ''}{withReferences ? ', and your reference images' : ''}, then writing the prompt that replaces AI defaults with how you see.
         </p>
         <div className="loading__bar" />
       </div>
@@ -617,7 +804,7 @@ function Loading({ withReferences }) {
 
 // ---------- signature card -------------------------------------------------
 
-function SignatureCard({ name, signature, qualityStandard, onRestart }) {
+function SignatureCard({ name, signature, visualTerritory, revealedTensions, onRestart }) {
   const [copied, setCopied] = useState(false)
   const promptRef = useRef(null)
 
@@ -683,12 +870,34 @@ function SignatureCard({ name, signature, qualityStandard, onRestart }) {
         </ul>
       </div>
 
-      {qualityStandard && qualityStandard.length === 3 && (
+      {visualTerritory && visualTerritory.length === 3 && (
         <div className="sig__quality-block">
-          <p className="section-heading">Your quality standard</p>
+          <p className="section-heading">Your visual territory</p>
           <ul className="quality-list">
-            {qualityStandard.map((line, i) => (
+            {visualTerritory.map((line, i) => (
               <li key={i}><span className="quality-list__dash">&mdash;</span>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {revealedTensions && revealedTensions.length > 0 && (
+        <div className="sig__tensions-block">
+          <p className="section-heading">Revealed tensions</p>
+          <p className="tensions-intro">
+            Places where what you chose and what you&rsquo;re drawn to don&rsquo;t agree. Neither is wrong. Pick a resolution.
+          </p>
+          <ul className="tensions-list">
+            {revealedTensions.map((t, i) => (
+              <li key={i} className="tension">
+                <p className="tension__name">{t.tension}</p>
+                {t.optionA && (
+                  <p className="tension__option"><span className="tension__opt-label">Option 1</span>{t.optionA}</p>
+                )}
+                {t.optionB && (
+                  <p className="tension__option"><span className="tension__opt-label">Option 2</span>{t.optionB}</p>
+                )}
+              </li>
             ))}
           </ul>
         </div>
@@ -792,8 +1001,12 @@ export default function App() {
   )
   const [index, setIndex] = useState(0)
   const [signature, setSignature] = useState(initialSaved?.signature || null)
-  const [qualityStandard, setQualityStandard] = useState(initialSaved?.qualityStandard || null)
+  const [visualTerritory, setVisualTerritory] = useState(
+    initialSaved?.visualTerritory || initialSaved?.qualityStandard || null
+  )
+  const [revealedTensions, setRevealedTensions] = useState(initialSaved?.revealedTensions || null)
   const [references, setReferences] = useState({ 1: null, 2: null, 3: null })
+  const [specimenIds, setSpecimenIds] = useState([])
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -805,6 +1018,7 @@ export default function App() {
     setChoices(Array(QUESTIONS.length).fill(null))
     setIndex(0)
     setReferences({ 1: null, 2: null, 3: null })
+    setSpecimenIds([])
     setError(null)
     setStage('questions')
   }
@@ -816,8 +1030,10 @@ export default function App() {
     setChoices(Array(QUESTIONS.length).fill(null))
     setIndex(0)
     setReferences({ 1: null, 2: null, 3: null })
+    setSpecimenIds([])
     setSignature(null)
-    setQualityStandard(null)
+    setVisualTerritory(null)
+    setRevealedTensions(null)
     setError(null)
     setStage('welcome')
   }
@@ -842,10 +1058,25 @@ export default function App() {
       setIndex(index + 1)
       return
     }
-    setStage('references')
+    setStage('specimens')
   }
 
   const back = () => { if (index > 0) setIndex(index - 1) }
+
+  const toggleSpecimen = (id) => {
+    setSpecimenIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id)
+      // ring buffer: max 3, oldest out
+      if (prev.length >= 3) return [...prev.slice(1), id]
+      return [...prev, id]
+    })
+  }
+
+  const goToReferences = () => setStage('references')
+  const skipSpecimens = () => {
+    setSpecimenIds([])
+    setStage('references')
+  }
 
   const generate = async (includeReferences) => {
     setStage('loading')
@@ -855,11 +1086,25 @@ export default function App() {
           .filter((row) => references[row])
           .map((row) => ({ row, url: references[row] }))
       : []
+    const specimens = specimenIds
+      .map((id) => SPECIMEN_DATA.find((s) => s.id === id))
+      .filter(Boolean)
+      .map(({ id, label, signal }) => ({ id, label, signal }))
+    // 1-indexed pairs object for detectContradictions
+    const pairs = {}
+    choices.forEach((c, i) => { pairs[i + 1] = c })
+    const tensions = specimens.length > 0 ? detectContradictions(pairs, specimens) : []
     try {
       const res = await fetch('/api/signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, choices, references: refPayload }),
+        body: JSON.stringify({
+          name,
+          choices,
+          references: refPayload,
+          specimenSelections: specimens,
+          detectedTensions: tensions,
+        }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -867,20 +1112,25 @@ export default function App() {
         const detail = data?.detail ? ` — ${typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)}` : ''
         throw new Error(base + detail)
       }
-      const usedRefs = data?._meta?.usedReferences > 0
-      const qs = usedRefs ? extractQualityStandard(data.signature_prompt) : null
+      const usedRefs = (data?._meta?.usedReferences ?? 0) > 0
+      const usedSpecimens = (data?._meta?.usedSpecimens ?? 0) > 0
+      const vt = usedRefs ? extractVisualTerritory(data.signature_prompt) : null
+      const rt = usedSpecimens ? extractRevealedTensions(data.signature_prompt) : null
       const payload = {
         name,
         choices,
         references: refPayload,
+        specimenSelections: specimens,
         signature: { voice: data.voice, tokens: data.tokens, signature_prompt: data.signature_prompt },
-        qualityStandard: qs,
+        visualTerritory: vt,
+        revealedTensions: rt,
         created: Date.now(),
       }
       save(payload)
       setSavedState(payload)
       setSignature(payload.signature)
-      setQualityStandard(qs)
+      setVisualTerritory(vt)
+      setRevealedTensions(rt)
       setStage('signature')
     } catch (err) {
       setError(err.message || String(err))
@@ -926,6 +1176,15 @@ export default function App() {
         />
       )}
 
+      {stage === 'specimens' && (
+        <StyleSpecimens
+          selectedIds={specimenIds}
+          onToggle={toggleSpecimen}
+          onSubmit={goToReferences}
+          onSkip={skipSpecimens}
+        />
+      )}
+
       {stage === 'references' && (
         <References
           selections={references}
@@ -936,14 +1195,27 @@ export default function App() {
       )}
 
       {stage === 'loading' && (
-        <Loading withReferences={Object.values(references).some(Boolean)} />
+        <Loading
+          withReferences={Object.values(references).some(Boolean)}
+          withSpecimens={specimenIds.length > 0}
+          withTensions={(() => {
+            if (specimenIds.length === 0) return false
+            const specimens = specimenIds
+              .map((id) => SPECIMEN_DATA.find((s) => s.id === id))
+              .filter(Boolean)
+            const pairs = {}
+            choices.forEach((c, i) => { pairs[i + 1] = c })
+            return detectContradictions(pairs, specimens).length > 0
+          })()}
+        />
       )}
 
       {stage === 'signature' && signature && (
         <SignatureCard
           name={name}
           signature={signature}
-          qualityStandard={qualityStandard}
+          visualTerritory={visualTerritory}
+          revealedTensions={revealedTensions}
           onRestart={restart}
         />
       )}

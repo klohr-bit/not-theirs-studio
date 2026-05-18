@@ -46,9 +46,9 @@ Each requirement must describe exactly how this person builds their design. Be c
 Blank line
 Final line: Build every design decision from these rules. No defaults.`;
 
-const REFERENCE_EXTENSION = `
+const VISUAL_TERRITORY_EXTENSION = `
 
-If reference images are provided, analyze each one using these three extraction briefs and add a third section to the Signature called QUALITY STANDARD.
+If reference images are provided, analyze each one using these three extraction briefs and add a section to the Signature called VISUAL TERRITORY.
 
 EXTRACTION BRIEF — Row 1 (craft confidence):
 Do not describe style or subject matter.
@@ -71,16 +71,41 @@ Produce one sentence beginning:
 "Follow the production logic of: ___"
 The sentence must describe a way of making decisions, not a historical period or named style.
 
-The QUALITY STANDARD section appears after DO: in the Signature Prompt. Format it exactly like this:
+The VISUAL TERRITORY section appears after DO: in the Signature Prompt. Format it exactly like this:
 
-QUALITY STANDARD:
+VISUAL TERRITORY:
 — [Row 1 sentence]
 — [Row 2 sentence]
 — [Row 3 sentence]
 
 Hold every design decision to this standard. Rules define the structure. This defines how well and in what spirit.
 
-If no reference images were provided, omit the QUALITY STANDARD section entirely. Do not mention it or explain its absence.`;
+If no reference images were provided, omit the VISUAL TERRITORY section entirely. Do not mention it or explain its absence.`;
+
+const TENSIONS_EXTENSION = `
+
+If specimen selections are provided, compare them against the seven pair choices and identify structural contradictions — places where what the user chose in the pairs conflicts with what they are visually drawn to.
+
+Pre-detected tensions may be supplied alongside the selections. Treat those as authoritative and include them in the output. You may also surface up to two additional tensions if you find ones the pre-detected list missed, but only if they are genuine structural contradictions, not minor stylistic differences.
+
+For each contradiction:
+— Name the tension in plain language
+— Offer two resolution options, each described in one sentence
+— The user's pair choice is not wrong. The specimen selection is not wrong. The contradiction is information. The resolution is a choice.
+
+Add a REVEALED TENSIONS section to the Signature Prompt, placed after the VISUAL TERRITORY section (or after DO: if there is no VISUAL TERRITORY section):
+
+REVEALED TENSIONS:
+— Tension: [plain language description]
+  Option 1: [one sentence resolution]
+  Option 2: [one sentence resolution]
+— Tension: [next]
+  Option 1: [...]
+  Option 2: [...]
+
+Use exactly that indentation (two spaces before "Option").
+
+If no contradictions are found between pair choices and specimen selections, omit this section entirely. Do not mention it or explain its absence.`;
 
 async function fetchImageAsBase64(url) {
   const r = await fetch(url);
@@ -102,7 +127,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
   }
 
-  const { name, choices, references } = req.body || {};
+  const { name, choices, references, specimenSelections, detectedTensions } = req.body || {};
 
   if (typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({ error: 'name is required' });
@@ -130,23 +155,44 @@ export default async function handler(req, res) {
       error: res.status === 'rejected' ? String(res.reason?.message || res.reason) : null,
     }));
   }
-
   const successfulRefs = imageFetches.filter(f => f.ok);
+
+  const cleanSpecimens = Array.isArray(specimenSelections)
+    ? specimenSelections.filter(s => s && Number.isInteger(s.id) && typeof s.label === 'string' && typeof s.signal === 'string').slice(0, 3)
+    : [];
+
+  const cleanTensions = Array.isArray(detectedTensions)
+    ? detectedTensions.filter(t => t && typeof t.tension === 'string' && typeof t.optionA === 'string' && typeof t.optionB === 'string')
+    : [];
 
   const choiceLines = choices
     .map((letter, i) => `${i + 1}. ${CHOICE_MAP[i + 1][letter]}`)
     .join('\n');
 
-  const systemPrompt = successfulRefs.length > 0
-    ? BASE_SYSTEM_PROMPT + REFERENCE_EXTENSION
-    : BASE_SYSTEM_PROMPT;
+  let systemPrompt = BASE_SYSTEM_PROMPT;
+  if (successfulRefs.length > 0) systemPrompt += VISUAL_TERRITORY_EXTENSION;
+  if (cleanSpecimens.length > 0) systemPrompt += TENSIONS_EXTENSION;
+
+  const textHead = `Name: ${name.trim()}\nChoices:\n${choiceLines}`;
+
+  const specimenBlock = cleanSpecimens.length > 0
+    ? '\n\nSpecimen selections (structures the user is visually drawn to):\n' +
+      cleanSpecimens.map(s => `— ${s.label}  [signal: ${s.signal}]`).join('\n')
+    : '';
+
+  const tensionsBlock = cleanTensions.length > 0
+    ? '\n\nPre-detected tensions (include these in the REVEALED TENSIONS section, you may rephrase but do not drop them):\n' +
+      cleanTensions.map(t => `— Tension: ${t.tension}\n  Option 1: ${t.optionA}\n  Option 2: ${t.optionB}`).join('\n')
+    : '';
+
+  const tail = '\n\nGenerate their Signature now.';
 
   let userContent;
   if (successfulRefs.length === 0) {
-    userContent = `Name: ${name.trim()}\nChoices:\n${choiceLines}\n\nGenerate their Signature now.`;
+    userContent = `${textHead}${specimenBlock}${tensionsBlock}${tail}`;
   } else {
     userContent = [
-      { type: 'text', text: `Name: ${name.trim()}\nChoices:\n${choiceLines}\n\nReference images (the user picked the following):` },
+      { type: 'text', text: textHead + '\n\nReference images (the user picked the following):' },
     ];
     for (const f of successfulRefs.sort((a, b) => a.row - b.row)) {
       userContent.push({ type: 'text', text: `\nRow ${f.row} reference:` });
@@ -155,7 +201,10 @@ export default async function handler(req, res) {
         source: { type: 'base64', media_type: f.payload.mediaType, data: f.payload.data },
       });
     }
-    userContent.push({ type: 'text', text: '\n\nGenerate their Signature now.' });
+    if (specimenBlock || tensionsBlock) {
+      userContent.push({ type: 'text', text: specimenBlock + tensionsBlock });
+    }
+    userContent.push({ type: 'text', text: tail });
   }
 
   try {
@@ -168,7 +217,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1600,
+        max_tokens: 2000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userContent }],
       }),
@@ -202,6 +251,8 @@ export default async function handler(req, res) {
       ...parsed,
       _meta: {
         usedReferences: successfulRefs.length,
+        usedSpecimens: cleanSpecimens.length,
+        usedTensions: cleanTensions.length,
         failedReferences: imageFetches.filter(f => !f.ok).map(f => ({ row: f.row, error: f.error })),
       },
     });
